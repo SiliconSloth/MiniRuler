@@ -1,0 +1,8 @@
+package siliconsloth.miniruler.rules;
+dialect  "mvel"
+
+rule "Main"
+    when
+    then
+        System.out.println("Hello!");
+end
