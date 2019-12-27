@@ -6,20 +6,26 @@ import com.mojang.ld22.gfx.Screen;
 import com.mojang.ld22.sound.Sound;
 
 public class TitleMenu extends Menu {
-	private int selected = 0;
+	public int selected = 0;
 
-	private static final String[] options = { "Start game", "How to play", "About" };
+	public static final String[] options = { "Start game", "How to play", "About" };
 
 	public TitleMenu() {
 	}
 
 	public void tick() {
+		int selectedBefore = selected;
+
 		if (input.up.clicked) selected--;
 		if (input.down.clicked) selected++;
 
 		int len = options.length;
 		if (selected < 0) selected += len;
 		if (selected >= len) selected -= len;
+
+		if (selected != selectedBefore && game.getGameListener() != null) {
+			game.getGameListener().onTitleOptionSelect(options[selected]);
+		}
 
 		if (input.attack.clicked || input.menu.clicked) {
 			if (selected == 0) {

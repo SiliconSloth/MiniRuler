@@ -1,8 +1,18 @@
 package siliconsloth.miniruler.rules;
 dialect  "mvel"
 
-rule "Main"
+import siliconsloth.miniruler.TitleSelection;
+
+rule "Title Select"
     when
+        TitleSelection(option : option)
     then
-        System.out.println("Hello!");
+        System.out.println(option);
+end
+
+rule "Title Close"
+    when
+        not TitleSelection()
+    then
+        System.out.println("Bye!");
 end

@@ -40,6 +40,7 @@ public class Game extends Canvas implements Runnable {
 	private Screen screen;
 	private Screen lightScreen;
 	private InputHandler input = new InputHandler(this);
+	private GameListener gameListener;
 
 	private int[] colors = new int[256];
 	private int tickCount = 0;
@@ -57,8 +58,25 @@ public class Game extends Canvas implements Runnable {
 	public boolean hasWon = false;
 
 	public void setMenu(Menu menu) {
+		if (gameListener != null) {
+			if (this.menu != null) {
+				gameListener.onMenuClose(this.menu);
+			}
+			if (menu != null) {
+				gameListener.onMenuOpen(menu);
+			}
+		}
+
 		this.menu = menu;
 		if (menu != null) menu.init(this, input);
+	}
+
+	public void setGameListener(GameListener gameListener) {
+		this.gameListener = gameListener;
+	}
+
+	public GameListener getGameListener() {
+		return gameListener;
 	}
 
 	public void start() {
@@ -329,8 +347,10 @@ public class Game extends Canvas implements Runnable {
 		pendingLevelChange = dir;
 	}
 
-	public static void main(String[] args) {
+	public static Game startWindowedGame(GameListener gameListener) {
 		Game game = new Game();
+		game.setGameListener(gameListener);
+
 		game.setMinimumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
 		game.setMaximumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
 		game.setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
@@ -345,6 +365,11 @@ public class Game extends Canvas implements Runnable {
 		frame.setVisible(true);
 
 		game.start();
+		return game;
+	}
+
+	public static void main(String[] args) {
+		startWindowedGame(null);
 	}
 
 	public void won() {
