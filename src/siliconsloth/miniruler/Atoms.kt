@@ -1,5 +1,7 @@
 package siliconsloth.miniruler
 
+import com.mojang.ld22.InputHandler
+
 enum class TitleOption {
     START_GAME, HOW_TO_PLAY, ABOUT;
 
@@ -12,4 +14,8 @@ enum class TitleOption {
                 else -> throw RuntimeException("Unknown title selection")
             }
     }
+}
+
+enum class Key {
+    UP, DOWN, LEFT, RIGHT, ATTACK, MENU
 }

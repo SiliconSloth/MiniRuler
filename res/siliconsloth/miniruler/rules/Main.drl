@@ -2,17 +2,37 @@ package siliconsloth.miniruler.rules;
 dialect  "mvel"
 
 import siliconsloth.miniruler.TitleSelection;
+import siliconsloth.miniruler.KeyPress;
+import siliconsloth.miniruler.TitleOption;
+import siliconsloth.miniruler.Key;
 
-rule "Title Select"
+rule "Title Down"
     when
-        TitleSelection(option : option)
+        TitleSelection(option == TitleOption.HOW_TO_PLAY)
+        not KeyPress()
     then
-        System.out.println(option);
+        insert(new KeyPress(Key.DOWN))
 end
 
-rule "Title Close"
+rule "Title Not Down"
     when
-        not TitleSelection()
+        not TitleSelection(option == TitleOption.HOW_TO_PLAY)
+        press : KeyPress(key == Key.DOWN)
     then
-        System.out.println("Bye!");
+        delete(press);
+end
+
+rule "Title Up"
+    when
+        TitleSelection(option == TitleOption.ABOUT)
+    then
+        insert(new KeyPress(Key.UP))
+end
+
+rule "Title Not Up"
+    when
+        not TitleSelection(option == TitleOption.ABOUT)
+        press : KeyPress(key == Key.UP)
+    then
+        delete(press);
 end

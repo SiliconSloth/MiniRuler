@@ -25,3 +25,6 @@ abstract class Fact {
 
 abstract class Perception: Fact()
 class TitleSelection(var option: TitleOption): Perception()
+
+abstract class Action: Fact()
+class KeyPress(val key: Key): Action()

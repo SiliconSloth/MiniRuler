@@ -71,6 +71,10 @@ public class Game extends Canvas implements Runnable {
 		if (menu != null) menu.init(this, input);
 	}
 
+	public InputHandler getInput() {
+		return input;
+	}
+
 	public void setGameListener(GameListener gameListener) {
 		this.gameListener = gameListener;
 	}
