@@ -2,6 +2,7 @@ package siliconsloth.miniruler
 
 import com.mojang.ld22.Game
 import org.kie.api.KieServices
+import org.kie.api.runtime.KieSession
 
 fun main(args: Array<String>) {
     val kServices = KieServices.Factory.get()
@@ -13,3 +14,9 @@ fun main(args: Array<String>) {
     kSession.addEventListener(KeyListener(game.input))
     kSession.fireUntilHalt()
 }
+
+fun KieSession.update(fact: Fact) =
+        update(getFactHandle(fact), fact)
+
+fun KieSession.delete(fact: Fact) =
+        delete(getFactHandle(fact))
