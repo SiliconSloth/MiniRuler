@@ -24,4 +24,4 @@ abstract class Fact {
 }
 
 abstract class Perception: Fact()
-class TitleSelection(var option: String): Perception()
+class TitleSelection(var option: TitleOption): Perception()

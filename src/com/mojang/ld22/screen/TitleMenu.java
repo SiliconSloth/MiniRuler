@@ -8,7 +8,7 @@ import com.mojang.ld22.sound.Sound;
 public class TitleMenu extends Menu {
 	public int selected = 0;
 
-	public static final String[] options = { "Start game", "How to play", "About" };
+	private static final String[] options = { "Start game", "How to play", "About" };
 
 	public TitleMenu() {
 	}
@@ -24,7 +24,7 @@ public class TitleMenu extends Menu {
 		if (selected >= len) selected -= len;
 
 		if (selected != selectedBefore && game.getGameListener() != null) {
-			game.getGameListener().onTitleOptionSelect(options[selected]);
+			game.getGameListener().onTitleOptionSelect(selected);
 		}
 
 		if (input.attack.clicked || input.menu.clicked) {

@@ -2,7 +2,6 @@ package siliconsloth.miniruler
 
 import com.mojang.ld22.Game
 import org.kie.api.KieServices
-import org.kie.api.runtime.KieSession
 
 fun main(args: Array<String>) {
     val ks = KieServices.Factory.get()
