@@ -21,8 +21,12 @@ class KeyListener(val inputHandler: InputHandler): RuleRuntimeEventListener {
     }
 
     override fun objectUpdated(event: ObjectUpdatedEvent) {
-        if (event.`object` is KeyPress) {
-            throw RuntimeException("Cannot update immutable KeyPress")
+        (event.oldObject as? KeyPress)?.let {
+            toggle(it.key, false)
+        }
+
+        (event.`object` as? KeyPress)?.let {
+            toggle(it.key, true)
         }
     }
 

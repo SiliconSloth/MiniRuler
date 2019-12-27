@@ -14,25 +14,9 @@ rule "Title Down"
         insert(new KeyPress(Key.DOWN))
 end
 
-rule "Title Not Down"
+rule "Key Repeat"
     when
-        not TitleSelection(option == TitleOption.HOW_TO_PLAY)
-        press : KeyPress(key == Key.DOWN)
+        press : KeyPress()
     then
-        delete(press);
-end
-
-rule "Title Up"
-    when
-        TitleSelection(option == TitleOption.ABOUT)
-    then
-        insert(new KeyPress(Key.UP))
-end
-
-rule "Title Not Up"
-    when
-        not TitleSelection(option == TitleOption.ABOUT)
-        press : KeyPress(key == Key.UP)
-    then
-        delete(press);
+        update(press);
 end
