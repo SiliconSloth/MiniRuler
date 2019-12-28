@@ -4,7 +4,7 @@ import com.mojang.ld22.Game
 import org.kie.api.KieServices
 import org.kie.api.runtime.KieSession
 
-fun main(args: Array<String>) {
+fun main() {
     val kServices = KieServices.Factory.get()
     val kContainer = kServices.kieClasspathContainer
     val kSession = kContainer.newKieSession("ksession-rules")

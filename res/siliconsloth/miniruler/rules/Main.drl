@@ -1,22 +1,45 @@
 package siliconsloth.miniruler.rules;
 dialect  "mvel"
 
+import siliconsloth.miniruler.MenuOpen;
 import siliconsloth.miniruler.TitleSelection;
 import siliconsloth.miniruler.KeyPress;
+import siliconsloth.miniruler.Menu;
 import siliconsloth.miniruler.TitleOption;
 import siliconsloth.miniruler.Key;
 
-rule "Title Down"
-    when
-        TitleSelection(option == TitleOption.HOW_TO_PLAY)
-        not KeyPress()
-    then
-        insert(new KeyPress(Key.DOWN))
+rule "Close info menus"
+when
+    MenuOpen(menu == Menu.INSTRUCTIONS || menu == Menu.ABOUT)
+then
+    insert(new KeyPress(Key.ATTACK))
 end
 
-rule "Key Repeat"
-    when
-        press : KeyPress()
-    then
-        update(press);
+rule "Move up from instructions"
+when
+    TitleSelection(option == TitleOption.HOW_TO_PLAY)
+then
+    insert(new KeyPress(Key.UP))
+end
+
+rule "Move down from about"
+when
+    TitleSelection(option == TitleOption.ABOUT)
+then
+    insert(new KeyPress(Key.DOWN))
+end
+
+rule "Press start"
+when
+    TitleSelection(option == TitleOption.START_GAME)
+then
+    insert(new KeyPress(Key.ATTACK))
+end
+
+rule "Don't hold keys in menus"
+when
+    MenuOpen()
+    press : KeyPress()
+then
+    retract(press)
 end

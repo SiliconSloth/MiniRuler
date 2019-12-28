@@ -58,17 +58,14 @@ public class Game extends Canvas implements Runnable {
 	public boolean hasWon = false;
 
 	public void setMenu(Menu menu) {
-		if (gameListener != null) {
-			if (this.menu != null) {
-				gameListener.onMenuClose(this.menu);
-			}
-			if (menu != null) {
-				gameListener.onMenuOpen(menu);
-			}
-		}
-
+		Menu oldMenu = this.menu;
 		this.menu = menu;
-		if (menu != null) menu.init(this, input);
+		if (menu != null) {
+			menu.init(this, input);
+		}
+		if (gameListener != null) {
+			gameListener.onMenuChange(oldMenu, menu);
+		}
 	}
 
 	public InputHandler getInput() {
