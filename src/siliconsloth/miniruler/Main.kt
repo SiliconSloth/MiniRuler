@@ -10,8 +10,12 @@ fun main() {
     val kSession = kContainer.newKieSession("ksession-rules")
 
     val game = Game.startWindowedGame(PerceptionHandler(kSession))
-
     kSession.addEventListener(KeyListener(game.input))
+
+    val visualizer = Visualizer()
+    kSession.addEventListener(visualizer)
+    visualizer.display()
+
     kSession.fireUntilHalt()
 }
 
@@ -20,3 +24,17 @@ fun KieSession.update(fact: Fact) =
 
 fun KieSession.delete(fact: Fact) =
         delete(getFactHandle(fact))
+
+fun KieSession.insertOrUpdate(fact: Fact) {
+    if (getFactHandle(fact) == null) {
+        insert(fact)
+    } else {
+        update(fact)
+    }
+}
+
+fun KieSession.deleteIfPresent(fact: Fact) {
+    if (getFactHandle(fact) != null) {
+        delete(fact)
+    }
+}

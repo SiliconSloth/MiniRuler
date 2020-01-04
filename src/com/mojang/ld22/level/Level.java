@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
+import com.mojang.ld22.GameListener;
 import com.mojang.ld22.entity.AirWizard;
 import com.mojang.ld22.entity.Entity;
 import com.mojang.ld22.entity.Mob;
@@ -18,6 +19,7 @@ import com.mojang.ld22.level.tile.Tile;
 
 public class Level {
 	private Random random = new Random();
+	private GameListener gameListener;
 
 	public int w, h;
 
@@ -42,7 +44,9 @@ public class Level {
 	};
 
 	@SuppressWarnings("unchecked")
-	public Level(int w, int h, int level, Level parentLevel) {
+	public Level(int w, int h, int level, Level parentLevel, GameListener gameListener) {
+		this.gameListener = gameListener;
+
 		if (level < 0) {
 			dirtColor = 222;
 		}
@@ -115,13 +119,21 @@ public class Level {
 		int yo = yScroll >> 4;
 		int w = (screen.w + 15) >> 4;
 		int h = (screen.h + 15) >> 4;
+
+		Tile[][] renderedTiles = new Tile[w+1][h+1];
+
 		screen.setOffset(xScroll, yScroll);
 		for (int y = yo; y <= h + yo; y++) {
 			for (int x = xo; x <= w + xo; x++) {
+				renderedTiles[x - xo][y  - yo] = getTile(x, y);
 				getTile(x, y).render(screen, this, x, y);
 			}
 		}
 		screen.setOffset(0, 0);
+
+		if (gameListener != null) {
+			gameListener.onRender(renderedTiles, xScroll % 16, yScroll % 16);
+		}
 	}
 
 	private List<Entity> rowSprites = new ArrayList<Entity>();

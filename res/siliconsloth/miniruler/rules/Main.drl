@@ -4,9 +4,10 @@ dialect  "mvel"
 import siliconsloth.miniruler.MenuOpen;
 import siliconsloth.miniruler.TitleSelection;
 import siliconsloth.miniruler.KeyPress;
+
+import siliconsloth.miniruler.Key;
 import siliconsloth.miniruler.Menu;
 import siliconsloth.miniruler.TitleOption;
-import siliconsloth.miniruler.Key;
 
 rule "Close info menus"
 when

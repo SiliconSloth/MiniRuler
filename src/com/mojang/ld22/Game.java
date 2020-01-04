@@ -98,11 +98,11 @@ public class Game extends Canvas implements Runnable {
 		levels = new Level[5];
 		currentLevel = 3;
 
-		levels[4] = new Level(128, 128, 1, null);
-		levels[3] = new Level(128, 128, 0, levels[4]);
-		levels[2] = new Level(128, 128, -1, levels[3]);
-		levels[1] = new Level(128, 128, -2, levels[2]);
-		levels[0] = new Level(128, 128, -3, levels[1]);
+		levels[4] = new Level(128, 128, 1, null, gameListener);
+		levels[3] = new Level(128, 128, 0, levels[4], gameListener);
+		levels[2] = new Level(128, 128, -1, levels[3], gameListener);
+		levels[1] = new Level(128, 128, -2, levels[2], gameListener);
+		levels[0] = new Level(128, 128, -3, levels[1], gameListener);
 
 		level = levels[currentLevel];
 		player = new Player(this, input);
