@@ -1,10 +1,6 @@
 package com.mojang.ld22.level;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import com.mojang.ld22.GameListener;
 import com.mojang.ld22.entity.AirWizard;
@@ -114,7 +110,7 @@ public class Level {
 		}
 	}
 
-	public void renderBackground(Screen screen, int xScroll, int yScroll) {
+	public Tile[][] renderBackground(Screen screen, int xScroll, int yScroll) {
 		int xo = xScroll >> 4;
 		int yo = yScroll >> 4;
 		int w = (screen.w + 15) >> 4;
@@ -131,20 +127,20 @@ public class Level {
 		}
 		screen.setOffset(0, 0);
 
-		if (gameListener != null) {
-			gameListener.onRender(renderedTiles, xScroll % 16, yScroll % 16);
-		}
+		return renderedTiles;
 	}
 
 	private List<Entity> rowSprites = new ArrayList<Entity>();
 
 	public Player player;
 
-	public void renderSprites(Screen screen, int xScroll, int yScroll) {
+	public List<Entity> renderSprites(Screen screen, int xScroll, int yScroll) {
 		int xo = xScroll >> 4;
 		int yo = yScroll >> 4;
 		int w = (screen.w + 15) >> 4;
 		int h = (screen.h + 15) >> 4;
+
+		List<Entity> renderedEntities = new LinkedList<>();
 
 		screen.setOffset(xScroll, yScroll);
 		for (int y = yo; y <= h + yo; y++) {
@@ -155,9 +151,12 @@ public class Level {
 			if (rowSprites.size() > 0) {
 				sortAndRender(screen, rowSprites);
 			}
+			renderedEntities.addAll(rowSprites);
 			rowSprites.clear();
 		}
 		screen.setOffset(0, 0);
+
+		return renderedEntities;
 	}
 
 	public void renderLight(Screen screen, int xScroll, int yScroll) {

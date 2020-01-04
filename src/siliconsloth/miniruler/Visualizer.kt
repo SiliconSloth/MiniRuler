@@ -13,7 +13,8 @@ import javax.swing.JFrame
 import javax.swing.JPanel
 
 class Visualizer: JPanel(), RuleRuntimeEventListener {
-    val sightings = mutableSetOf<TileSighting>()
+    val tileSightings = mutableSetOf<TileSighting>()
+    val entitySightings = mutableSetOf<EntitySighting>()
 
     init {
         preferredSize = Dimension(Game.WIDTH * 3, Game.HEIGHT * 3)
@@ -34,49 +35,64 @@ class Visualizer: JPanel(), RuleRuntimeEventListener {
         g2d.translate(Game.WIDTH / 2, (Game.HEIGHT - 8) / 2)
 
         synchronized(this) {
-            sightings.forEach {
+            tileSightings.forEach {
                 // Generate arbitrary colours from tile enum.
                 g2d.color = Color((it.tile.ordinal * 31 + 76) % 256, (it.tile.ordinal * 131 + 176) % 256, (it.tile.ordinal * 231 + 276) % 256, 255)
                 g2d.fillRect(it.x, it.y, 16, 16)
             }
-        }
 
-        // Draw player.
-        g2d.color = Color(255, 200, 0, 255)
-        g2d.fillRect(-5, -5, 10, 10)
+            entitySightings.forEach {
+                g2d.color = Color((it.entity.ordinal * 163 + 87) % 256, (it.entity.ordinal * 3 + 90) % 256, (it.entity.ordinal * 321 + 54) % 256, 255)
+                g2d.fillRect(it.x - 6, it.y - 6, 12, 12)
+            }
+        }
+    }
+
+    private fun <T> addSighting(sighting: T, sightings: MutableSet<T>) {
+        synchronized(this) {
+            sightings.add(sighting)
+        }
+        repaint()
+    }
+
+    private fun <T> removeSighting(sighting: T, sightings: MutableSet<T>) {
+        synchronized(this) {
+            sightings.remove(sighting)
+        }
+        repaint()
     }
 
     override fun objectInserted(event: ObjectInsertedEvent) {
         (event.`object` as? TileSighting)?.let {
-            synchronized(this) {
-                sightings.add(it)
-            }
-            repaint()
+            addSighting(it, tileSightings)
+        }
+        (event.`object` as? EntitySighting)?.let {
+            addSighting(it, entitySightings)
         }
     }
 
     override fun objectDeleted(event: ObjectDeletedEvent) {
         (event.oldObject as? TileSighting)?.let {
-            synchronized(this) {
-                sightings.remove(it)
-            }
-            repaint()
+            removeSighting(it, tileSightings)
+        }
+        (event.oldObject as? EntitySighting)?.let {
+            removeSighting(it, entitySightings)
         }
     }
 
     override fun objectUpdated(event: ObjectUpdatedEvent) {
         (event.oldObject as? TileSighting)?.let {
-            synchronized(this) {
-                sightings.remove(it)
-            }
-            repaint()
+            removeSighting(it, tileSightings)
+        }
+        (event.oldObject as? EntitySighting)?.let {
+            removeSighting(it, entitySightings)
         }
 
         (event.`object` as? TileSighting)?.let {
-            synchronized(this) {
-                sightings.add(it)
-            }
-            repaint()
+            addSighting(it, tileSightings)
+        }
+        (event.`object` as? EntitySighting)?.let {
+            addSighting(it, entitySightings)
         }
     }
 }

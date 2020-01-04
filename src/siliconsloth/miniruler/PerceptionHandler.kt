@@ -2,10 +2,9 @@ package siliconsloth.miniruler
 
  import com.mojang.ld22.Game
  import com.mojang.ld22.GameListener
- import com.mojang.ld22.screen.AboutMenu
- import com.mojang.ld22.screen.InstructionsMenu
  import com.mojang.ld22.level.tile.Tile as GameTile
 import com.mojang.ld22.screen.Menu as GameMenu
+ import com.mojang.ld22.entity.Entity as GameEntity
 import com.mojang.ld22.screen.TitleMenu
 import org.kie.api.runtime.KieSession
 
@@ -17,6 +16,7 @@ class PerceptionHandler(private val kSession: KieSession): GameListener {
             TileSighting(Tile.GRASS, 0, 0)
         }
     }
+    private val entitySightings = mutableMapOf<GameEntity, EntitySighting>()
 
     override fun onMenuChange(oldMenu: GameMenu?, newMenu: GameMenu?) {
         if (oldMenu != null && newMenu != null) {
@@ -43,20 +43,47 @@ class PerceptionHandler(private val kSession: KieSession): GameListener {
         kSession.update(titleSelection)
     }
 
-    override fun onRender(tiles: Array<out Array<GameTile>>, xOffset: Int, yOffset: Int) {
-        val centerX = xOffset + Game.WIDTH / 2
-        val centerY = yOffset + (Game.HEIGHT - 8) / 2
+    override fun onRender(tiles: Array<out Array<GameTile>>, entities: List<GameEntity>, xScroll: Int, yScroll: Int) {
+        // Camera center in world
+        val cameraX = xScroll + Game.WIDTH / 2
+        val cameraY = yScroll + (Game.HEIGHT - 8) / 2
+        // Camera center relative to tile array
+        val gridCenterX = cameraX - xScroll + xScroll % 16
+        val gridCenterY = cameraY - yScroll + yScroll % 16
 
         tileSightings.forEachIndexed { x, column -> column.forEachIndexed { y, sighting ->
             if (x < tiles.size && y < tiles[0].size) {
                 sighting.tile = Tile.fromGameTile(tiles[x][y])
-                sighting.x = x*16 - centerX
-                sighting.y = y*16 - centerY
+                sighting.x = x*16 - gridCenterX
+                sighting.y = y*16 - gridCenterY
 
                 kSession.insertOrUpdate(sighting)
             } else {
                 kSession.deleteIfPresent(sighting)
             }
         } }
+
+        val remaining = HashSet(entitySightings.keys)
+        entities.forEach { entity ->
+            entitySightings[entity]?.let {
+                it.x = entity.x - cameraX
+                it.y = entity.y - cameraY
+                kSession.update(it)
+                remaining.remove(entity)
+            } ?: {
+                val sighting = EntitySighting(
+                        Entity.fromGameEntity(entity),
+                        entity.x - cameraX,
+                        entity.y - cameraY
+                )
+                entitySightings[entity] = sighting
+                kSession.insert(sighting)
+            } ()
+        }
+
+        remaining.forEach {
+            kSession.delete(entitySightings[it]!!)
+            entitySightings.remove(it)
+        }
     }
 }

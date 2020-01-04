@@ -8,11 +8,13 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.IOException;
+import java.util.List;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
+import com.mojang.ld22.entity.Entity;
 import com.mojang.ld22.entity.Player;
 import com.mojang.ld22.gfx.Color;
 import com.mojang.ld22.gfx.Font;
@@ -251,8 +253,8 @@ public class Game extends Canvas implements Runnable {
 				}
 		}
 
-		level.renderBackground(screen, xScroll, yScroll);
-		level.renderSprites(screen, xScroll, yScroll);
+		Tile[][] renderedTiles = level.renderBackground(screen, xScroll, yScroll);
+		List<Entity> renderedEntities = level.renderSprites(screen, xScroll, yScroll);
 
 		if (currentLevel < 3) {
 			lightScreen.clear(0);
@@ -263,6 +265,10 @@ public class Game extends Canvas implements Runnable {
 		renderGui();
 
 		if (!hasFocus()) renderFocusNagger();
+
+		if (gameListener != null) {
+			gameListener.onRender(renderedTiles, renderedEntities, xScroll, yScroll);
+		}
 
 		for (int y = 0; y < screen.h; y++) {
 			for (int x = 0; x < screen.w; x++) {

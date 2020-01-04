@@ -1,11 +1,15 @@
 package siliconsloth.miniruler
 
 import com.mojang.ld22.InputHandler
+import com.mojang.ld22.entity.*
+import com.mojang.ld22.entity.particle.SmashParticle
+import com.mojang.ld22.entity.particle.TextParticle
 import com.mojang.ld22.level.tile.GrassTile
 import com.mojang.ld22.level.tile.RockTile
 import com.mojang.ld22.screen.*
 import com.mojang.ld22.screen.Menu as GameMenu
 import com.mojang.ld22.level.tile.Tile as GameTile
+import com.mojang.ld22.entity.Entity as GameEntity
 import java.security.InvalidParameterException
 
 enum class Key {
@@ -78,6 +82,32 @@ enum class Tile {
                     GameTile.gemOre -> GEM_ORE
                     GameTile.cloudCactus -> CLOUD_CACTUS
                     else -> throw InvalidParameterException("Unknown tile")
+                }
+    }
+}
+
+enum class Entity {
+    AIR_WIZARD, ANVIL, CHEST, FURNACE, ITEM, LANTERN, OVEN, PLAYER, SLIME, SPARK, WORKBENCH, ZOMBIE,
+    SMASH_PARTICLE, TEXT_PARTICLE;
+
+    companion object {
+        fun fromGameEntity(entity: GameEntity): Entity =
+                when (entity) {
+                    is AirWizard -> AIR_WIZARD
+                    is Anvil -> ANVIL
+                    is Chest -> CHEST
+                    is Furnace -> FURNACE
+                    is ItemEntity -> ITEM
+                    is Lantern -> LANTERN
+                    is Oven -> OVEN
+                    is Player -> PLAYER
+                    is Slime -> SLIME
+                    is Spark -> SPARK
+                    is Workbench -> WORKBENCH
+                    is Zombie -> ZOMBIE
+                    is SmashParticle -> SMASH_PARTICLE
+                    is TextParticle -> TEXT_PARTICLE
+                    else -> throw InvalidParameterException("Unknown entity")
                 }
     }
 }
