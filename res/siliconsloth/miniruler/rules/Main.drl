@@ -1,13 +1,25 @@
 package siliconsloth.miniruler.rules;
 dialect  "mvel"
 
+import com.mojang.ld22.Game;
+import siliconsloth.miniruler.MainKt;
+import siliconsloth.miniruler.SpatialMemoryStore
+
 import siliconsloth.miniruler.MenuOpen;
 import siliconsloth.miniruler.TitleSelection;
 import siliconsloth.miniruler.KeyPress;
+import siliconsloth.miniruler.CameraLocation;
+import siliconsloth.miniruler.TileSighting;
+import siliconsloth.miniruler.EntitySighting;
+import siliconsloth.miniruler.Memory;
+import siliconsloth.miniruler.TileMemory;
+import siliconsloth.miniruler.EntityMemory;
 
 import siliconsloth.miniruler.Key;
 import siliconsloth.miniruler.Menu;
 import siliconsloth.miniruler.TitleOption;
+import siliconsloth.miniruler.Tile;
+import siliconsloth.miniruler.Entity;
 
 rule "Close info menus"
 when
@@ -43,4 +55,63 @@ when
     press : KeyPress()
 then
     retract(press)
+end
+
+rule "Erase map on start"
+when
+    MenuOpen(menu == Menu.TITLE)
+    mem : Memory()
+then
+    retract(mem)
+end
+
+rule "Remember Tiles"
+when
+    store : SpatialMemoryStore()
+    TileSighting(tile : tile, tileX : x, tileY : y, frame : frame)
+    CameraLocation(cameraX : x, cameraY : y, frame == frame)
+    not TileMemory(tile == tile, x == cameraX + tileX, y == cameraY + tileY)
+then
+    TileMemory mem = new TileMemory(tile, cameraX + tileX, cameraY + tileY, frame);
+    insert(mem);
+    store.insert(mem);
+end
+
+rule "Remember Entities"
+when
+    store : SpatialMemoryStore()
+    EntitySighting(entity : entity, entityX : x, entityY : y, frame : frame)
+    CameraLocation(cameraX : x, cameraY : y, frame == frame)
+    not EntityMemory(entity == entity, x == cameraX + entityX, y == cameraY + entityY)
+then
+    EntityMemory mem = new EntityMemory(entity, cameraX + entityX, cameraY + entityY, frame);
+    insert(mem);
+    store.insert(mem);
+end
+
+rule "Forget Tiles"
+when
+    store : SpatialMemoryStore()
+    CameraLocation(cameraX : x, cameraY : y, frame : frame)
+    mem : TileMemory(tile : tile, memX : x >= (cameraX / 16) * 16 && x < ((cameraX + Game.WIDTH) / 16) * 16,
+        memY : y >= (cameraY / 16) * 16 && y < ((cameraY + Game.HEIGHT) / 16) * 16, mf : frame)
+    not TileSighting(tile == tile, x == memX - cameraX, y == memY - cameraY, frame == frame)
+then
+    System.err.printf("Doop %d, %d: %s\n", memX - cameraX, memY - cameraY, frame);
+    System.exit(-1);
+//    throw new RuntimeException("asdfas");
+    retract(mem);
+    store.retract(mem);
+end
+
+rule "Forget Entities"
+when
+    store : SpatialMemoryStore()
+    CameraLocation(cameraX : x, cameraY : y, frame : frame)
+    mem : EntityMemory(entity : entity, memX : x >= (cameraX / 16) * 16 && x < ((cameraX + Game.WIDTH) / 16) * 16,
+        memY : y >= (cameraY / 16) * 16 && y < ((cameraY + Game.HEIGHT) / 16) * 16, mf : frame)
+    not EntitySighting(entity == entity, x == memX - cameraX, y == memY - cameraY, frame == frame)
+then
+    retract(mem);
+    store.retract(mem);
 end

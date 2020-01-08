@@ -89,7 +89,7 @@ public class Player extends Mob {
 		if (input.right.down) xa++;
 		if (isSwimming() && tickTime % 60 == 0) {
 			if (stamina > 0) {
-				stamina--;
+//				stamina--;
 			} else {
 				hurt(this, 1, dir ^ 1);
 			}
@@ -344,7 +344,7 @@ public class Player extends Mob {
 
 	public boolean payStamina(int cost) {
 		if (cost > stamina) return false;
-		stamina -= cost;
+//		stamina -= cost;
 		return true;
 	}
 
@@ -379,7 +379,7 @@ public class Player extends Mob {
 
 		Sound.playerHurt.play();
 		level.add(new TextParticle("" + damage, x, y, Color.get(-1, 504, 504, 504)));
-		health -= damage;
+//		health -= damage;
 		if (attackDir == 0) yKnockback = +6;
 		if (attackDir == 1) yKnockback = -6;
 		if (attackDir == 2) xKnockback = -6;
