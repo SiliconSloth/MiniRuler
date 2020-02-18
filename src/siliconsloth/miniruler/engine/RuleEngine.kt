@@ -59,7 +59,7 @@ class RuleEngine(val scope: CoroutineScope): FactStore {
         delete(fact)
     }
 
-    override fun update(old: Any, new: Any) = atomic {
-        update(old, new)
+    override fun replace(old: Any, new: Any) = atomic {
+        replace(old, new)
     }
 }

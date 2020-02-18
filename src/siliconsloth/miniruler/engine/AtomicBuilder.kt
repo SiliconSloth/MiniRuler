@@ -15,7 +15,7 @@ open class AtomicBuilder: FactStore {
                 .add(RuleEngine.Update(fact, false))
     }
 
-    override fun update(old: Any, new: Any) {
+    override fun replace(old: Any, new: Any) {
         delete(old)
         insert(new)
     }

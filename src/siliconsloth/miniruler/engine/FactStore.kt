@@ -5,7 +5,7 @@ interface FactStore {
 
     fun delete(fact: Any)
 
-    fun update(old: Any, new: Any) {
+    fun replace(old: Any, new: Any) {
         delete(old)
         insert(new)
     }

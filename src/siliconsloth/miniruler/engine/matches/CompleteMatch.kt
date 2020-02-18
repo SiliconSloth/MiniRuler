@@ -39,8 +39,8 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactStore {
         delete(fact)
     }
 
-    override fun update(old: Any, new: Any) = atomic {
-        update(old, new)
+    override fun replace(old: Any, new: Any) = atomic {
+        replace(old, new)
     }
 
     fun maintain(fact: Any) = atomic {
