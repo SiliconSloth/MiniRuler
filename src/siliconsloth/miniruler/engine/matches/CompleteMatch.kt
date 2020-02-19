@@ -10,13 +10,15 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactStore {
     val maintaining = mutableListOf<Any>()
 
     init {
-        rule.body(this)
+        rule.fire?.invoke(this)
     }
 
     override fun applyUpdates(updates: Map<KClass<*>, List<RuleEngine.Update<*>>>) {
     }
 
-    override fun drop() = atomic {
+    override fun drop()  = atomic {
+        rule.end?.invoke(this@CompleteMatch)
+
         maintaining.forEach { fact ->
             rule.engine.maintainers[fact]?.let {
                 it.remove(match)

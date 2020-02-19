@@ -38,7 +38,8 @@ class MatchSet<T: Any>(val binding: Binding<T>, val nextBindings: List<Binding<*
         }
     }
 
-    override fun drop() = matches.values.forEach {
-        it.drop()
+    override fun drop() = matches.forEach {
+        binding.value = it.key
+        it.value.drop()
     }
 }
