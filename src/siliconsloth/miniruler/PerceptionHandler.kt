@@ -7,49 +7,40 @@ import com.mojang.ld22.screen.Menu as GameMenu
  import com.mojang.ld22.entity.Entity as GameEntity
 import com.mojang.ld22.screen.TitleMenu
 import org.kie.api.runtime.KieSession
+ import siliconsloth.miniruler.engine.FactStore
+ import siliconsloth.miniruler.engine.RuleEngine
 
-class PerceptionHandler(private val kSession: KieSession): GameListener {
-    private val menuOpen = MenuOpen(Menu.TITLE)
-    private val titleSelection = TitleSelection(TitleOption.START_GAME)
+class PerceptionHandler(private val engine: RuleEngine): GameListener {
+    private var titleSelection: TitleSelection? = null
     private val tileSightings = Array(Game.WIDTH/16 + 1) {
-        Array(Game.HEIGHT/16 + 1) {
-            TileSighting(Tile.GRASS, 0, 0, 0)
+        Array<TileSighting?>(Game.HEIGHT/16 + 1) {
+            null
         }
     }
-    private val entitySightings = mutableMapOf<GameEntity, EntitySighting>()
-    private val cameraLocation = CameraLocation(0, 0, 0)
+    private val entitySightings = mutableListOf<EntitySighting>()
+    private var cameraLocation: CameraLocation? = null
     private var frame = 0
 
-    override fun onMenuChange(oldMenu: GameMenu?, newMenu: GameMenu?) {
-        if (oldMenu != null && newMenu != null) {
-            menuOpen.menu = Menu.fromGameMenu(newMenu)
-            kSession.update(menuOpen)
-        } else if (newMenu != null) {
-            menuOpen.menu = Menu.fromGameMenu(newMenu)
-            kSession.insert(menuOpen)
-        } else {
-            kSession.delete(menuOpen)
-        }
+    override fun onMenuChange(oldMenu: GameMenu?, newMenu: GameMenu?) = engine.atomic {
+        oldMenu?.let { delete(MenuOpen(Menu.fromGameMenu(it))) }
+        newMenu?.let { insert(MenuOpen(Menu.fromGameMenu(it))) }
 
         if (oldMenu is TitleMenu) {
-            kSession.delete(titleSelection)
+            delete(TitleSelection(TitleOption.fromSelection(oldMenu.selected)))
         }
         if (newMenu is TitleMenu) {
-            titleSelection.option = TitleOption.fromSelection(newMenu.selected)
-            kSession.insert(titleSelection)
+            insert(TitleSelection(TitleOption.fromSelection(newMenu.selected)))
         }
     }
 
-    override fun onTitleOptionSelect(selection: Int) {
-        titleSelection.option = TitleOption.fromSelection(selection)
-        kSession.update(titleSelection)
+    override fun onTitleOptionSelect(selection: Int) = engine.atomic {
+        titleSelection?.let { delete(it) }
+        titleSelection = TitleSelection(TitleOption.fromSelection(selection)).also { insert(it) }
     }
 
-    override fun onRender(tiles: Array<out Array<GameTile>>, entities: List<GameEntity>, xScroll: Int, yScroll: Int) {
-        cameraLocation.x = xScroll
-        cameraLocation.y = yScroll
-        cameraLocation.frame = frame
-        kSession.insertOrUpdate(cameraLocation)
+    override fun onRender(tiles: Array<out Array<GameTile>>, entities: List<GameEntity>, xScroll: Int, yScroll: Int) = engine.atomic {
+        cameraLocation?.let { delete(it) }
+        cameraLocation = CameraLocation(xScroll, yScroll, frame).also { insert(it) }
 
         updateTiles(tiles, xScroll % 16, yScroll % 16)
         updateEntities(entities, xScroll, yScroll)
@@ -58,49 +49,24 @@ class PerceptionHandler(private val kSession: KieSession): GameListener {
     }
 
     // Center is relative to tile array.
-    private fun updateTiles(tiles: Array<out Array<GameTile>>, xOffset: Int, yOffset: Int) {
+    private fun FactStore.updateTiles(tiles: Array<out Array<GameTile>>, xOffset: Int, yOffset: Int) {
         tileSightings.forEachIndexed { x, column -> column.forEachIndexed { y, sighting ->
-            if (x < tiles.size && y < tiles[0].size) {
-                sighting.tile = Tile.fromGameTile(tiles[x][y])
-                sighting.x = x*16 - xOffset
-                sighting.y = y*16 - yOffset
-                sighting.frame = frame
+            sighting?.let { delete(it) }
 
-//                if (kSession.getFactHandle(sighting) == null) {
-                System.err.println("${sighting.x}, ${sighting.y}: ${sighting.frame}");
-                    kSession.insertOrUpdate(sighting)
-                System.err.println("Oof ${sighting.x}, ${sighting.y}: ${sighting.frame}");
-//                }
-            } else {
-                kSession.deleteIfPresent(sighting)
+            if (x < tiles.size && y < tiles[0].size) {
+                tileSightings[x][y] = TileSighting(Tile.fromGameTile(tiles[x][y]), x*16 - xOffset, y*16 - yOffset, frame)
+                        .also { insert(it) }
             }
         } }
     }
 
-    private fun updateEntities(entities: List<GameEntity>, cameraX: Int, cameraY: Int) {
-        val remaining = HashSet(entitySightings.keys)
-        entities.forEach { entity ->
-            entitySightings[entity]?.let {
-                it.x = entity.x - cameraX
-                it.y = entity.y - cameraY
-                it.frame = frame
-                kSession.update(it)
-                remaining.remove(entity)
-            } ?: {
-                val sighting = EntitySighting(
-                        Entity.fromGameEntity(entity),
-                        entity.x - cameraX,
-                        entity.y - cameraY,
-                        frame
-                )
-                entitySightings[entity] = sighting
-                kSession.insert(sighting)
-            } ()
-        }
+    private fun FactStore.updateEntities(entities: List<GameEntity>, cameraX: Int, cameraY: Int) {
+        entitySightings.forEach { delete(it) }
+        entitySightings.clear()
 
-        remaining.forEach {
-            kSession.delete(entitySightings[it]!!)
-            entitySightings.remove(it)
+        entities.forEach { entity ->
+            EntitySighting(Entity.fromGameEntity(entity), entity.x - cameraX, entity.y - cameraY, frame)
+                    .also { entitySightings.add(it) }.also { insert(it) }
         }
     }
 }

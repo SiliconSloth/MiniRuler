@@ -1,32 +1,18 @@
 package siliconsloth.miniruler
 
 import com.mojang.ld22.InputHandler
-import org.kie.api.event.rule.ObjectDeletedEvent
-import org.kie.api.event.rule.ObjectInsertedEvent
-import org.kie.api.event.rule.ObjectUpdatedEvent
-import org.kie.api.event.rule.RuleRuntimeEventListener
-import java.lang.RuntimeException
+import siliconsloth.miniruler.engine.RuleEngine
 
-class KeyListener(val inputHandler: InputHandler): RuleRuntimeEventListener {
-    override fun objectInserted(event: ObjectInsertedEvent) {
-        (event.`object` as? KeyPress)?.let {
-            toggle(it.key, true)
-        }
-    }
-
-    override fun objectDeleted(event: ObjectDeletedEvent) {
-        (event.oldObject as? KeyPress)?.let {
-            toggle(it.key, false)
-        }
-    }
-
-    override fun objectUpdated(event: ObjectUpdatedEvent) {
-        (event.oldObject as? KeyPress)?.let {
-            toggle(it.key, false)
-        }
-
-        (event.`object` as? KeyPress)?.let {
-            toggle(it.key, true)
+class KeyListener(val engine: RuleEngine, val inputHandler: InputHandler) {
+    init {
+        engine.rule {
+            val keyPress by find<KeyPress>()
+            fire {
+                toggle(keyPress.key, true)
+            }
+            end {
+                toggle(keyPress.key, false)
+            }
         }
     }
 

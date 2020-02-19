@@ -1,27 +1,17 @@
 package siliconsloth.miniruler
 
 import com.mojang.ld22.Game
+import kotlinx.coroutines.runBlocking
 import org.kie.api.KieServices
 import org.kie.api.runtime.KieSession
+import siliconsloth.miniruler.engine.RuleEngine
 import java.lang.Exception
 
-fun main() {
-    val kServices = KieServices.Factory.get()
-    val kContainer = kServices.kieClasspathContainer
-    val kSession = kContainer.newKieSession("ksession-rules")
+fun main() = runBlocking {
+    val engine = RuleEngine(this)
 
-    val spatialMemory = SpatialMemoryStore(kSession)
-    kSession.addEventListener(spatialMemory)
-    kSession.insert(spatialMemory)
-
-    val game = Game.startWindowedGame(PerceptionHandler(kSession))
-    kSession.addEventListener(KeyListener(game.input))
-
-    val visualizer = Visualizer(spatialMemory)
-//    kSession.addEventListener(visualizer)
-    visualizer.display()
-
-    kSession.fireUntilHalt()
+    val game = Game.startWindowedGame(PerceptionHandler(engine))
+    KeyListener(engine, game.input)
 }
 
 fun onScreen(tileX: Int, tileY: Int, cameraX: Int, cameraY: Int): Boolean =
