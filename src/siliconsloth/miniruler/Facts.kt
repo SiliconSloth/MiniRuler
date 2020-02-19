@@ -1,23 +1,27 @@
 package siliconsloth.miniruler
 
-import org.kie.api.runtime.KieSession
-import org.kie.api.runtime.rule.FactHandle
+interface Fact
 
-abstract class Fact
+interface Perception: Fact
+data class MenuOpen(val menu: Menu): Perception
+data class TitleSelection(val option: TitleOption): Perception
+data class CameraLocation(val x: Int, val y: Int, val frame: Int): Perception
 
-abstract class Perception: Fact()
-data class MenuOpen(var menu: Menu): Perception()
-data class TitleSelection(var option: TitleOption): Perception()
-data class CameraLocation(var x: Int, var y: Int, var frame: Int): Perception()
+interface Sighting: Perception {
+    val x: Int
+    val y: Int
+    val frame: Int
+}
+data class TileSighting(val tile: Tile, override val x: Int, override val y: Int, override val frame: Int): Sighting
+data class EntitySighting(val entity: Entity, override val x: Int, override val y: Int, override val frame: Int): Sighting
 
-abstract class Sighting(var x: Int, var y: Int, var frame: Int): Perception()
-class TileSighting(var tile: Tile, x: Int, y: Int, frame: Int): Sighting(x, y, frame)
-class EntitySighting(var entity: Entity, x: Int, y: Int, frame: Int): Sighting(x, y, frame)
+interface Memory: Fact
+interface SpatialMemory: Memory {
+    val x: Int
+    val y: Int
+}
+data class TileMemory(val tile: Tile, override val x: Int, override val y: Int): SpatialMemory
+data class EntityMemory(val entity: Entity, override val x: Int, override val y: Int): SpatialMemory
 
-abstract class Memory: Fact()
-abstract class SightingMemory(var x: Int, var y: Int, var frame: Int): Memory()
-class TileMemory(var tile: Tile, x: Int, y: Int, frame: Int): SightingMemory(x, y, frame)
-class EntityMemory(var entity: Entity, x: Int, y: Int, frame: Int): SightingMemory(x, y, frame)
-
-abstract class Action: Fact()
-class KeyPress(val key: Key): Action()
+interface Action: Fact
+data class KeyPress(val key: Key): Action

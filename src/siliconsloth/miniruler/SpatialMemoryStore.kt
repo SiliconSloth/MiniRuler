@@ -11,8 +11,8 @@ class SpatialMemoryStore(val kSession: KieSession): RuleRuntimeEventListener {
     val BLOCK_SIZE = 64
     val MARGIN = 3
 
-    val memories = mutableMapOf<Pair<Int, Int>, MutableSet<SightingMemory>>()
-    val loadedMemories = mutableSetOf<SightingMemory>()
+    val memories = mutableMapOf<Pair<Int, Int>, MutableSet<SpatialMemory>>()
+    val loadedMemories = mutableSetOf<SpatialMemory>()
 
     fun loadMemories(cameraX: Int, cameraY: Int) {
         synchronized(this) {
@@ -30,7 +30,7 @@ class SpatialMemoryStore(val kSession: KieSession): RuleRuntimeEventListener {
         }
     }
 
-    fun insert(memory: SightingMemory) {
+    fun insert(memory: SpatialMemory) {
         synchronized(this) {
             println(memories.values.map { it.size }.sum())
             println(kSession.factCount)
@@ -40,7 +40,7 @@ class SpatialMemoryStore(val kSession: KieSession): RuleRuntimeEventListener {
         }
     }
 
-    fun retract(memory: SightingMemory) {
+    fun retract(memory: SpatialMemory) {
         synchronized(this) {
             val coords = Pair(memory.x/BLOCK_SIZE, memory.y/BLOCK_SIZE)
             memories.get(coords)?.remove(memory)
@@ -52,7 +52,7 @@ class SpatialMemoryStore(val kSession: KieSession): RuleRuntimeEventListener {
             loadMemories(it.x, it.y)
         }
 
-        (event.`object` as? SightingMemory)?.let {
+        (event.`object` as? SpatialMemory)?.let {
             loadedMemories.add(it)
 //            synchronized(this) {
 //                memories.put(Pair(it.x, it.y), memories.getOrDefault(Pair(it.x, it.y), mutableSetOf())
@@ -62,7 +62,7 @@ class SpatialMemoryStore(val kSession: KieSession): RuleRuntimeEventListener {
     }
 
     override fun objectDeleted(event: ObjectDeletedEvent) {
-        (event.oldObject as? SightingMemory)?.let {
+        (event.oldObject as? SpatialMemory)?.let {
             loadedMemories.remove(it)
 //            synchronized(this) {
 //                memories.get(Pair(it.x, it.y))?.remove(it)
