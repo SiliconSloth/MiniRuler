@@ -9,7 +9,7 @@ import kotlinx.coroutines.runBlocking
 import siliconsloth.miniruler.engine.matches.CompleteMatch
 
 class RuleEngine(val scope: CoroutineScope): FactStore {
-    class Update<T: Any>(val fact: T, val isInsert: Boolean, val maintainer: CompleteMatch? = null)
+    data class Update<T: Any>(val fact: T, val isInsert: Boolean, val maintainer: CompleteMatch? = null)
 
     val rules = mutableMapOf<KClass<*>, MutableList<Rule>>()
     val facts = mutableMapOf<KClass<*>, MutableSet<Any>>()
