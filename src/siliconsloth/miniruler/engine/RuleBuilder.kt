@@ -7,10 +7,10 @@ class RuleBuilder(val engine: RuleEngine) {
     var fire: (CompleteMatch.() -> Unit)? = null
     var end: (CompleteMatch.() -> Unit)? = null
 
-    inline fun <reified T: Any> find(noinline condition: (T) -> Boolean = {true}): Binding<T> =
+    inline fun <reified T: Any> find(noinline condition: T.() -> Boolean = {true}): Binding<T> =
             Binding(T::class, condition).also { bindings.add(it) }
 
-    inline fun <reified T: Any> not(noinline condition: (T) -> Boolean = {true}) {
+    inline fun <reified T: Any> not(noinline condition: T.() -> Boolean = {true}) {
         bindings.add(Binding(T::class, condition, inverted = true))
     }
 
