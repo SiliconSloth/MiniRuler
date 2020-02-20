@@ -5,13 +5,17 @@ import kotlinx.coroutines.runBlocking
 import org.kie.api.KieServices
 import org.kie.api.runtime.KieSession
 import siliconsloth.miniruler.engine.RuleEngine
+import siliconsloth.miniruler.rules.menuRules
 import java.lang.Exception
 
-fun main() = runBlocking {
-    val engine = RuleEngine(this)
+fun main() {
+    runBlocking {
+        val engine = RuleEngine(this)
+        val game = Game.startWindowedGame(PerceptionHandler(engine))
+        KeyListener(engine, game.input)
 
-    val game = Game.startWindowedGame(PerceptionHandler(engine))
-    KeyListener(engine, game.input)
+        engine.menuRules()
+    }
 }
 
 fun onScreen(tileX: Int, tileY: Int, cameraX: Int, cameraY: Int): Boolean =

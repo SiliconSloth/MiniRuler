@@ -42,8 +42,6 @@ class Visualizer(val spatialMemoryStore: SpatialMemoryStore): JPanel(), RuleRunt
             mems.map { it.x }.max()?.let { maxX ->
             mems.map { it.y }.min()?.let { minY ->
             mems.map { it.y }.max()?.let { maxY ->
-            mems.map { it.frame }.min()?.let { minF ->
-            mems.map { it.frame }.max()?.let { maxF ->
                 val scale = min(width.toDouble() / (maxX - minX).toDouble(), height.toDouble() / (maxY - minY).toDouble())
                 g2d.scale(scale, scale)
                 g2d.translate(-minX, -minY)
@@ -68,7 +66,7 @@ class Visualizer(val spatialMemoryStore: SpatialMemoryStore): JPanel(), RuleRunt
 
                     g2d.fillRect(it.x - 6, it.y - 6, 12, 12)
                 }
-            }}}}}}
+            }}}}
         }
 
         repaint()
