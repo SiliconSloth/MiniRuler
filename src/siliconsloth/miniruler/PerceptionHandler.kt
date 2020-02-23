@@ -11,6 +11,7 @@ import org.kie.api.runtime.KieSession
  import siliconsloth.miniruler.engine.RuleEngine
 
 class PerceptionHandler(private val engine: RuleEngine): GameListener {
+    private var menu: Menu? = null
     private var titleSelection: TitleSelection? = null
     private val tileSightings = Array(Game.WIDTH/16 + 1) {
         Array<TileSighting?>(Game.HEIGHT/16 + 1) {
@@ -22,6 +23,8 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
     private var frame = 0
 
     override fun onMenuChange(oldMenu: GameMenu?, newMenu: GameMenu?) = engine.atomic {
+        menu = newMenu?.let { Menu.fromGameMenu(it) }
+
         oldMenu?.let { delete(MenuOpen(Menu.fromGameMenu(it))) }
         newMenu?.let { insert(MenuOpen(Menu.fromGameMenu(it))) }
 
@@ -39,6 +42,10 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
     }
 
     override fun onRender(tiles: Array<out Array<GameTile>>, entities: List<GameEntity>, xScroll: Int, yScroll: Int) = engine.atomic {
+        if (menu == Menu.TITLE || menu == Menu.INSTRUCTIONS || menu == Menu.ABOUT) {
+            return@atomic
+        }
+
         cameraLocation?.let { delete(it) }
         cameraLocation = CameraLocation(xScroll, yScroll, frame).also { insert(it) }
 
