@@ -5,6 +5,7 @@ import org.kie.api.event.rule.ObjectDeletedEvent
 import org.kie.api.event.rule.ObjectInsertedEvent
 import org.kie.api.event.rule.ObjectUpdatedEvent
 import org.kie.api.event.rule.RuleRuntimeEventListener
+import siliconsloth.miniruler.engine.RuleEngine
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics
@@ -13,12 +14,32 @@ import javax.swing.JFrame
 import javax.swing.JPanel
 import kotlin.math.min
 
-class Visualizer(val spatialMemoryStore: SpatialMemoryStore): JPanel(), RuleRuntimeEventListener {
+class Visualizer(engine: RuleEngine): JPanel() {
     val tileMemories = mutableSetOf<TileMemory>()
     val entityMemories = mutableSetOf<EntityMemory>()
 
     init {
         preferredSize = Dimension(Game.WIDTH * 3, Game.HEIGHT * 3)
+
+        engine.rule {
+            val memory by find<TileMemory>()
+            fire {
+                addMemory(memory, tileMemories)
+            }
+            end {
+                removeMemory(memory, tileMemories)
+            }
+        }
+
+        engine.rule {
+            val memory by find<EntityMemory>()
+            fire {
+                addMemory(memory, entityMemories)
+            }
+            end {
+                removeMemory(memory, entityMemories)
+            }
+        }
     }
 
     fun display() {
@@ -34,10 +55,11 @@ class Visualizer(val spatialMemoryStore: SpatialMemoryStore): JPanel(), RuleRunt
 
 //        g2d.scale(3.0, 3.0)
 
-        synchronized(spatialMemoryStore) {
+        synchronized(this) {
 //            println("Tiles: " + tileMemories.size)
 //            println("Entities: " + entityMemories.size)
-            val mems = spatialMemoryStore.loadedMemories
+//            val mems = spatialMemoryStore.loadedMemories
+            val mems = (tileMemories.union(entityMemories))
             mems.map { it.x }.min()?.let { minX ->
             mems.map { it.x }.max()?.let { maxX ->
             mems.map { it.y }.min()?.let { minY ->
@@ -46,9 +68,9 @@ class Visualizer(val spatialMemoryStore: SpatialMemoryStore): JPanel(), RuleRunt
                 g2d.scale(scale, scale)
                 g2d.translate(-minX, -minY)
 
-                mems.filter { it is TileMemory }.forEach {
-//                tileMemories.forEach {
-                    if (!(it is TileMemory)) return
+    //            mems.filter { it is TileMemory }.forEach {
+                tileMemories.forEach {
+    //                if (!(it is TileMemory)) return
                     // Generate arbitrary colours from tile enum.
                     val color = Color((it.tile.ordinal * 31 + 76) % 256, (it.tile.ordinal * 131 + 176) % 256, (it.tile.ordinal * 231 + 276) % 256, 255)
                     val freshness = 1 //(it.frame - minF + 1).toDouble() / (maxF - minF + 1).toDouble()
@@ -57,9 +79,9 @@ class Visualizer(val spatialMemoryStore: SpatialMemoryStore): JPanel(), RuleRunt
                     g2d.fillRect(it.x, it.y, 16, 16)
                 }
 
-                mems.filter { it is EntityMemory }.forEach {
-//                entityMemories.forEach {
-                    if (!(it is EntityMemory)) return
+    //            mems.filter { it is EntityMemory }.forEach {
+                entityMemories.forEach {
+    //                if (!(it is EntityMemory)) return
                     val color = Color((it.entity.ordinal * 163 + 87) % 256, (it.entity.ordinal * 3 + 90) % 256, (it.entity.ordinal * 321 + 54) % 256, 255)
                     val freshness = 1 //(it.frame - minF + 1).toDouble() / (maxF - minF + 1).toDouble()
                     g2d.color = Color((color.red * freshness).toInt(), (color.green * freshness).toInt(), (color.blue * freshness).toInt(), color.alpha)
@@ -84,39 +106,5 @@ class Visualizer(val spatialMemoryStore: SpatialMemoryStore): JPanel(), RuleRunt
             memories.remove(memory)
         }
         repaint()
-    }
-
-    override fun objectInserted(event: ObjectInsertedEvent) {
-        (event.`object` as? TileMemory)?.let {
-            addMemory(it, tileMemories)
-        }
-        (event.`object` as? EntityMemory)?.let {
-            addMemory(it, entityMemories)
-        }
-    }
-
-    override fun objectDeleted(event: ObjectDeletedEvent) {
-        (event.oldObject as? TileMemory)?.let {
-            removeMemory(it, tileMemories)
-        }
-        (event.oldObject as? EntityMemory)?.let {
-            removeMemory(it, entityMemories)
-        }
-    }
-
-    override fun objectUpdated(event: ObjectUpdatedEvent) {
-        (event.oldObject as? TileMemory)?.let {
-            removeMemory(it, tileMemories)
-        }
-        (event.oldObject as? EntityMemory)?.let {
-            removeMemory(it, entityMemories)
-        }
-
-        (event.`object` as? TileMemory)?.let {
-            addMemory(it, tileMemories)
-        }
-        (event.`object` as? EntityMemory)?.let {
-            addMemory(it, entityMemories)
-        }
     }
 }

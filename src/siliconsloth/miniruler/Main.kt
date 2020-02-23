@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import org.kie.api.KieServices
 import org.kie.api.runtime.KieSession
 import siliconsloth.miniruler.engine.RuleEngine
+import siliconsloth.miniruler.rules.memoryRules
 import siliconsloth.miniruler.rules.menuRules
 import java.lang.Exception
 
@@ -13,8 +14,10 @@ fun main() {
         val engine = RuleEngine(this)
         val game = Game.startWindowedGame(PerceptionHandler(engine))
         KeyListener(engine, game.input)
+        Visualizer(engine).display()
 
         engine.menuRules()
+        engine.memoryRules()
     }
 }
 
