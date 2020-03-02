@@ -1,6 +1,7 @@
 package siliconsloth.miniruler.rules
 
 import siliconsloth.miniruler.*
+import siliconsloth.miniruler.engine.EqualityFilter
 import siliconsloth.miniruler.engine.RuleEngine
 
 fun RuleEngine.memoryRules() {
@@ -23,7 +24,7 @@ fun RuleEngine.memoryRules() {
     rule {
         val camera by find<CameraLocation>()
         val memory by find<TileMemory>() //{ onScreen(x, y, camera.x, camera.y) }
-        not<TileSighting> { tile == memory.tile && x == memory.x - camera.x && y == memory.y - camera.y }
+        not<TileSighting>(EqualityFilter { TileSighting(memory.tile, memory.x - camera.x, memory.y - camera.y, camera.frame) })
         fire {
             delete(memory)
         }
@@ -32,7 +33,7 @@ fun RuleEngine.memoryRules() {
     rule {
         val camera by find<CameraLocation>()
         val memory by find<EntityMemory>() //{ onScreen(x, y, camera.x, camera.y) }
-        not<EntitySighting> { entity == memory.entity && x == memory.x - camera.x && y == memory.y - camera.y }
+        not<EntitySighting>(EqualityFilter { EntitySighting(memory.entity, memory.x - camera.x, memory.y - camera.y, camera.frame)  })
         fire {
             delete(memory)
         }
