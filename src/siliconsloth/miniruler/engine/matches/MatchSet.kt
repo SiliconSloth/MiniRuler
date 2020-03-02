@@ -10,7 +10,7 @@ class MatchSet<T: Any>(val binding: Binding<T>, val nextBindings: List<Binding<*
     val matches = mutableMapOf<T, MatchNode>()
 
     init {
-        (rule.engine.stores[binding.type] as FactStore<T>?)?.retrieveMatching(binding.condition)?.forEach {
+        (rule.engine.stores[binding.type] as FactStore<T>?)?.retrieveMatching(binding.filter)?.forEach {
             matchRemaining(it as T)
         }
     }
@@ -24,7 +24,7 @@ class MatchSet<T: Any>(val binding: Binding<T>, val nextBindings: List<Binding<*
         val added = mutableListOf<T>()
         updates[binding.type]?.forEach { (it as RuleEngine.Update<T>).also {
             if (it.isInsert) {
-                if (binding.condition(it.fact)) {
+                if (binding.filter.predicate(it.fact)) {
                     added.add(it.fact)
                     matchRemaining(it.fact)
                 }

@@ -11,6 +11,6 @@ class FactSet<T: Any>: FactStore<T> {
         facts.remove(fact)
     }
 
-    override fun retrieveMatching(condition: (T) -> Boolean): Iterable<T> =
-            facts.filter(condition)
+    override fun retrieveMatching(filter: Filter<T>): Iterable<T> =
+            facts.filter(filter.predicate)
 }

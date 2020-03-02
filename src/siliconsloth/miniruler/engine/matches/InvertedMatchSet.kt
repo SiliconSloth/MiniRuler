@@ -5,7 +5,7 @@ import kotlin.reflect.KClass
 
 class InvertedMatchSet<T: Any>(val binding: Binding<T>, val nextBindings: List<Binding<*>>, rule: Rule): MatchNode(rule) {
     val matches = mutableSetOf<T>().also { matches ->
-        (rule.engine.stores[binding.type] as FactStore<T>?)?.retrieveMatching(binding.condition)?.forEach {
+        (rule.engine.stores[binding.type] as FactStore<T>?)?.retrieveMatching(binding.filter)?.forEach {
             matches.add(it as T)
         }
     }
@@ -25,7 +25,7 @@ class InvertedMatchSet<T: Any>(val binding: Binding<T>, val nextBindings: List<B
     override fun applyUpdates(updates: Map<KClass<*>, List<RuleEngine.Update<*>>>) {
         updates[binding.type]?.forEach { (it as RuleEngine.Update<T>).also {
             if (it.isInsert) {
-                if (binding.condition(it.fact)) {
+                if (binding.filter.predicate(it.fact)) {
                     matches.add(it.fact)
                 }
             } else {
