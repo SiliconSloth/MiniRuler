@@ -59,7 +59,7 @@ class Visualizer(engine: RuleEngine): JPanel() {
 //            println("Tiles: " + tileMemories.size)
 //            println("Entities: " + entityMemories.size)
 //            val mems = spatialMemoryStore.loadedMemories
-            val mems = (tileMemories.union(entityMemories))
+            val mems: Set<Spatial> = (tileMemories.union(entityMemories))
             mems.map { it.x }.min()?.let { minX ->
             mems.map { it.x }.max()?.let { maxX ->
             mems.map { it.y }.min()?.let { minY ->
