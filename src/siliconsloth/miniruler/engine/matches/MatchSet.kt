@@ -1,6 +1,7 @@
 package siliconsloth.miniruler.engine.matches
 
 import siliconsloth.miniruler.engine.Binding
+import siliconsloth.miniruler.engine.FactStore
 import siliconsloth.miniruler.engine.Rule
 import siliconsloth.miniruler.engine.RuleEngine
 import kotlin.reflect.KClass
@@ -9,7 +10,7 @@ class MatchSet<T: Any>(val binding: Binding<T>, val nextBindings: List<Binding<*
     val matches = mutableMapOf<T, MatchNode>()
 
     init {
-        rule.engine.facts[binding.type]?.filter { binding.condition(it as T) }?.forEach {
+        (rule.engine.stores[binding.type] as FactStore<T>?)?.retrieveMatching(binding.condition)?.forEach {
             matchRemaining(it as T)
         }
     }

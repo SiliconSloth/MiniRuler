@@ -1,12 +1,12 @@
 package siliconsloth.miniruler.engine.matches
 
-import siliconsloth.miniruler.engine.FactStore
+import siliconsloth.miniruler.engine.FactUpdater
 import siliconsloth.miniruler.engine.Rule
 import siliconsloth.miniruler.engine.MatchAtomicBuilder
 import siliconsloth.miniruler.engine.RuleEngine
 import kotlin.reflect.KClass
 
-class CompleteMatch(rule: Rule): MatchNode(rule), FactStore {
+class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
     val maintaining = mutableListOf<Any>()
 
     init {

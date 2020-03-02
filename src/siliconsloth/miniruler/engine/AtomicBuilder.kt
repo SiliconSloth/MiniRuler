@@ -2,7 +2,7 @@ package siliconsloth.miniruler.engine
 
 import kotlin.reflect.KClass
 
-open class AtomicBuilder: FactStore {
+open class AtomicBuilder: FactUpdater<Any> {
     val updates = mutableMapOf<KClass<*>, MutableList<RuleEngine.Update<*>>>()
 
     override fun insert(fact: Any) {

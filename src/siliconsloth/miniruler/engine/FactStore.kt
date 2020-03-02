@@ -1,12 +1,5 @@
 package siliconsloth.miniruler.engine
 
-interface FactStore {
-    fun insert(fact: Any)
-
-    fun delete(fact: Any)
-
-    fun replace(old: Any, new: Any) {
-        delete(old)
-        insert(new)
-    }
+interface FactStore<T: Any>: FactUpdater<T> {
+    fun retrieveMatching(condition: (T) -> Boolean): Iterable<T>
 }

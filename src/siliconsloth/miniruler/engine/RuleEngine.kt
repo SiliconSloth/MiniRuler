@@ -8,25 +8,17 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.runBlocking
 import siliconsloth.miniruler.engine.matches.CompleteMatch
 
-class RuleEngine(val scope: CoroutineScope): FactStore {
+class RuleEngine(val scope: CoroutineScope): FactUpdater<Any> {
     data class Update<T: Any>(val fact: T, val isInsert: Boolean, val maintainer: CompleteMatch? = null)
 
     val rules = mutableMapOf<KClass<*>, MutableList<Rule>>()
-    val facts = mutableMapOf<KClass<*>, MutableSet<Any>>()
+    val stores = mutableMapOf<KClass<*>, FactStore<out Any>>()
     val maintainers = mutableMapOf<Any, MutableList<CompleteMatch>>()
 
     private val updateHandler = scope.actor<Map<KClass<*>, List<Update<*>>>>(capacity=UNLIMITED) {
         consumeEach { updates ->
-            updates.values.flatten().forEach {
-                if (it.isInsert) {
-                    facts.getOrPut(it.fact::class) { mutableSetOf() }.add(it.fact)
-                    if (it.maintainer != null) {
-                        maintainers.getOrPut(it.fact) { mutableListOf() }.add(it.maintainer)
-                    }
-                } else {
-                    facts[it.fact::class]?.remove(it.fact)
-                    maintainers.remove(it.fact)
-                }
+            updates.forEach {
+                applyUpdates(it.key as KClass<Any>, it.value as List<Update<Any>>)
             }
 
             updates.keys.forEach {
@@ -35,6 +27,25 @@ class RuleEngine(val scope: CoroutineScope): FactStore {
                 }
             }
         }
+    }
+
+    private fun <T: Any> applyUpdates(type: KClass<T>, updates: List<Update<T>>) {
+        val store = stores.getOrPut(type) { FactSet<T>() } as FactStore<T>
+        updates.forEach {
+            if (it.isInsert) {
+                store.insert(it.fact)
+                if (it.maintainer != null) {
+                    maintainers.getOrPut(it.fact) { mutableListOf() }.add(it.maintainer)
+                }
+            } else {
+                store.delete(it.fact)
+                maintainers.remove(it.fact)
+            }
+        }
+    }
+
+    inline fun <reified T: Any> addFactStore(store: FactStore<T>) {
+        stores[T::class] = store
     }
 
     fun rule(definition: RuleBuilder.() -> Unit) {

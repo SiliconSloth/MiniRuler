@@ -6,8 +6,7 @@ package siliconsloth.miniruler
 import com.mojang.ld22.screen.Menu as GameMenu
  import com.mojang.ld22.entity.Entity as GameEntity
 import com.mojang.ld22.screen.TitleMenu
-import org.kie.api.runtime.KieSession
- import siliconsloth.miniruler.engine.FactStore
+ import siliconsloth.miniruler.engine.FactUpdater
  import siliconsloth.miniruler.engine.RuleEngine
 
 class PerceptionHandler(private val engine: RuleEngine): GameListener {
@@ -56,7 +55,7 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
     }
 
     // Center is relative to tile array.
-    private fun FactStore.updateTiles(tiles: Array<out Array<GameTile>>, xOffset: Int, yOffset: Int) {
+    private fun FactUpdater<in TileSighting>.updateTiles(tiles: Array<out Array<GameTile>>, xOffset: Int, yOffset: Int) {
         tileSightings.forEachIndexed { x, column -> column.forEachIndexed { y, sighting ->
             sighting?.let { delete(it) }
 
@@ -67,7 +66,7 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
         } }
     }
 
-    private fun FactStore.updateEntities(entities: List<GameEntity>, cameraX: Int, cameraY: Int) {
+    private fun FactUpdater<in EntitySighting>.updateEntities(entities: List<GameEntity>, cameraX: Int, cameraY: Int) {
         entitySightings.forEach { delete(it) }
         entitySightings.clear()
 

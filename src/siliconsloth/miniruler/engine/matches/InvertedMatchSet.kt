@@ -1,13 +1,11 @@
 package siliconsloth.miniruler.engine.matches
 
-import siliconsloth.miniruler.engine.Binding
-import siliconsloth.miniruler.engine.Rule
-import siliconsloth.miniruler.engine.RuleEngine
+import siliconsloth.miniruler.engine.*
 import kotlin.reflect.KClass
 
 class InvertedMatchSet<T: Any>(val binding: Binding<T>, val nextBindings: List<Binding<*>>, rule: Rule): MatchNode(rule) {
     val matches = mutableSetOf<T>().also { matches ->
-        rule.engine.facts[binding.type]?.filter { binding.condition(it as T) }?.forEach {
+        (rule.engine.stores[binding.type] as FactStore<T>?)?.retrieveMatching(binding.condition)?.forEach {
             matches.add(it as T)
         }
     }
