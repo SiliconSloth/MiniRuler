@@ -4,7 +4,11 @@ import siliconsloth.miniruler.engine.*
 import kotlin.reflect.KClass
 
 class MatchSet<T: Any>(val binding: Binding<T>, val nextBindings: List<Binding<*>>, rule: Rule): MatchNode(rule) {
-    val matches = mutableMapOf<T, MatchNode>()
+    class FreshNode(val node: MatchNode) {
+        var fresh = true
+    }
+
+    val matches = mutableMapOf<T, FreshNode>()
 
     init {
         (rule.engine.stores[binding.type] as FactStore<T>?)?.retrieveMatching(binding.filter)?.forEach {
@@ -14,33 +18,33 @@ class MatchSet<T: Any>(val binding: Binding<T>, val nextBindings: List<Binding<*
 
     fun matchRemaining(bindValue: T) {
         binding.value = bindValue
-        matches[bindValue] = makeMatchTree(nextBindings, rule)
+        matches[bindValue] = FreshNode(makeMatchTree(nextBindings, rule))
     }
 
     override fun applyUpdates(updates: Map<KClass<*>, List<RuleEngine.Update<*>>>) {
-        val added = mutableListOf<T>()
         updates[binding.type]?.forEach { (it as RuleEngine.Update<T>).also {
             if (it.isInsert) {
                 if (binding.filter.predicate(it.fact)) {
-                    added.add(it.fact)
                     matchRemaining(it.fact)
                 }
             } else {
                 binding.value = it.fact
-                matches.remove(it.fact)?.drop()
+                matches.remove(it.fact)?.node?.drop()
             }
         }}
 
         matches.forEach {
-            if (it.key !in added) {
+            if (it.value.fresh) {
+                it.value.fresh = false
+            } else {
                 binding.value = it.key
-                it.value.applyUpdates(updates)
+                it.value.node.applyUpdates(updates)
             }
         }
     }
 
     override fun drop() = matches.forEach {
         binding.value = it.key
-        it.value.drop()
+        it.value.node.drop()
     }
 }
