@@ -12,11 +12,7 @@ import com.mojang.ld22.screen.TitleMenu
 class PerceptionHandler(private val engine: RuleEngine): GameListener {
     private var menu: Menu? = null
     private var titleSelection: TitleSelection? = null
-    private val tileSightings = Array(Game.WIDTH/16 + 1) {
-        Array<TileSighting?>(Game.HEIGHT/16 + 1) {
-            null
-        }
-    }
+    private val tileSightings = mutableListOf<TileSighting>()
     private val entitySightings = mutableListOf<EntitySighting>()
     private var cameraLocation: CameraLocation? = null
     private var frame = 0
@@ -56,13 +52,12 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
 
     // Center is relative to tile array.
     private fun FactUpdater<in TileSighting>.updateTiles(tiles: Array<out Array<GameTile>>, xOffset: Int, yOffset: Int) {
-        tileSightings.forEachIndexed { x, column -> column.forEachIndexed { y, sighting ->
-            sighting?.let { delete(it) }
+        tileSightings.forEach { delete(it) }
+        tileSightings.clear()
 
-            if (x < tiles.size && y < tiles[0].size) {
-                tileSightings[x][y] = TileSighting(Tile.fromGameTile(tiles[x][y]), x*16 - xOffset, y*16 - yOffset, frame)
-                        .also { insert(it) }
-            }
+        tiles.forEachIndexed { x, column -> column.forEachIndexed { y, sighting ->
+            tileSightings.add(TileSighting(Tile.fromGameTile(tiles[x][y]), x*16 - xOffset, y*16 - yOffset, frame)
+                    .also { insert(it) })
         } }
     }
 
@@ -71,8 +66,8 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
         entitySightings.clear()
 
         entities.forEach { entity ->
-            EntitySighting(Entity.fromGameEntity(entity), entity.x - cameraX, entity.y - cameraY, frame)
-                    .also { entitySightings.add(it) }.also { insert(it) }
+            entitySightings.add(EntitySighting(Entity.fromGameEntity(entity), entity.x - cameraX, entity.y - cameraY, frame)
+                    .also { insert(it) })
         }
     }
 }
