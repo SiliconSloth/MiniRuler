@@ -76,7 +76,7 @@ public class Entity {
 			for (int xt = xt0; xt <= xt1; xt++) {
 				if (xt >= xto0 && xt <= xto1 && yt >= yto0 && yt <= yto1) continue;
 				level.getTile(xt, yt).bumpedInto(level, xt, yt, this);
-				if (!level.getTile(xt, yt).mayPass(level, xt, yt, this)) {
+				if (!(this instanceof Player) && !level.getTile(xt, yt).mayPass(level, xt, yt, this)) {
 					blocked = true;
 					return false;
 				}
