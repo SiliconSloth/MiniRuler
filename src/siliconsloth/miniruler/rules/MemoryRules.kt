@@ -38,4 +38,22 @@ fun RuleEngine.memoryRules() {
             delete(memory)
         }
     }
+
+    rule {
+        find<MenuOpen> { menu == Menu.TITLE }
+        val memory by find<TileMemory>()
+
+        fire {
+            delete(memory)
+        }
+    }
+
+    rule {
+        find<MenuOpen> { menu == Menu.TITLE }
+        val memory by find<EntityMemory>()
+
+        fire {
+            delete(memory)
+        }
+    }
 }
