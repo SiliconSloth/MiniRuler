@@ -23,7 +23,8 @@ class RuleEngine(val scope: CoroutineScope): FactUpdater<Any> {
 
             updates.keys.forEach {
                 rules[it]?.forEach {
-                    it.updateHandler.send(updates)
+//                    it.updateHandler.send(updates)
+                    it.matches.applyUpdates(updates)
                 }
             }
         }
@@ -56,7 +57,17 @@ class RuleEngine(val scope: CoroutineScope): FactUpdater<Any> {
     }
 
     fun applyUpdates(updates: Map<KClass<*>, List<Update<*>>>) = runBlocking {
-        updateHandler.send(updates)
+//        updateHandler.send(updates)
+        updates.forEach {
+            applyUpdates(it.key as KClass<Any>, it.value as List<Update<Any>>)
+        }
+
+        updates.keys.forEach {
+            rules[it]?.forEach {
+                //                    it.updateHandler.send(updates)
+                it.matches.applyUpdates(updates)
+            }
+        }
     }
 
     fun atomic(updates: AtomicBuilder.() -> Unit) =
