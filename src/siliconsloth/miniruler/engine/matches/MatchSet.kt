@@ -31,9 +31,11 @@ class MatchSet<T: Any>(val binding: Binding<T>, val nextBindings: List<Binding<*
             }
         }}
 
-        matches.filterKeys { it !in added }.forEach {
-            binding.value = it.key
-            it.value.applyUpdates(updates)
+        matches.forEach {
+            if (it.key !in added) {
+                binding.value = it.key
+                it.value.applyUpdates(updates)
+            }
         }
     }
 
