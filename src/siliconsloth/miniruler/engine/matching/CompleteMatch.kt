@@ -2,7 +2,7 @@ package siliconsloth.miniruler.engine.matching
 
 import siliconsloth.miniruler.engine.FactUpdater
 import siliconsloth.miniruler.engine.Rule
-import siliconsloth.miniruler.engine.MatchAtomicBuilder
+import siliconsloth.miniruler.engine.builders.MatchAtomicBuilder
 import siliconsloth.miniruler.engine.RuleEngine
 import kotlin.reflect.KClass
 

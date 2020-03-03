@@ -1,5 +1,6 @@
-package siliconsloth.miniruler.engine
+package siliconsloth.miniruler.engine.builders
 
+import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.engine.matching.CompleteMatch
 
 class MatchAtomicBuilder(val match: CompleteMatch): AtomicBuilder() {

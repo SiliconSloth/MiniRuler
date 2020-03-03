@@ -1,5 +1,7 @@
-package siliconsloth.miniruler.engine
+package siliconsloth.miniruler.engine.builders
 
+import siliconsloth.miniruler.engine.FactUpdater
+import siliconsloth.miniruler.engine.RuleEngine
 import kotlin.reflect.KClass
 
 open class AtomicBuilder: FactUpdater<Any> {

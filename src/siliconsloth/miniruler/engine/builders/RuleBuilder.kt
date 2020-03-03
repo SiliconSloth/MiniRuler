@@ -1,5 +1,8 @@
-package siliconsloth.miniruler.engine
+package siliconsloth.miniruler.engine.builders
 
+import siliconsloth.miniruler.engine.Binding
+import siliconsloth.miniruler.engine.Rule
+import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.engine.filters.Filter
 import siliconsloth.miniruler.engine.matching.CompleteMatch
 

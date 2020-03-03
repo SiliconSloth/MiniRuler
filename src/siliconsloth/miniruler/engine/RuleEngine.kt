@@ -6,6 +6,8 @@ import kotlin.reflect.KClass
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.runBlocking
+import siliconsloth.miniruler.engine.builders.AtomicBuilder
+import siliconsloth.miniruler.engine.builders.RuleBuilder
 import siliconsloth.miniruler.engine.matching.CompleteMatch
 import siliconsloth.miniruler.engine.stores.FactSet
 import siliconsloth.miniruler.engine.stores.FactStore
