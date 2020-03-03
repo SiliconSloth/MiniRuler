@@ -18,6 +18,13 @@ class Visualizer(engine: RuleEngine): JPanel() {
         preferredSize = Dimension(Game.WIDTH * 3, Game.HEIGHT * 3)
 
         engine.rule {
+            find<CameraLocation>()
+            fire {
+                repaint()
+            }
+        }
+
+        engine.rule {
             val memory by find<TileMemory>()
             fire {
                 addMemory(memory, tileMemories)
@@ -86,21 +93,17 @@ class Visualizer(engine: RuleEngine): JPanel() {
                 }
             }}}}
         }
-
-        repaint()
     }
 
     private fun <T> addMemory(memory: T, memories: MutableSet<T>) {
         synchronized(this) {
             memories.add(memory)
         }
-        repaint()
     }
 
     private fun <T> removeMemory(memory: T, memories: MutableSet<T>) {
         synchronized(this) {
             memories.remove(memory)
         }
-        repaint()
     }
 }
