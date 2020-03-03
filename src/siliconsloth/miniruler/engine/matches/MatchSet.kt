@@ -1,9 +1,6 @@
 package siliconsloth.miniruler.engine.matches
 
-import siliconsloth.miniruler.engine.Binding
-import siliconsloth.miniruler.engine.FactStore
-import siliconsloth.miniruler.engine.Rule
-import siliconsloth.miniruler.engine.RuleEngine
+import siliconsloth.miniruler.engine.*
 import kotlin.reflect.KClass
 
 class MatchSet<T: Any>(val binding: Binding<T>, val nextBindings: List<Binding<*>>, rule: Rule): MatchNode(rule) {
@@ -29,6 +26,7 @@ class MatchSet<T: Any>(val binding: Binding<T>, val nextBindings: List<Binding<*
                     matchRemaining(it.fact)
                 }
             } else {
+                binding.value = it.fact
                 matches.remove(it.fact)?.drop()
             }
         }}
