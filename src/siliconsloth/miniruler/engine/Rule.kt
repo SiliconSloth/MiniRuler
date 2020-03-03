@@ -3,8 +3,8 @@ package siliconsloth.miniruler.engine
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
-import siliconsloth.miniruler.engine.matches.CompleteMatch
-import siliconsloth.miniruler.engine.matches.MatchNode
+import siliconsloth.miniruler.engine.matching.CompleteMatch
+import siliconsloth.miniruler.engine.matching.MatchNode
 import kotlin.reflect.KClass
 
 class Rule(val bindings: List<Binding<*>>, val fire: (CompleteMatch.() -> Unit)?,

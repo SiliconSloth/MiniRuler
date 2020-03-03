@@ -1,4 +1,4 @@
-package siliconsloth.miniruler.engine.matches
+package siliconsloth.miniruler.engine.matching
 
 import siliconsloth.miniruler.engine.*
 import kotlin.reflect.KClass

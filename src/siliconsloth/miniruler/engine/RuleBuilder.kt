@@ -1,6 +1,6 @@
 package siliconsloth.miniruler.engine
 
-import siliconsloth.miniruler.engine.matches.CompleteMatch
+import siliconsloth.miniruler.engine.matching.CompleteMatch
 
 class RuleBuilder(val engine: RuleEngine) {
     val bindings = mutableListOf<Binding<*>>()

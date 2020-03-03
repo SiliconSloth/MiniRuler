@@ -6,7 +6,7 @@ import kotlin.reflect.KClass
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.runBlocking
-import siliconsloth.miniruler.engine.matches.CompleteMatch
+import siliconsloth.miniruler.engine.matching.CompleteMatch
 
 class RuleEngine(val scope: CoroutineScope): FactUpdater<Any> {
     data class Update<T: Any>(val fact: T, val isInsert: Boolean, val maintainer: CompleteMatch? = null)
