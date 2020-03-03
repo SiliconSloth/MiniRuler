@@ -1,6 +1,6 @@
 package siliconsloth.miniruler
 
-import siliconsloth.miniruler.engine.FactStore
+import siliconsloth.miniruler.engine.stores.FactStore
 import siliconsloth.miniruler.engine.filters.Filter
 import kotlin.math.ceil
 import kotlin.math.floor

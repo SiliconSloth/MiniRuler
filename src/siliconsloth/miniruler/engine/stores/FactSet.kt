@@ -1,4 +1,4 @@
-package siliconsloth.miniruler.engine
+package siliconsloth.miniruler.engine.stores
 
 import siliconsloth.miniruler.engine.filters.EqualityFilter
 import siliconsloth.miniruler.engine.filters.Filter

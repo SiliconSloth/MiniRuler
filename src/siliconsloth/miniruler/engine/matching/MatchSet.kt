@@ -1,6 +1,7 @@
 package siliconsloth.miniruler.engine.matching
 
 import siliconsloth.miniruler.engine.*
+import siliconsloth.miniruler.engine.stores.FactStore
 import kotlin.reflect.KClass
 
 class MatchSet<T: Any>(val binding: Binding<T>, val nextBindings: List<Binding<*>>, rule: Rule): MatchNode(rule) {
