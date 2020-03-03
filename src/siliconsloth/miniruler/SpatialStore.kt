@@ -1,9 +1,7 @@
 package siliconsloth.miniruler
 
-import com.mojang.ld22.Game
 import siliconsloth.miniruler.engine.FactStore
-import siliconsloth.miniruler.engine.Filter
-import siliconsloth.miniruler.engine.RuleEngine
+import siliconsloth.miniruler.engine.filters.Filter
 import kotlin.math.ceil
 import kotlin.math.floor
 

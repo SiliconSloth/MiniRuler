@@ -1,5 +1,6 @@
 package siliconsloth.miniruler.engine
 
+import siliconsloth.miniruler.engine.filters.Filter
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 

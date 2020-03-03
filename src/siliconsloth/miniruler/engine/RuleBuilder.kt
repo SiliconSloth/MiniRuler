@@ -1,5 +1,6 @@
 package siliconsloth.miniruler.engine
 
+import siliconsloth.miniruler.engine.filters.Filter
 import siliconsloth.miniruler.engine.matching.CompleteMatch
 
 class RuleBuilder(val engine: RuleEngine) {

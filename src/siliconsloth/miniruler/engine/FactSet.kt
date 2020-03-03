@@ -1,5 +1,8 @@
 package siliconsloth.miniruler.engine
 
+import siliconsloth.miniruler.engine.filters.EqualityFilter
+import siliconsloth.miniruler.engine.filters.Filter
+
 class FactSet<T: Any>: FactStore<T> {
     val facts = mutableSetOf<T>()
 
