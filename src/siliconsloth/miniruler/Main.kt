@@ -12,6 +12,9 @@ import java.lang.Exception
 fun main() {
     runBlocking {
         val engine = RuleEngine(this)
+        engine.addFactStore(SpatialStore<TileMemory>())
+        engine.addFactStore(SpatialStore<EntityMemory>())
+
         val game = Game.startWindowedGame(PerceptionHandler(engine))
         KeyListener(engine, game.input)
         Visualizer(engine).display()
@@ -21,11 +24,12 @@ fun main() {
     }
 }
 
-fun onScreen(tileX: Int, tileY: Int, cameraX: Int, cameraY: Int): Boolean =
-        tileX >= (cameraX / 16) * 16 &&
-        tileX < ((cameraX + Game.WIDTH) / 16) * 16 &&
-        tileY >= (cameraY / 16) * 16 &&
-        tileY < ((cameraY + Game.HEIGHT) / 16) * 16
+fun <T: Spatial> screenFilter(cameraX: () -> Int, cameraY: () -> Int) = AreaFilter<T>(
+        { (cameraX() / 16) * 16 },
+        { ((cameraX() + Game.WIDTH) / 16) * 16 - 1 },
+        { (cameraY() / 16) * 16 },
+        { ((cameraY() + Game.HEIGHT) / 16) * 16 - 1 }
+)
 
 fun KieSession.update(fact: Fact) =
         update(getFactHandle(fact), fact)
