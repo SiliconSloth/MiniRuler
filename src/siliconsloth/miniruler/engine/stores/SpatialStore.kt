@@ -1,7 +1,8 @@
-package siliconsloth.miniruler
+package siliconsloth.miniruler.engine.stores
 
+import siliconsloth.miniruler.Spatial
 import siliconsloth.miniruler.engine.filters.AllFilter
-import siliconsloth.miniruler.engine.stores.FactStore
+import siliconsloth.miniruler.engine.filters.AreaFilter
 import siliconsloth.miniruler.engine.filters.Filter
 import kotlin.math.ceil
 import kotlin.math.floor

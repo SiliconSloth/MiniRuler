@@ -3,6 +3,8 @@ package siliconsloth.miniruler
 import com.mojang.ld22.Game
 import kotlinx.coroutines.runBlocking
 import siliconsloth.miniruler.engine.RuleEngine
+import siliconsloth.miniruler.engine.filters.AreaFilter
+import siliconsloth.miniruler.engine.stores.SpatialStore
 import siliconsloth.miniruler.rules.memoryRules
 import siliconsloth.miniruler.rules.menuRules
 
