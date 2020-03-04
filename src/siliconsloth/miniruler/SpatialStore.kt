@@ -1,5 +1,6 @@
 package siliconsloth.miniruler
 
+import siliconsloth.miniruler.engine.filters.AllFilter
 import siliconsloth.miniruler.engine.stores.FactStore
 import siliconsloth.miniruler.engine.filters.Filter
 import kotlin.math.ceil
@@ -22,18 +23,20 @@ class SpatialStore<T: Spatial>(): FactStore<T> {
     }
 
     override fun retrieveMatching(filter: Filter<T>): Iterable<T> =
-        if (filter is AreaFilter) {
-            val minX = floor(filter.minX().toFloat() / BLOCK_SIZE).toInt()
-            val maxX = ceil(filter.maxX().toFloat() / BLOCK_SIZE).toInt()
-            val minY = floor(filter.minY().toFloat() / BLOCK_SIZE).toInt()
-            val maxY = ceil(filter.maxY().toFloat() / BLOCK_SIZE).toInt()
+            when (filter) {
+                is AllFilter -> spatials.values.flatten()
+                is AreaFilter -> {
+                    val minX = floor(filter.minX().toFloat() / BLOCK_SIZE).toInt()
+                    val maxX = ceil(filter.maxX().toFloat() / BLOCK_SIZE).toInt()
+                    val minY = floor(filter.minY().toFloat() / BLOCK_SIZE).toInt()
+                    val maxY = ceil(filter.maxY().toFloat() / BLOCK_SIZE).toInt()
 
-            (minX..maxX).map { x ->
-                (minY..maxY).map { y ->
-                    spatials.getOrDefault(Pair(x, y), mutableSetOf()).filter(filter.predicate)
-                }.flatten()
-            }.flatten()
-        } else {
-            spatials.values.flatten().filter(filter.predicate)
-        }
+                    (minX..maxX).map { x ->
+                        (minY..maxY).map { y ->
+                            spatials.getOrDefault(Pair(x, y), mutableSetOf()).filter(filter.predicate)
+                        }.flatten()
+                    }.flatten()
+                }
+                else -> spatials.values.flatten().filter(filter.predicate)
+            }
 }

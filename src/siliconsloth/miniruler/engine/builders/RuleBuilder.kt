@@ -3,6 +3,7 @@ package siliconsloth.miniruler.engine.builders
 import siliconsloth.miniruler.engine.Binding
 import siliconsloth.miniruler.engine.Rule
 import siliconsloth.miniruler.engine.RuleEngine
+import siliconsloth.miniruler.engine.filters.AllFilter
 import siliconsloth.miniruler.engine.filters.Filter
 import siliconsloth.miniruler.engine.matching.CompleteMatch
 
@@ -18,11 +19,17 @@ class RuleBuilder(val engine: RuleEngine) {
         bindings.add(Binding(T::class, filter, inverted = true))
     }
 
-    inline fun <reified T: Any> find(noinline condition: T.() -> Boolean = {true}): Binding<T> =
+    inline fun <reified T: Any> find(noinline condition: T.() -> Boolean): Binding<T> =
             find(Filter(condition))
 
-    inline fun <reified T: Any> not(noinline condition: T.() -> Boolean = {true}) =
+    inline fun <reified T: Any> not(noinline condition: T.() -> Boolean) =
             not(Filter(condition))
+
+    inline fun <reified T: Any> find(): Binding<T> =
+            find(AllFilter())
+
+    inline fun <reified T: Any> not() =
+            not(AllFilter<T>())
 
     fun fire(body: CompleteMatch.() -> Unit) {
         this.fire = body
