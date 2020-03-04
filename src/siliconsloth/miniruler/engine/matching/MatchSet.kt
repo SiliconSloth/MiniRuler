@@ -34,12 +34,14 @@ class MatchSet<T: Any>(val binding: Binding<T>, val nextBindings: List<Binding<*
             }
         }}
 
-        matches.forEach {
-            if (it.value.fresh) {
-                it.value.fresh = false
-            } else {
-                binding.value = it.key
-                it.value.node.applyUpdates(updates)
+        if (nextBindings.isNotEmpty()) {
+            matches.forEach {
+                if (it.value.fresh) {
+                    it.value.fresh = false
+                } else {
+                    binding.value = it.key
+                    it.value.node.applyUpdates(updates)
+                }
             }
         }
     }
