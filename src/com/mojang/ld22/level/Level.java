@@ -15,7 +15,6 @@ import com.mojang.ld22.level.tile.Tile;
 
 public class Level {
 	private Random random = new Random();
-	private GameListener gameListener;
 
 	public int w, h;
 
@@ -40,9 +39,7 @@ public class Level {
 	};
 
 	@SuppressWarnings("unchecked")
-	public Level(int w, int h, int level, Level parentLevel, GameListener gameListener) {
-		this.gameListener = gameListener;
-
+	public Level(int w, int h, int level, Level parentLevel) {
 		if (level < 0) {
 			dirtColor = 222;
 		}
