@@ -157,7 +157,7 @@ public class Game extends Canvas implements Runnable {
 
 		init();
 
-		try (OutputStream stream = new BufferedOutputStream(new FileOutputStream("level.bin"))) {
+		try (DataOutputStream stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream("level.bin")))) {
 			stream.write(level.tiles);
 			for (Entity entity : level.entities) {
 				byte id = -1;
@@ -177,8 +177,8 @@ public class Game extends Canvas implements Runnable {
 				if (entity instanceof TextParticle) id = 13;
 				assert id >= 0 : "Unknown entity";
 
-				stream.write(entity.x);
-				stream.write(entity.y);
+				stream.writeInt(entity.x);
+				stream.writeInt(entity.y);
 				stream.write(id);
 			}
 		} catch (IOException e) {
