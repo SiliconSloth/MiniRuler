@@ -13,6 +13,7 @@ import kotlin.math.min
 class Visualizer(engine: RuleEngine): JPanel() {
     val tileMemories = mutableSetOf<TileMemory>()
     val entityMemories = mutableSetOf<EntityMemory>()
+    val keyProposals = mutableSetOf<KeyProposal>()
 
     init {
         preferredSize = Dimension(Game.WIDTH * 3, Game.HEIGHT * 3)
@@ -41,6 +42,16 @@ class Visualizer(engine: RuleEngine): JPanel() {
             }
             end {
                 removeMemory(memory, entityMemories)
+            }
+        }
+
+        engine.rule {
+            val proposal by find<KeyProposal>()
+            fire {
+                addMemory(proposal, keyProposals)
+            }
+            end {
+                removeMemory(proposal, keyProposals)
             }
         }
     }
@@ -75,6 +86,32 @@ class Visualizer(engine: RuleEngine): JPanel() {
                 entityMemories.forEach {
                     g2d.color = Color((it.entity.ordinal * 163 + 87) % 256, (it.entity.ordinal * 3 + 90) % 256, (it.entity.ordinal * 321 + 54) % 256, 255)
                     g2d.fillRect(it.x - 6, it.y - 6, 12, 12)
+                }
+
+                keyProposals.forEach {
+                    g2d.color = if (it.strength > 0) {
+                        when (it.key) {
+                            Key.UP -> Color.BLUE
+                            Key.DOWN -> Color.RED
+                            Key.LEFT -> Color.YELLOW
+                            Key.RIGHT -> Color.GREEN
+                            else -> throw RuntimeException("Unexpected key")
+                        }
+                    } else {
+                        Color.BLACK
+                    }
+
+                    val xOff = when (it.key) {
+                        Key.LEFT -> -1
+                        Key.RIGHT -> 1
+                        else -> 0
+                    }
+                    val yOff = when (it.key) {
+                        Key.UP -> -1
+                        Key.DOWN -> 1
+                        else -> 0
+                    }
+                    g2d.fillRect(it.cause.x + 3 + xOff*3, it.cause.y + 3 + yOff*3, 10, 10)
                 }
             }}}}
         }

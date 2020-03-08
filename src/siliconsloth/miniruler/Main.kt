@@ -7,6 +7,7 @@ import siliconsloth.miniruler.engine.filters.AreaFilter
 import siliconsloth.miniruler.engine.stores.SpatialStore
 import siliconsloth.miniruler.rules.memoryRules
 import siliconsloth.miniruler.rules.menuRules
+import siliconsloth.miniruler.rules.navigationRules
 
 fun main() {
     runBlocking {
@@ -20,6 +21,7 @@ fun main() {
 
         engine.menuRules()
         engine.memoryRules()
+        engine.navigationRules()
     }
 }
 
