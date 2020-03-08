@@ -157,66 +157,66 @@ public class Game extends Canvas implements Runnable {
 
 		init();
 
-		try (DataOutputStream stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream("level.bin")))) {
-			stream.write(level.tiles);
-			for (Entity entity : level.entities) {
-				byte id = -1;
-				if (entity instanceof AirWizard) id = 0;
-				if (entity instanceof Anvil) id = 1;
-				if (entity instanceof Chest) id = 2;
-				if (entity instanceof Furnace) id = 3;
-				if (entity instanceof ItemEntity) id = 4;
-				if (entity instanceof Lantern) id = 5;
-				if (entity instanceof Oven) id = 6;
-				if (entity instanceof Player) id = 7;
-				if (entity instanceof Slime) id = 8;
-				if (entity instanceof Spark) id = 9;
-				if (entity instanceof Workbench) id = 10;
-				if (entity instanceof Zombie) id = 11;
-				if (entity instanceof SmashParticle) id = 12;
-				if (entity instanceof TextParticle) id = 13;
-				assert id >= 0 : "Unknown entity";
-
-				stream.writeInt(entity.x);
-				stream.writeInt(entity.y);
-				stream.write(id);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		System.out.println("Saved level to file.");
-		System.exit(0);
-
-//		while (running) {
-//			long now = System.nanoTime();
-//			unprocessed += (now - lastTime) / nsPerTick;
-//			lastTime = now;
-//			boolean shouldRender = true;
-//			while (unprocessed >= 1) {
-//				ticks++;
-//				tick();
-//				unprocessed -= 1;
-//				shouldRender = true;
-//			}
+//		try (DataOutputStream stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream("level.bin")))) {
+//			stream.write(level.tiles);
+//			for (Entity entity : level.entities) {
+//				byte id = -1;
+//				if (entity instanceof AirWizard) id = 0;
+//				if (entity instanceof Anvil) id = 1;
+//				if (entity instanceof Chest) id = 2;
+//				if (entity instanceof Furnace) id = 3;
+//				if (entity instanceof ItemEntity) id = 4;
+//				if (entity instanceof Lantern) id = 5;
+//				if (entity instanceof Oven) id = 6;
+//				if (entity instanceof Player) id = 7;
+//				if (entity instanceof Slime) id = 8;
+//				if (entity instanceof Spark) id = 9;
+//				if (entity instanceof Workbench) id = 10;
+//				if (entity instanceof Zombie) id = 11;
+//				if (entity instanceof SmashParticle) id = 12;
+//				if (entity instanceof TextParticle) id = 13;
+//				assert id >= 0 : "Unknown entity";
 //
-//			try {
-//				Thread.sleep(2);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
+//				stream.writeInt(entity.x);
+//				stream.writeInt(entity.y);
+//				stream.write(id);
 //			}
-//
-//			if (shouldRender) {
-//				frames++;
-//				render();
-//			}
-//
-//			if (System.currentTimeMillis() - lastTimer1 > 1000) {
-//				lastTimer1 += 1000;
-//				System.out.println(ticks + " ticks, " + frames + " fps");
-//				frames = 0;
-//				ticks = 0;
-//			}
+//		} catch (IOException e) {
+//			e.printStackTrace();
 //		}
+//		System.out.println("Saved level to file.");
+//		System.exit(0);
+
+		while (running) {
+			long now = System.nanoTime();
+			unprocessed += (now - lastTime) / nsPerTick;
+			lastTime = now;
+			boolean shouldRender = true;
+			while (unprocessed >= 1) {
+				ticks++;
+				tick();
+				unprocessed -= 1;
+				shouldRender = true;
+			}
+
+			try {
+				Thread.sleep(2);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			if (shouldRender) {
+				frames++;
+				render();
+			}
+
+			if (System.currentTimeMillis() - lastTimer1 > 1000) {
+				lastTimer1 += 1000;
+				System.out.println(ticks + " ticks, " + frames + " fps");
+				frames = 0;
+				ticks = 0;
+			}
+		}
 	}
 
 	public void tick() {
