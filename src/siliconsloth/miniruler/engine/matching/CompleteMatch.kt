@@ -16,7 +16,7 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
     override fun applyUpdates(updates: Map<KClass<*>, List<RuleEngine.Update<*>>>) {
     }
 
-    override fun drop()  = atomic {
+    override fun drop() = atomic {
         rule.end?.invoke(this@CompleteMatch)
 
         maintaining.forEach { fact ->
