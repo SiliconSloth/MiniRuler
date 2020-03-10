@@ -1,7 +1,6 @@
 package siliconsloth.miniruler.engine
 
 import kotlin.reflect.KClass
-import kotlinx.coroutines.runBlocking
 import siliconsloth.miniruler.engine.builders.AtomicBuilder
 import siliconsloth.miniruler.engine.builders.RuleBuilder
 import siliconsloth.miniruler.engine.matching.CompleteMatch
@@ -41,7 +40,7 @@ class RuleEngine(): FactUpdater<Any> {
         }
     }
 
-    fun applyUpdates(updates: Map<KClass<*>, List<Update<*>>>) = runBlocking {
+    fun applyUpdates(updates: Map<KClass<*>, List<Update<*>>>) {
         updates.forEach {
             applyUpdates(it.key as KClass<Any>, it.value as List<Update<Any>>)
         }
