@@ -14,6 +14,9 @@ class RuleEngine(): FactUpdater<Any> {
     val stores = mutableMapOf<KClass<*>, FactStore<out Any>>()
     val maintainers = mutableMapOf<Any, MutableList<CompleteMatch>>()
 
+    var running = false
+    val updateQueue = mutableListOf<Map<KClass<*>, List<Update<*>>>>()
+
     private fun <T: Any> applyUpdates(type: KClass<T>, updates: List<Update<T>>) {
         val store = stores.getOrPut(type) { FactSet<T>() } as FactStore<T>
         updates.forEach {
@@ -41,14 +44,22 @@ class RuleEngine(): FactUpdater<Any> {
     }
 
     fun applyUpdates(updates: Map<KClass<*>, List<Update<*>>>) {
-        updates.forEach {
-            applyUpdates(it.key as KClass<Any>, it.value as List<Update<Any>>)
-        }
+        updateQueue.add(updates)
+         if (!running) {
+             running = true
+             while (!updateQueue.isEmpty()) {
+                 val batch = updateQueue.removeAt(0)
+                 batch.forEach {
+                     applyUpdates(it.key as KClass<Any>, it.value as List<Update<Any>>)
+                 }
 
-        val applicable = updates.keys.map { rules[it] ?: mutableListOf() }.flatten().distinct()
-        applicable.forEach {
-            it.applyUpdates(updates)
-        }
+                 val applicable = batch.keys.map { rules[it] ?: mutableListOf() }.flatten().distinct()
+                 applicable.forEach {
+                     it.applyUpdates(batch)
+                 }
+             }
+             running = false
+         }
     }
 
     fun atomic(updates: AtomicBuilder.() -> Unit) =
