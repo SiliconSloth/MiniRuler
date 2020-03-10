@@ -25,7 +25,7 @@ class MatchSet<T: Any>(val binding: Binding<T>, val nextBindings: List<Binding<*
     override fun applyUpdates(updates: Map<KClass<*>, List<RuleEngine.Update<*>>>) {
         updates[binding.type]?.forEach { (it as RuleEngine.Update<T>).also {
             if (it.isInsert) {
-                if (binding.filter.predicate(it.fact)) {
+                if (binding.filter.predicate(it.fact) && !matches.containsKey(it.fact)) {
                     matchRemaining(it.fact)
                 }
             } else {
