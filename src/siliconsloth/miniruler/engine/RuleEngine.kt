@@ -1,6 +1,5 @@
 package siliconsloth.miniruler.engine
 
-import kotlinx.coroutines.CoroutineScope
 import kotlin.reflect.KClass
 import kotlinx.coroutines.runBlocking
 import siliconsloth.miniruler.engine.builders.AtomicBuilder
@@ -47,10 +46,9 @@ class RuleEngine(): FactUpdater<Any> {
             applyUpdates(it.key as KClass<Any>, it.value as List<Update<Any>>)
         }
 
-        updates.keys.forEach {
-            rules[it]?.forEach {
-                it.applyUpdates(updates)
-            }
+        val applicable = updates.keys.map { rules[it] ?: mutableListOf() }.flatten().distinct()
+        applicable.forEach {
+            it.applyUpdates(updates)
         }
     }
 
