@@ -10,7 +10,7 @@ import javax.swing.JFrame
 import javax.swing.JPanel
 import kotlin.math.min
 
-class Visualizer(engine: RuleEngine): JPanel() {
+class Visualizer(val engine: RuleEngine): JPanel() {
     val tileMemories = mutableSetOf<TileMemory>()
     val entityMemories = mutableSetOf<EntityMemory>()
     val keyProposals = mutableSetOf<KeyProposal>()
@@ -89,7 +89,7 @@ class Visualizer(engine: RuleEngine): JPanel() {
                 }
 
                 keyProposals.forEach {
-                    g2d.color = if (it.strength > 0) {
+                    g2d.color = if (it.strength != 0f) {
                         when (it.key) {
                             Key.UP -> Color.BLUE
                             Key.DOWN -> Color.RED
@@ -100,6 +100,7 @@ class Visualizer(engine: RuleEngine): JPanel() {
                     } else {
                         Color.BLACK
                     }
+                    g2d.color = g2d.color.run { Color(red, green, blue, 100) }
 
                     val xOff = when (it.key) {
                         Key.LEFT -> -1
