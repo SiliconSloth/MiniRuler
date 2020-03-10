@@ -11,7 +11,7 @@ import siliconsloth.miniruler.rules.navigationRules
 
 fun main() {
     runBlocking {
-        val engine = RuleEngine(this)
+        val engine = RuleEngine()
         engine.addFactStore(SpatialStore<TileMemory>())
         engine.addFactStore(SpatialStore<EntityMemory>())
 

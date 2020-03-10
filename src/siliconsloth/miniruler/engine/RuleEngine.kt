@@ -1,10 +1,7 @@
 package siliconsloth.miniruler.engine
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlin.reflect.KClass
-import kotlinx.coroutines.channels.actor
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.runBlocking
 import siliconsloth.miniruler.engine.builders.AtomicBuilder
 import siliconsloth.miniruler.engine.builders.RuleBuilder
@@ -12,27 +9,12 @@ import siliconsloth.miniruler.engine.matching.CompleteMatch
 import siliconsloth.miniruler.engine.stores.FactSet
 import siliconsloth.miniruler.engine.stores.FactStore
 
-class RuleEngine(val scope: CoroutineScope): FactUpdater<Any> {
+class RuleEngine(): FactUpdater<Any> {
     data class Update<T: Any>(val fact: T, val isInsert: Boolean, val maintainer: CompleteMatch? = null)
 
     val rules = mutableMapOf<KClass<*>, MutableList<Rule>>()
     val stores = mutableMapOf<KClass<*>, FactStore<out Any>>()
     val maintainers = mutableMapOf<Any, MutableList<CompleteMatch>>()
-
-    private val updateHandler = scope.actor<Map<KClass<*>, List<Update<*>>>>(capacity=UNLIMITED) {
-        consumeEach { updates ->
-            updates.forEach {
-                applyUpdates(it.key as KClass<Any>, it.value as List<Update<Any>>)
-            }
-
-            updates.keys.forEach {
-                rules[it]?.forEach {
-//                    it.updateHandler.send(updates)
-                    it.matches.applyUpdates(updates)
-                }
-            }
-        }
-    }
 
     private fun <T: Any> applyUpdates(type: KClass<T>, updates: List<Update<T>>) {
         val store = stores.getOrPut(type) { FactSet<T>() } as FactStore<T>
@@ -61,15 +43,13 @@ class RuleEngine(val scope: CoroutineScope): FactUpdater<Any> {
     }
 
     fun applyUpdates(updates: Map<KClass<*>, List<Update<*>>>) = runBlocking {
-//        updateHandler.send(updates)
         updates.forEach {
             applyUpdates(it.key as KClass<Any>, it.value as List<Update<Any>>)
         }
 
         updates.keys.forEach {
             rules[it]?.forEach {
-                //                    it.updateHandler.send(updates)
-                it.matches.applyUpdates(updates)
+                it.applyUpdates(updates)
             }
         }
     }
