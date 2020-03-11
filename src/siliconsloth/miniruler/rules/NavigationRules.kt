@@ -1,6 +1,5 @@
 package siliconsloth.miniruler.rules
 
-import com.mojang.ld22.Game
 import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
 import kotlin.math.pow
@@ -26,25 +25,19 @@ fun RuleEngine.navigationRules() {
             val x = xDiff / mag
             val y = yDiff / mag
 
-            val strength = 0.99f.pow(mag)
+            val strength = 0.7f.pow(mag)
 
             atomic {
-                if (xDiff > 4) {
+                if (xDiff > 0) {
                     maintain(KeyProposal(Key.RIGHT, x * strength, memory))
-                } else if ( xDiff < -4) {
-                    maintain(KeyProposal(Key.LEFT, -x * strength, memory))
                 } else {
-                    maintain(KeyProposal(Key.LEFT, -strength * 10, memory))
-                    maintain(KeyProposal(Key.RIGHT, -strength * 10, memory))
+                    maintain(KeyProposal(Key.LEFT, -x * strength, memory))
                 }
 
-                if (yDiff > 4) {
+                if (yDiff > 0) {
                     maintain(KeyProposal(Key.DOWN, y * strength, memory))
-                } else if ( yDiff < -4) {
-                    maintain(KeyProposal(Key.UP, -y * strength, memory))
                 } else {
-                    maintain(KeyProposal(Key.UP, -strength * 10, memory))
-                    maintain(KeyProposal(Key.DOWN, -strength * 10, memory))
+                    maintain(KeyProposal(Key.UP, -y * strength, memory))
                 }
             }
         }
@@ -60,7 +53,6 @@ fun RuleEngine.navigationRules() {
             val oldStrength = strengths[key]!!
             val newStrength = oldStrength + proposal.strength
             strengths[key] = newStrength
-            println(strengths)
 
             replace(KeyDesire(key, oldStrength), KeyDesire(key, newStrength))
         }
