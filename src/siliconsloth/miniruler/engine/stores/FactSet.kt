@@ -28,4 +28,6 @@ class FactSet<T: Any>: FactStore<T> {
                     }
                 else -> facts.filter(filter.predicate)
             }
+
+    override fun allFacts(): Iterable<T> = facts
 }

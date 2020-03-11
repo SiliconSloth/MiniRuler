@@ -40,4 +40,6 @@ class SpatialStore<T: Spatial>(): FactStore<T> {
                 }
                 else -> spatials.values.flatten().filter(filter.predicate)
             }
+
+    override fun allFacts(): Iterable<T> = spatials.values.flatten()
 }
