@@ -8,6 +8,7 @@ import kotlin.reflect.KClass
 
 class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
     val maintaining = mutableListOf<Any>()
+    var dropped = false
 
     init {
         rule.fire?.invoke(this)
@@ -16,14 +17,17 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
     override fun applyUpdates(updates: Map<KClass<*>, List<RuleEngine.Update<*>>>) {
     }
 
-    override fun drop() = atomic {
+    override fun drop() {
+        dropped = true
         rule.end?.invoke(this@CompleteMatch)
 
-        maintaining.forEach { fact ->
-            rule.engine.maintainers[fact]?.let {
-                it.remove(match)
-                if (it.isEmpty()) {
-                    delete(fact)
+        atomic {
+            maintaining.forEach { fact ->
+                rule.engine.maintainers[fact]?.let {
+                    it.remove(match)
+                    if (it.isEmpty()) {
+                        delete(fact)
+                    }
                 }
             }
         }

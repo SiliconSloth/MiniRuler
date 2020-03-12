@@ -47,8 +47,10 @@ class RuleEngine(): FactUpdater<Any> {
         updateQueue.add(updates)
          if (!running) {
              running = true
-             while (!updateQueue.isEmpty()) {
+             while (updateQueue.isNotEmpty()) {
                  val batch = updateQueue.removeAt(0)
+                         .mapValues { it.value.filter { !(it.isInsert && it.maintainer?.dropped ?: false) } }
+
                  batch.forEach {
                      applyUpdates(it.key as KClass<Any>, it.value as List<Update<Any>>)
                  }
