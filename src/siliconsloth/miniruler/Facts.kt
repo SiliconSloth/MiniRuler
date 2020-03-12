@@ -25,5 +25,5 @@ data class EntityMemory(val entity: Entity, override val x: Int, override val y:
 interface Action: Fact
 data class KeyPress(val key: Key): Action
 
-data class KeyProposal(val key: Key, val strength: Float, val cause: TileMemory): Fact
-data class KeyDesire(val key: Key, val strength: Float): Fact
+data class MoveProposal(val direction: Direction, val strength: Float, val cause: TileMemory): Fact
+data class MoveDesire(val direction: Direction, val strength: Float): Fact

@@ -13,7 +13,8 @@ import kotlin.math.min
 class Visualizer(val engine: RuleEngine): JPanel() {
     val tileMemories = mutableSetOf<TileMemory>()
     val entityMemories = mutableSetOf<EntityMemory>()
-    val keyProposals = mutableSetOf<KeyProposal>()
+    val moveProposals = mutableSetOf<MoveProposal>()
+    val moveDesires = mutableSetOf<MoveDesire>()
 
     init {
         preferredSize = Dimension(Game.WIDTH * 3, Game.HEIGHT * 3)
@@ -46,12 +47,22 @@ class Visualizer(val engine: RuleEngine): JPanel() {
         }
 
         engine.rule {
-            val proposal by find<KeyProposal>()
+            val proposal by find<MoveProposal>()
             fire {
-                addMemory(proposal, keyProposals)
+                addMemory(proposal, moveProposals)
             }
             end {
-                removeMemory(proposal, keyProposals)
+                removeMemory(proposal, moveProposals)
+            }
+        }
+
+        engine.rule {
+            val desire by find<MoveDesire>()
+            fire {
+                addMemory(desire, moveDesires)
+            }
+            end {
+                removeMemory(desire, moveDesires)
             }
         }
     }
@@ -86,36 +97,44 @@ class Visualizer(val engine: RuleEngine): JPanel() {
                 entityMemories.forEach {
                     g2d.color = Color((it.entity.ordinal * 163 + 87) % 256, (it.entity.ordinal * 3 + 90) % 256, (it.entity.ordinal * 321 + 54) % 256, 255)
                     g2d.fillRect(it.x - 6, it.y - 6, 12, 12)
+
+                    if (it.entity == Entity.PLAYER) {
+                        moveDesires.forEach { d ->
+                            drawDirectional(g2d, it.x - 3, it.y - 3, d.direction, d.strength, d.direction == moveDesires.maxBy { it.strength }!!.direction)
+                        }
+                    }
                 }
 
-                keyProposals.forEach {
-                    g2d.color = if (it.strength != 0f) {
-                        when (it.key) {
-                            Key.UP -> Color.BLUE
-                            Key.DOWN -> Color.RED
-                            Key.LEFT -> Color.YELLOW
-                            Key.RIGHT -> Color.GREEN
-                            else -> throw RuntimeException("Unexpected key")
-                        }
-                    } else {
-                        Color.BLACK
-                    }
-                    g2d.color = g2d.color.run { Color(red, green, blue, 100) }
-
-                    val xOff = when (it.key) {
-                        Key.LEFT -> -1
-                        Key.RIGHT -> 1
-                        else -> 0
-                    }
-                    val yOff = when (it.key) {
-                        Key.UP -> -1
-                        Key.DOWN -> 1
-                        else -> 0
-                    }
-                    g2d.fillRect(it.cause.x + 3 + xOff*3, it.cause.y + 3 + yOff*3, 10, 10)
+                moveProposals.forEach {
+                    drawDirectional(g2d, it.cause.x + 3, it.cause.y + 3, it.direction, it.strength, false)
                 }
             }}}}
         }
+    }
+
+    private fun drawDirectional(g2d: Graphics2D, x: Int, y: Int, direction: Direction, strength: Float, red: Boolean) {
+        val brightness = (strength * 500).toInt().coerceIn(0, 255)
+        g2d.color = g2d.color.run { Color(if (red) { 255 } else { 0 }, brightness, if (red) { 0 } else { 255 }, 100) }
+
+        val xOff = when (direction) {
+            Direction.UP_RIGHT -> 1
+            Direction.RIGHT -> 1
+            Direction.DOWN_RIGHT -> 1
+            Direction.UP_LEFT -> -1
+            Direction.LEFT -> -1
+            Direction.DOWN_LEFT -> -1
+            else -> 0
+        }
+        val yOff = when (direction) {
+            Direction.UP_LEFT -> -1
+            Direction.UP -> -1
+            Direction.UP_RIGHT -> -1
+            Direction.DOWN_LEFT -> 1
+            Direction.DOWN -> 1
+            Direction.DOWN_RIGHT -> 1
+            else -> 0
+        }
+        g2d.fillRect(x + 2 + xOff*6, y + 2 + yOff*6, 6, 6)
     }
 
     private fun <T> addMemory(memory: T, memories: MutableSet<T>) {

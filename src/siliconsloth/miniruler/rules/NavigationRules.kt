@@ -2,15 +2,13 @@ package siliconsloth.miniruler.rules
 
 import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
-import kotlin.math.pow
-import kotlin.math.sqrt
+import kotlin.math.*
 
 fun RuleEngine.navigationRules() {
     atomic {
-        insert(KeyDesire(Key.UP, 0f))
-        insert(KeyDesire(Key.DOWN, 0f))
-        insert(KeyDesire(Key.LEFT, 0f))
-        insert(KeyDesire(Key.RIGHT, 0f))
+        Direction.values().forEach {
+            insert(MoveDesire(it, 0f))
+        }
     }
 
     rule {
@@ -22,91 +20,112 @@ fun RuleEngine.navigationRules() {
             val yDiff = memory.y + 8 - (player.y + 3)
 
             val mag = sqrt((xDiff*xDiff + yDiff*yDiff).toFloat())
-            val x = xDiff / mag
-            val y = yDiff / mag
+            val strength = 0.99f.pow(mag)
 
-            val strength = 0.7f.pow(mag)
+            val angle = ((atan2(yDiff.toFloat(), xDiff.toFloat())/PI.toFloat() + 1) % 2) * 4
+            val sector = angle.toInt()
+            val interpolation = angle - sector
+
+            val upperStrength = interpolation * strength
+            val lowerStrength = (1-interpolation) * strength
+
+            val lowerDirection = sectorToDirection(sector)
+            val upperDirection = sectorToDirection((sector + 1) % 8)
 
             atomic {
-                if (xDiff > 0) {
-                    maintain(KeyProposal(Key.RIGHT, x * strength, memory))
-                } else {
-                    maintain(KeyProposal(Key.LEFT, -x * strength, memory))
-                }
-
-                if (yDiff > 0) {
-                    maintain(KeyProposal(Key.DOWN, y * strength, memory))
-                } else {
-                    maintain(KeyProposal(Key.UP, -y * strength, memory))
-                }
+                maintain(MoveProposal(lowerDirection, lowerStrength, memory))
+                maintain(MoveProposal(upperDirection, upperStrength, memory))
             }
         }
     }
 
     rule {
-        val strengths = mutableMapOf(Key.UP to 0f, Key.DOWN to 0f, Key.LEFT to 0f, Key.RIGHT to 0f)
-        val proposal by find<KeyProposal>()
+        val strengths = Direction.values().map { it to 0f }.toMap().toMutableMap()
+        val proposal by find<MoveProposal>()
 
         fire {
-            val key = proposal.key
+            val dir = proposal.direction
 
-            val oldStrength = strengths[key]!!
+            val oldStrength = strengths[dir]!!
             val newStrength = oldStrength + proposal.strength
-            strengths[key] = newStrength
+            strengths[dir] = newStrength
 
-            replace(KeyDesire(key, oldStrength), KeyDesire(key, newStrength))
+            replace(MoveDesire(dir, oldStrength), MoveDesire(dir, newStrength))
         }
 
         end {
-            val key = proposal.key
+            val dir = proposal.direction
 
-            val oldStrength = strengths[key]!!
+            val oldStrength = strengths[dir]!!
             val newStrength = oldStrength - proposal.strength
-            strengths[key] = newStrength
+            strengths[dir] = newStrength
 
-            replace(KeyDesire(key, oldStrength), KeyDesire(key, newStrength))
+            replace(MoveDesire(dir, oldStrength), MoveDesire(dir, newStrength))
         }
     }
 
     rule {
         val upPress = KeyPress(Key.UP)
         val downPress = KeyPress(Key.DOWN)
-
-        val up by find<KeyDesire> { key == Key.UP }
-        val down by find<KeyDesire> { key == Key.DOWN }
-
-        fire {
-            atomic {
-                if (up.strength > down.strength) {
-                    replace(downPress, upPress)
-                } else if (down.strength > 0) {
-                    replace(upPress, downPress)
-                } else {
-                    delete(upPress)
-                    delete(downPress)
-                }
-            }
-        }
-    }
-
-    rule {
         val leftPress = KeyPress(Key.LEFT)
         val rightPress = KeyPress(Key.RIGHT)
 
-        val left by find<KeyDesire> { key == Key.LEFT }
-        val right by find<KeyDesire> { key == Key.RIGHT }
+        val bindings = Direction.values().map { find<MoveDesire> { direction == it && strength > 0 } }
 
         fire {
+            val chosen = bindings.map { it.value!! }.maxBy { it.strength }!!.direction
             atomic {
-                if (left.strength > right.strength) {
-                    replace(rightPress, leftPress)
-                } else if (right.strength > 0) {
-                    replace(leftPress, rightPress)
-                } else {
-                    delete(leftPress)
-                    delete(rightPress)
+                val presses = mutableMapOf(upPress to false, downPress to false, leftPress to false, rightPress to false)
+                when (chosen) {
+                    Direction.UP -> {
+                        presses[upPress] = true
+                    }
+                    Direction.UP_RIGHT -> {
+                        presses[upPress] = true
+                        presses[rightPress] = true
+                    }
+                    Direction.RIGHT -> {
+                        presses[rightPress] = true
+                    }
+                    Direction.DOWN_RIGHT -> {
+                        presses[downPress] = true
+                        presses[rightPress] = true
+                    }
+                    Direction.DOWN -> {
+                        presses[downPress] = true
+                    }
+                    Direction.DOWN_LEFT -> {
+                        presses[downPress] = true
+                        presses[leftPress] = true
+                    }
+                    Direction.LEFT -> {
+                        presses[leftPress] = true
+                    }
+                    Direction.UP_LEFT -> {
+                        presses[upPress] = true
+                        presses[leftPress] = true
+                    }
+                }
+                presses.forEach { key, press ->
+                    if (press) {
+                        insert(key)
+                    } else {
+                        delete(key)
+                    }
                 }
             }
         }
     }
+}
+
+fun sectorToDirection(sector: Int): Direction = when (sector) {
+    0 -> Direction.LEFT
+    1 -> Direction.UP_LEFT
+    2 -> Direction.UP
+    3 -> Direction.UP_RIGHT
+    4 -> Direction.RIGHT
+    5 -> Direction.DOWN_RIGHT
+    6 -> Direction.DOWN
+    7 -> Direction.DOWN_LEFT
+    else -> throw RuntimeException("Bad sector $sector")
 }
