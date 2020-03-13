@@ -4,6 +4,7 @@ import com.mojang.ld22.Game
 import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.engine.filters.AreaFilter
 import siliconsloth.miniruler.engine.stores.SpatialStore
+import siliconsloth.miniruler.rules.attackRules
 import siliconsloth.miniruler.rules.memoryRules
 import siliconsloth.miniruler.rules.menuRules
 import siliconsloth.miniruler.rules.navigationRules
@@ -20,6 +21,7 @@ fun main() {
     engine.menuRules()
     engine.memoryRules()
     engine.navigationRules()
+    engine.attackRules()
 }
 
 fun <T: Spatial> screenFilter(cameraX: () -> Int, cameraY: () -> Int) = AreaFilter<T>(
