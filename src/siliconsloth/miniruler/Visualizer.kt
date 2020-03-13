@@ -13,8 +13,7 @@ import kotlin.math.min
 class Visualizer(val engine: RuleEngine): JPanel() {
     val tileMemories = mutableSetOf<TileMemory>()
     val entityMemories = mutableSetOf<EntityMemory>()
-    val moveProposals = mutableSetOf<MoveProposal>()
-    val moveDesires = mutableSetOf<MoveDesire>()
+    val targets = mutableSetOf<MoveTarget>()
 
     init {
         preferredSize = Dimension(Game.WIDTH * 3, Game.HEIGHT * 3)
@@ -47,22 +46,12 @@ class Visualizer(val engine: RuleEngine): JPanel() {
         }
 
         engine.rule {
-            val proposal by find<MoveProposal>()
+            val target by find<MoveTarget>()
             fire {
-                addMemory(proposal, moveProposals)
+                addMemory(target, targets)
             }
             end {
-                removeMemory(proposal, moveProposals)
-            }
-        }
-
-        engine.rule {
-            val desire by find<MoveDesire>()
-            fire {
-                addMemory(desire, moveDesires)
-            }
-            end {
-                removeMemory(desire, moveDesires)
+                removeMemory(target, targets)
             }
         }
     }
@@ -97,16 +86,11 @@ class Visualizer(val engine: RuleEngine): JPanel() {
                 entityMemories.forEach {
                     g2d.color = Color((it.entity.ordinal * 163 + 87) % 256, (it.entity.ordinal * 3 + 90) % 256, (it.entity.ordinal * 321 + 54) % 256, 255)
                     g2d.fillRect(it.x - 6, it.y - 6, 12, 12)
-
-                    if (it.entity == Entity.PLAYER) {
-                        moveDesires.forEach { d ->
-                            drawDirectional(g2d, it.x - 3, it.y - 3, d.direction, d.strength, d.direction == moveDesires.maxBy { it.strength }!!.direction)
-                        }
-                    }
                 }
 
-                moveProposals.forEach {
-                    drawDirectional(g2d, it.cause.x + 3, it.cause.y + 3, it.direction, it.strength, false)
+                targets.forEach {
+                    g2d.color = Color(0, 255, 0, 255)
+                    g2d.fillRect(it.tile.x + 3, it.tile.y + 3, 10, 10)
                 }
             }}}}
         }
