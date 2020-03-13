@@ -70,43 +70,43 @@ fun RuleEngine.navigationRules() {
         val leftPress = KeyPress(Key.LEFT)
         val rightPress = KeyPress(Key.RIGHT)
 
-        val bindings = Direction.values().map { find<MoveDesire> { direction == it && strength > 0 } }
+        val desire by find<MoveDesire>()
+        not<MoveDesire> { strength > desire.strength }
 
         fire {
-            val chosen = bindings.map { it.value!! }.maxBy { it.strength }!!.direction
-            atomic {
-                val presses = mutableMapOf(upPress to false, downPress to false, leftPress to false, rightPress to false)
-                when (chosen) {
-                    Direction.UP -> {
-                        presses[upPress] = true
-                    }
-                    Direction.UP_RIGHT -> {
-                        presses[upPress] = true
-                        presses[rightPress] = true
-                    }
-                    Direction.RIGHT -> {
-                        presses[rightPress] = true
-                    }
-                    Direction.DOWN_RIGHT -> {
-                        presses[downPress] = true
-                        presses[rightPress] = true
-                    }
-                    Direction.DOWN -> {
-                        presses[downPress] = true
-                    }
-                    Direction.DOWN_LEFT -> {
-                        presses[downPress] = true
-                        presses[leftPress] = true
-                    }
-                    Direction.LEFT -> {
-                        presses[leftPress] = true
-                    }
-                    Direction.UP_LEFT -> {
-                        presses[upPress] = true
-                        presses[leftPress] = true
-                    }
+            val presses = mutableMapOf(upPress to false, downPress to false, leftPress to false, rightPress to false)
+            when (desire.direction) {
+                Direction.UP -> {
+                    presses[upPress] = true
                 }
-                presses.forEach { key, press ->
+                Direction.UP_RIGHT -> {
+                    presses[upPress] = true
+                    presses[rightPress] = true
+                }
+                Direction.RIGHT -> {
+                    presses[rightPress] = true
+                }
+                Direction.DOWN_RIGHT -> {
+                    presses[downPress] = true
+                    presses[rightPress] = true
+                }
+                Direction.DOWN -> {
+                    presses[downPress] = true
+                }
+                Direction.DOWN_LEFT -> {
+                    presses[downPress] = true
+                    presses[leftPress] = true
+                }
+                Direction.LEFT -> {
+                    presses[leftPress] = true
+                }
+                Direction.UP_LEFT -> {
+                    presses[upPress] = true
+                    presses[leftPress] = true
+                }
+            }
+            atomic {
+                presses.forEach { (key, press) ->
                     if (press) {
                         insert(key)
                     } else {
