@@ -6,6 +6,7 @@ interface Perception: Fact
 data class MenuOpen(val menu: Menu): Perception
 data class TitleSelection(val option: TitleOption): Perception
 data class CameraLocation(val x: Int, val y: Int, val frame: Int): Perception
+data class StaminaLevel(val stamina: Int): Perception
 
 interface Spatial {
     val x: Int

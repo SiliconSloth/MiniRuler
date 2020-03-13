@@ -31,7 +31,8 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
         insert(TitleSelection(TitleOption.fromSelection(selection)))
     }
 
-    override fun onRender(tiles: Array<out Array<GameTile>>, entities: List<GameEntity>, xScroll: Int, yScroll: Int) = engine.atomic {
+    override fun onRender(tiles: Array<out Array<GameTile>>, entities: List<GameEntity>,
+                          xScroll: Int, yScroll: Int, stamina: Int) = engine.atomic {
         if (menu == Menu.TITLE || menu == Menu.INSTRUCTIONS || menu == Menu.ABOUT) {
             return@atomic
         }
@@ -41,6 +42,9 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
 
         updateTiles(tiles, xScroll % 16, yScroll % 16)
         updateEntities(entities, xScroll, yScroll)
+
+        deleteAll<StaminaLevel>()
+        insert(StaminaLevel(stamina))
 
         frame++
     }

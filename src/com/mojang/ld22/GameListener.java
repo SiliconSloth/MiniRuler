@@ -9,5 +9,5 @@ import java.util.List;
 public interface GameListener {
     void onMenuChange(Menu oldMenu, Menu newMenu);
     void onTitleOptionSelect(int selection);
-    void onRender(Tile[][] tiles, List<Entity> entities, int xScroll, int yScroll);
+    void onRender(Tile[][] tiles, List<Entity> entities, int xScroll, int yScroll, int stamina);
 }

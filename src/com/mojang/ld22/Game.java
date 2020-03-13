@@ -298,7 +298,7 @@ public class Game extends Canvas implements Runnable {
 		if (!hasFocus()) renderFocusNagger();
 
 		if (gameListener != null) {
-			gameListener.onRender(renderedTiles, renderedEntities, xScroll, yScroll);
+			gameListener.onRender(renderedTiles, renderedEntities, xScroll, yScroll, player.stamina);
 		}
 
 		for (int y = 0; y < screen.h; y++) {
