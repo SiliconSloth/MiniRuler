@@ -65,7 +65,7 @@ class RuleEngine(): FactUpdater<Any> {
     }
 
     fun atomic(updates: AtomicBuilder.() -> Unit) =
-        applyUpdates(AtomicBuilder().apply(updates).updates)
+        applyUpdates(AtomicBuilder(this).apply(updates).updates)
 
     override fun insert(fact: Any) = atomic {
         insert(fact)

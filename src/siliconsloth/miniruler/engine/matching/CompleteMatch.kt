@@ -34,7 +34,7 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
     }
 
     fun atomic(updates: MatchAtomicBuilder.() -> Unit) {
-        rule.engine.applyUpdates(MatchAtomicBuilder(this).apply(updates).updates)
+        rule.engine.applyUpdates(MatchAtomicBuilder(rule.engine, this).apply(updates).updates)
     }
 
     override fun insert(fact: Any) = atomic {
