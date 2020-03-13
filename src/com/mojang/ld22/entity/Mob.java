@@ -22,6 +22,10 @@ public class Mob extends Entity {
 		yr = 3;
 	}
 
+	public int getDir() {
+		return dir;
+	}
+
 	public void tick() {
 		tickTime++;
 		if (level.getTile(x >> 4, y >> 4) == Tile.lava) {
