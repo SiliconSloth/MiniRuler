@@ -17,11 +17,11 @@ interface Sighting: Perception, Spatial {
     val frame: Int
 }
 data class TileSighting(val tile: Tile, override val x: Int, override val y: Int, override val frame: Int): Sighting
-data class EntitySighting(val entity: Entity, override val x: Int, override val y: Int, override val frame: Int): Sighting
+data class EntitySighting(val entity: Entity, override val x: Int, override val y: Int, val facing: Direction, override val frame: Int): Sighting
 
 interface Memory: Fact
 data class TileMemory(val tile: Tile, override val x: Int, override val y: Int): Memory, Spatial
-data class EntityMemory(val entity: Entity, override val x: Int, override val y: Int): Memory, Spatial
+data class EntityMemory(val entity: Entity, override val x: Int, override val y: Int, val facing: Direction): Memory, Spatial
 
 interface Action: Fact
 data class KeyPress(val key: Key): Action

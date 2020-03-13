@@ -101,21 +101,13 @@ class Visualizer(val engine: RuleEngine): JPanel() {
         g2d.color = g2d.color.run { Color(if (red) { 255 } else { 0 }, brightness, if (red) { 0 } else { 255 }, 100) }
 
         val xOff = when (direction) {
-            Direction.UP_RIGHT -> 1
             Direction.RIGHT -> 1
-            Direction.DOWN_RIGHT -> 1
-            Direction.UP_LEFT -> -1
             Direction.LEFT -> -1
-            Direction.DOWN_LEFT -> -1
             else -> 0
         }
         val yOff = when (direction) {
-            Direction.UP_LEFT -> -1
             Direction.UP -> -1
-            Direction.UP_RIGHT -> -1
-            Direction.DOWN_LEFT -> 1
             Direction.DOWN -> 1
-            Direction.DOWN_RIGHT -> 1
             else -> 0
         }
         g2d.fillRect(x + 2 + xOff*6, y + 2 + yOff*6, 6, 6)

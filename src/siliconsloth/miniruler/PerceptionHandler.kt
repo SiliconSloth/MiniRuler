@@ -1,12 +1,14 @@
 package siliconsloth.miniruler
 
 import com.mojang.ld22.GameListener
+import com.mojang.ld22.entity.Mob
 import com.mojang.ld22.level.tile.Tile as GameTile
 import com.mojang.ld22.screen.Menu as GameMenu
 import com.mojang.ld22.entity.Entity as GameEntity
 import com.mojang.ld22.screen.TitleMenu
 import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.engine.builders.AtomicBuilder
+import java.lang.RuntimeException
 
 class PerceptionHandler(private val engine: RuleEngine): GameListener {
     private var menu: Menu? = null
@@ -62,7 +64,18 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
         deleteAll<EntitySighting>()
 
         entities.forEach { entity ->
-            insert(EntitySighting(Entity.fromGameEntity(entity), entity.x - cameraX, entity.y - cameraY, frame))
+            val facing = if (entity is Mob) {
+                when (entity.dir) {
+                    0 -> Direction.DOWN
+                    1 -> Direction.UP
+                    2 -> Direction.LEFT
+                    3 -> Direction.RIGHT
+                    else -> throw RuntimeException("Unknown direction ${entity.dir}")
+                }
+            } else {
+                Direction.DOWN
+            }
+            insert(EntitySighting(Entity.fromGameEntity(entity), entity.x - cameraX, entity.y - cameraY, facing, frame))
         }
     }
 }
