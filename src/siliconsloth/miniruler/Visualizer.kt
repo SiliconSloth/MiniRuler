@@ -80,7 +80,7 @@ class Visualizer(val engine: RuleEngine): JPanel() {
                 tileMemories.forEach {
                     // Generate arbitrary colours from tile enum.
                     g2d.color = Color((it.tile.ordinal * 31 + 76) % 256, (it.tile.ordinal * 131 + 176) % 256, (it.tile.ordinal * 231 + 276) % 256, 255)
-                    g2d.fillRect(it.x, it.y, 16, 16)
+                    g2d.fillRect(it.x - 8, it.y - 8, 16, 16)
                 }
 
                 entityMemories.forEach {
@@ -90,7 +90,7 @@ class Visualizer(val engine: RuleEngine): JPanel() {
 
                 targets.forEach {
                     g2d.color = Color(0, 255, 0, 255)
-                    g2d.fillRect(it.tile.x + 3, it.tile.y + 3, 10, 10)
+                    g2d.fillRect(it.tile.x - 5, it.tile.y - 5, 10, 10)
                 }
             }}}}
         }
