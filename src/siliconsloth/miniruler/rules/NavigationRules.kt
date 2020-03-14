@@ -13,8 +13,8 @@ fun RuleEngine.navigationRules() {
 
         fire {
             trees.minBy { tree ->
-                val xDiff = tree.x + 8 - (player.x + 4)
-                val yDiff = tree.y + 8 - (player.y + 3)
+                val xDiff = tree.x - (player.x + 4)
+                val yDiff = tree.y - (player.y + 3)
 
                 sqrt((xDiff*xDiff + yDiff*yDiff).toFloat())
             }?.let{
@@ -43,8 +43,8 @@ fun RuleEngine.navigationRules() {
 
         fire {
             atomic {
-                val tx = target.tile.x + 8
-                val ty = target.tile.y + 8
+                val tx = target.tile.x
+                val ty = target.tile.y
                 val px = player.x
                 val py = player.y
 

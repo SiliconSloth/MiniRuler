@@ -48,6 +48,6 @@ fun aimingAt(actor: EntityMemory, target: TileMemory): Boolean {
         Direction.RIGHT -> -minX
     }
 
-    return (target.x + 8 - actor.x) in minX2..maxX2
-            && (target.y + 8 - actor.y) in minY2..maxY2
+    return (target.x - actor.x) in minX2..maxX2
+            && (target.y - actor.y) in minY2..maxY2
 }

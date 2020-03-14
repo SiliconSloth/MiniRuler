@@ -56,7 +56,7 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
         deleteAll<TileSighting>()
 
         tiles.forEachIndexed { x, column -> column.forEachIndexed { y, tile ->
-            insert(TileSighting(Tile.fromGameTile(tile), x*16 - xOffset, y*16 - yOffset, frame))
+            insert(TileSighting(Tile.fromGameTile(tile), x*16 + 8 - xOffset, y*16 + 8 - yOffset, frame))
         } }
     }
 

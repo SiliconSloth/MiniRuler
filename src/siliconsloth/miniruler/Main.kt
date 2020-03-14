@@ -25,8 +25,8 @@ fun main() {
 }
 
 fun <T: Spatial> screenFilter(cameraX: () -> Int, cameraY: () -> Int) = AreaFilter<T>(
-        { (cameraX() / 16) * 16 },
-        { ((cameraX() + Game.WIDTH) / 16) * 16 - 1 },
-        { (cameraY() / 16) * 16 },
-        { ((cameraY() + Game.HEIGHT) / 16) * 16 - 1 }
+        { (cameraX() / 16) * 16 + 8 },
+        { ((cameraX() + Game.WIDTH) / 16) * 16 + 7 },
+        { (cameraY() / 16) * 16 + 8 },
+        { ((cameraY() + Game.HEIGHT) / 16) * 16 + 7 }
 )
