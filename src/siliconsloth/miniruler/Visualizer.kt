@@ -90,7 +90,7 @@ class Visualizer(val engine: RuleEngine): JPanel() {
 
                 targets.forEach {
                     g2d.color = Color(0, 255, 0, 255)
-                    g2d.fillRect(it.tile.x - 5, it.tile.y - 5, 10, 10)
+                    g2d.fillRect(it.target.x - 5, it.target.y - 5, 10, 10)
                 }
             }}}}
         }

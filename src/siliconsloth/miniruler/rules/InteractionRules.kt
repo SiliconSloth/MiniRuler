@@ -2,20 +2,31 @@ package siliconsloth.miniruler.rules
 
 import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
+import kotlin.math.abs
 
 fun RuleEngine.attackRules() {
     rule {
         val player by find<EntityMemory> { entity == Entity.PLAYER }
-        find<MoveTarget> { aimingAt(player, tile) }
+        find<MoveTarget> { target is TileMemory && target.tile == Tile.TREE && aimingAt(player, target) }
         find<StaminaLevel> { stamina > 8 }
 
         fire {
             maintain(KeyPress(Key.ATTACK))
         }
     }
+
+    rule {
+        val player by find<EntityMemory> { entity == Entity.PLAYER }
+        find<MoveTarget> { target is EntityMemory && target.entity == Entity.ITEM
+                && abs(player.x - target.x) <= 1 && abs(player.y - target.y) <= 1 }
+
+        fire {
+            insert(KeyPress(Key.UP))
+        }
+    }
 }
 
-fun aimingAt(actor: EntityMemory, target: TileMemory): Boolean {
+fun aimingAt(actor: EntityMemory, target: Spatial): Boolean {
     // Bounding box that target must lie in if the actor is facing down.
     val minX = -6
     val maxX = 6

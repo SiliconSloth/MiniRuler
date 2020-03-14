@@ -10,11 +10,12 @@ fun RuleEngine.navigationRules() {
         not<MoveTarget>()
         val player by find<EntityMemory> { entity == Entity.PLAYER }
         val trees by all<TileMemory> { tile == Tile.TREE }
+        val items by all<EntityMemory> { entity == Entity.ITEM }
 
         fire {
-            trees.minBy { tree ->
-                val xDiff = tree.x - player.x
-                val yDiff = tree.y - player.y
+            trees.union<Spatial>(items).minBy {
+                val xDiff = it.x - player.x
+                val yDiff = it.y - player.y
 
                 sqrt((xDiff*xDiff + yDiff*yDiff).toFloat())
             }?.let{
@@ -24,8 +25,17 @@ fun RuleEngine.navigationRules() {
     }
 
     rule {
-        val target by find<MoveTarget>()
-        not(EqualityFilter { target.tile })
+        val target by find<MoveTarget>() { target is TileMemory }
+        not(EqualityFilter { target.target as TileMemory })
+
+        fire {
+            delete(target)
+        }
+    }
+
+    rule {
+        val target by find<MoveTarget>() { target is EntityMemory }
+        not(EqualityFilter { target.target as EntityMemory })
 
         fire {
             delete(target)
@@ -43,8 +53,8 @@ fun RuleEngine.navigationRules() {
 
         fire {
             atomic {
-                val tx = target.tile.x
-                val ty = target.tile.y
+                val tx = target.target.x
+                val ty = target.target.y
                 val px = player.x
                 val py = player.y
 
