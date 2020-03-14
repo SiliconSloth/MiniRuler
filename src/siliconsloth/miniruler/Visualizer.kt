@@ -96,23 +96,6 @@ class Visualizer(val engine: RuleEngine): JPanel() {
         }
     }
 
-    private fun drawDirectional(g2d: Graphics2D, x: Int, y: Int, direction: Direction, strength: Float, red: Boolean) {
-        val brightness = (strength * 500).toInt().coerceIn(0, 255)
-        g2d.color = g2d.color.run { Color(if (red) { 255 } else { 0 }, brightness, if (red) { 0 } else { 255 }, 100) }
-
-        val xOff = when (direction) {
-            Direction.RIGHT -> 1
-            Direction.LEFT -> -1
-            else -> 0
-        }
-        val yOff = when (direction) {
-            Direction.UP -> -1
-            Direction.DOWN -> 1
-            else -> 0
-        }
-        g2d.fillRect(x + 2 + xOff*6, y + 2 + yOff*6, 6, 6)
-    }
-
     private fun <T> addMemory(memory: T, memories: MutableSet<T>) {
         synchronized(this) {
             memories.add(memory)
