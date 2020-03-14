@@ -13,8 +13,8 @@ fun RuleEngine.navigationRules() {
 
         fire {
             trees.minBy { tree ->
-                val xDiff = tree.x - (player.x + 4)
-                val yDiff = tree.y - (player.y + 3)
+                val xDiff = tree.x - player.x
+                val yDiff = tree.y - player.y
 
                 sqrt((xDiff*xDiff + yDiff*yDiff).toFloat())
             }?.let{
