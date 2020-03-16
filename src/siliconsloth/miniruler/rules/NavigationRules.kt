@@ -3,7 +3,6 @@ package siliconsloth.miniruler.rules
 import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.engine.filters.EqualityFilter
-import kotlin.math.*
 
 fun RuleEngine.navigationRules() {
     rule {
@@ -37,6 +36,18 @@ fun RuleEngine.navigationRules() {
 
         fire {
             delete(target)
+        }
+    }
+
+    rule {
+        val target by find<MoveTarget> { target is TileMemory }
+        val camera by find<CameraLocation>()
+        val player by find<EntityMemory> { entity == Entity.PLAYER }
+        val item by find<StationaryItem> { camera.frame - since > 20
+                && item.pos.distance(player.pos) < target.target.pos.distance(player.pos) }
+
+        fire {
+            replace(target, MoveTarget(item.item))
         }
     }
 
