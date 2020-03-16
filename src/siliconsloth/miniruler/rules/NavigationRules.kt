@@ -11,14 +11,11 @@ fun RuleEngine.navigationRules() {
         val camera by find<CameraLocation>()
         val player by find<EntityMemory> { entity == Entity.PLAYER }
         val trees by all<TileMemory> { tile == Tile.TREE }
-        val items by all<StationaryItem> { item.entity == Entity.ITEM && camera.frame - since > 20 }
+        val items by all<StationaryItem> { camera.frame - since > 20 }
 
         fire {
             trees.union<Spatial>(items.map { it.item }).minBy {
-                val xDiff = it.x - player.x
-                val yDiff = it.y - player.y
-
-                sqrt((xDiff*xDiff + yDiff*yDiff).toFloat())
+                it.pos.distance(player.pos)
             }?.let{
                 insert(MoveTarget(it))
             }
@@ -54,23 +51,21 @@ fun RuleEngine.navigationRules() {
 
         fire {
             atomic {
-                val tx = target.target.x
-                val ty = target.target.y
-                val px = player.x
-                val py = player.y
+                val t = target.target.pos
+                val p = player.pos
 
-                if (tx > px + 1) {
+                if (t.x > p.x + 1) {
                     replace(leftPress, rightPress)
-                } else if (tx < px - 1) {
+                } else if (t.x < p.x - 1) {
                     replace(rightPress, leftPress)
                 } else {
                     delete(leftPress)
                     delete(rightPress)
                 }
 
-                if (ty > py + 1) {
+                if (t.y > p.y + 1) {
                     replace(upPress, downPress)
-                } else if (ty < py - 1) {
+                } else if (t.y < p.y - 1) {
                     replace(downPress, upPress)
                 } else {
                     delete(upPress)

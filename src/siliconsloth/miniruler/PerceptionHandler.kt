@@ -8,6 +8,7 @@ import com.mojang.ld22.entity.Entity as GameEntity
 import com.mojang.ld22.screen.TitleMenu
 import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.engine.builders.AtomicBuilder
+import siliconsloth.miniruler.math.Vector
 import java.lang.RuntimeException
 
 class PerceptionHandler(private val engine: RuleEngine): GameListener {
@@ -40,7 +41,7 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
         }
 
         deleteAll<CameraLocation>()
-        insert(CameraLocation(xScroll, yScroll, frame))
+        insert(CameraLocation(Vector(xScroll, yScroll), frame))
 
         updateTiles(tiles, xScroll % 16, yScroll % 16)
         updateEntities(entities, xScroll, yScroll)
@@ -56,7 +57,7 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
         deleteAll<TileSighting>()
 
         tiles.forEachIndexed { x, column -> column.forEachIndexed { y, tile ->
-            insert(TileSighting(Tile.fromGameTile(tile), x*16 + 8 - xOffset, y*16 + 8 - yOffset, frame))
+            insert(TileSighting(Tile.fromGameTile(tile), Vector(x*16 + 8 - xOffset, y*16 + 8 - yOffset), frame))
         } }
     }
 
@@ -75,7 +76,7 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
             } else {
                 Direction.DOWN
             }
-            insert(EntitySighting(Entity.fromGameEntity(entity), entity.x - cameraX, entity.y - cameraY, facing, frame))
+            insert(EntitySighting(Entity.fromGameEntity(entity), Vector(entity.x - cameraX, entity.y - cameraY), facing, frame))
         }
     }
 }

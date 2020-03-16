@@ -18,7 +18,7 @@ fun RuleEngine.attackRules() {
     rule {
         val player by find<EntityMemory> { entity == Entity.PLAYER }
         find<MoveTarget> { target is EntityMemory && target.entity == Entity.ITEM
-                && abs(player.x - target.x) <= 1 && abs(player.y - target.y) <= 1 }
+                && abs(player.pos.x - target.pos.x) <= 1 && abs(player.pos.y - target.pos.y) <= 1 }
 
         fire {
             insert(KeyPress(Key.UP))
@@ -59,6 +59,6 @@ fun aimingAt(actor: EntityMemory, target: Spatial): Boolean {
         Direction.RIGHT -> -minX
     }
 
-    return (target.x - actor.x) in minX2..maxX2
-            && (target.y - actor.y) in minY2..maxY2
+    return (target.pos.x - actor.pos.x) in minX2..maxX2
+            && (target.pos.y - actor.pos.y) in minY2..maxY2
 }

@@ -1,7 +1,8 @@
 package siliconsloth.miniruler.engine.filters
 
 import siliconsloth.miniruler.Spatial
+import siliconsloth.miniruler.math.Box
 
-class AreaFilter<T: Spatial>(val minX: () -> Int, val maxX: () -> Int, val minY: () -> Int, val maxY: () -> Int): Filter<T>({
-    it.x in minX()..maxX() && it.y in minY()..maxY()
+class AreaFilter<T: Spatial>(val box: () -> Box): Filter<T>({
+    it.pos in box()
 })

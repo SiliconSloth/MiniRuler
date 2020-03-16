@@ -81,35 +81,39 @@ class Visualizer(val engine: RuleEngine): JPanel() {
 
         synchronized(this) {
             val mems: Set<Spatial> = (tileMemories.union(entityMemories))
-            mems.map { it.x }.min()?.let { minX ->
-            mems.map { it.x }.max()?.let { maxX ->
-            mems.map { it.y }.min()?.let { minY ->
-            mems.map { it.y }.max()?.let { maxY ->
-                val scale = min(width.toDouble() / (maxX - minX).toDouble(), height.toDouble() / (maxY - minY).toDouble())
-                g2d.scale(scale, scale)
-                g2d.translate(-minX, -minY)
+            if (mems.isEmpty()) {
+                return
+            }
 
-                tileMemories.forEach {
-                    // Generate arbitrary colours from tile enum.
-                    g2d.color = Color((it.tile.ordinal * 31 + 76) % 256, (it.tile.ordinal * 131 + 176) % 256, (it.tile.ordinal * 231 + 276) % 256, 255)
-                    g2d.fillRect(it.x - 8, it.y - 8, 16, 16)
-                }
+            val minX = mems.map { it.pos.x }.min()!!
+            val maxX = mems.map { it.pos.x }.max()!!
+            val minY = mems.map { it.pos.y }.min()!!
+            val maxY = mems.map { it.pos.y }.max()!!
 
-                entityMemories.forEach {
-                    g2d.color = Color((it.entity.ordinal * 163 + 87) % 256, (it.entity.ordinal * 3 + 90) % 256, (it.entity.ordinal * 321 + 54) % 256, 255)
-                    g2d.fillRect(it.x - 6, it.y - 6, 12, 12)
-                }
+            val scale = min(width.toDouble() / (maxX - minX).toDouble(), height.toDouble() / (maxY - minY).toDouble())
+            g2d.scale(scale, scale)
+            g2d.translate(-minX, -minY)
 
-                targets.forEach {
-                    g2d.color = Color(0, 255, 0, 255)
-                    g2d.fillRect(it.target.x - 5, it.target.y - 5, 10, 10)
-                }
+            tileMemories.forEach {
+                // Generate arbitrary colours from tile enum.
+                g2d.color = Color((it.tile.ordinal * 31 + 76) % 256, (it.tile.ordinal * 131 + 176) % 256, (it.tile.ordinal * 231 + 276) % 256, 255)
+                g2d.fillRect(it.pos.x - 8, it.pos.y - 8, 16, 16)
+            }
 
-                stationaries.forEach {
-                    g2d.color = Color(0, 255, 255, 255)
-                    g2d.fillRect(it.item.x - 2, it.item.y - 2, 4, 4)
-                }
-            }}}}
+            entityMemories.forEach {
+                g2d.color = Color((it.entity.ordinal * 163 + 87) % 256, (it.entity.ordinal * 3 + 90) % 256, (it.entity.ordinal * 321 + 54) % 256, 255)
+                g2d.fillRect(it.pos.x - 6, it.pos.y - 6, 12, 12)
+            }
+
+            targets.forEach {
+                g2d.color = Color(0, 255, 0, 255)
+                g2d.fillRect(it.target.pos.x - 5, it.target.pos.y - 5, 10, 10)
+            }
+
+            stationaries.forEach {
+                g2d.color = Color(0, 255, 255, 255)
+                g2d.fillRect(it.item.pos.x - 2, it.item.pos.y - 2, 4, 4)
+            }
         }
     }
 
