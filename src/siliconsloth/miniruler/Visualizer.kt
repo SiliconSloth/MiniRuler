@@ -14,6 +14,7 @@ class Visualizer(val engine: RuleEngine): JPanel() {
     val tileMemories = mutableSetOf<TileMemory>()
     val entityMemories = mutableSetOf<EntityMemory>()
     val targets = mutableSetOf<MoveTarget>()
+    val stationaries = mutableSetOf<StationaryItem>()
 
     init {
         preferredSize = Dimension(Game.WIDTH * 3, Game.HEIGHT * 3)
@@ -54,6 +55,16 @@ class Visualizer(val engine: RuleEngine): JPanel() {
                 removeMemory(target, targets)
             }
         }
+
+        engine.rule {
+            val stat by find<StationaryItem>()
+            fire {
+                addMemory(stat, stationaries)
+            }
+            end {
+                removeMemory(stat, stationaries)
+            }
+        }
     }
 
     fun display() {
@@ -91,6 +102,11 @@ class Visualizer(val engine: RuleEngine): JPanel() {
                 targets.forEach {
                     g2d.color = Color(0, 255, 0, 255)
                     g2d.fillRect(it.target.x - 5, it.target.y - 5, 10, 10)
+                }
+
+                stationaries.forEach {
+                    g2d.color = Color(0, 255, 255, 255)
+                    g2d.fillRect(it.item.x - 2, it.item.y - 2, 4, 4)
                 }
             }}}}
         }

@@ -24,7 +24,7 @@ fun RuleEngine.memoryRules() {
     rule {
         val camera by find<CameraLocation>()
         val memory by find<TileMemory>(screenFilter({camera.x}, {camera.y}))
-        not<TileSighting>(EqualityFilter { TileSighting(memory.tile, memory.x - camera.x, memory.y - camera.y, camera.frame) })
+        not(EqualityFilter { TileSighting(memory.tile, memory.x - camera.x, memory.y - camera.y, camera.frame) })
         fire {
             delete(memory)
         }
@@ -33,7 +33,7 @@ fun RuleEngine.memoryRules() {
     rule {
         val camera by find<CameraLocation>()
         val memory by find<EntityMemory>(screenFilter({camera.x}, {camera.y}))
-        not<EntitySighting>(EqualityFilter { EntitySighting(memory.entity, memory.x - camera.x, memory.y - camera.y, memory.facing, camera.frame) })
+        not(EqualityFilter { EntitySighting(memory.entity, memory.x - camera.x, memory.y - camera.y, memory.facing, camera.frame) })
         fire {
             delete(memory)
         }
@@ -54,6 +54,27 @@ fun RuleEngine.memoryRules() {
 
         fire {
             delete(memory)
+        }
+    }
+
+    rule {
+        val camera by find<CameraLocation>()
+        val sighting by find<EntitySighting> { entity == Entity.ITEM }
+
+        fire {
+            val memory = EntityMemory(sighting.entity, camera.x + sighting.x, camera.y + sighting.y, sighting.facing)
+            if (exists(EqualityFilter { memory })) {
+                insert(StationaryItem(memory))
+            }
+        }
+    }
+
+    rule {
+        val stat by find<StationaryItem>()
+        not(EqualityFilter { stat.item } )
+
+        fire {
+            delete(stat)
         }
     }
 }
