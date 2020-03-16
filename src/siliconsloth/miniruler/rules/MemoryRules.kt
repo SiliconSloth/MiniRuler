@@ -64,7 +64,7 @@ fun RuleEngine.memoryRules() {
         fire {
             val memory = EntityMemory(sighting.entity, camera.x + sighting.x, camera.y + sighting.y, sighting.facing)
             if (exists(EqualityFilter { memory })) {
-                insert(StationaryItem(memory))
+                insert(StationaryItem(memory, camera.frame))
             }
         }
     }

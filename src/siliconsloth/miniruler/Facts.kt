@@ -27,4 +27,4 @@ interface Action: Fact
 data class KeyPress(val key: Key): Action
 
 data class MoveTarget(val target: Spatial): Fact
-data class StationaryItem(val item: EntityMemory): Fact
+data class StationaryItem(val item: EntityMemory, val since: Int): Fact

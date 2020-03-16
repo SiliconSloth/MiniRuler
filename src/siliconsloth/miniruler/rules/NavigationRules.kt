@@ -8,12 +8,13 @@ import kotlin.math.*
 fun RuleEngine.navigationRules() {
     rule {
         not<MoveTarget>()
+        val camera by find<CameraLocation>()
         val player by find<EntityMemory> { entity == Entity.PLAYER }
         val trees by all<TileMemory> { tile == Tile.TREE }
-        val items by all<EntityMemory> { entity == Entity.ITEM }
+        val items by all<StationaryItem> { item.entity == Entity.ITEM && camera.frame - since > 20 }
 
         fire {
-            trees.union<Spatial>(items).minBy {
+            trees.union<Spatial>(items.map { it.item }).minBy {
                 val xDiff = it.x - player.x
                 val yDiff = it.y - player.y
 
