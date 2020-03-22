@@ -8,7 +8,7 @@ import siliconsloth.miniruler.math.Vector
 import kotlin.math.ceil
 import kotlin.math.floor
 
-class SpatialStore<T: Spatial>(): FactStore<T> {
+class SpatialMap<T: Spatial>(): FactStore<T> {
     val BLOCK_SIZE = 64
 
     val spatials = mutableMapOf<Vector, MutableSet<T>>()

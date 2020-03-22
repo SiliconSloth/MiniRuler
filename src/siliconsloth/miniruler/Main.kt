@@ -3,7 +3,7 @@ package siliconsloth.miniruler
 import com.mojang.ld22.Game
 import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.engine.filters.AreaFilter
-import siliconsloth.miniruler.engine.stores.SpatialStore
+import siliconsloth.miniruler.engine.stores.SpatialMap
 import siliconsloth.miniruler.math.Box
 import siliconsloth.miniruler.math.Vector
 import siliconsloth.miniruler.rules.attackRules
@@ -13,8 +13,8 @@ import siliconsloth.miniruler.rules.navigationRules
 
 fun main() {
     val engine = RuleEngine()
-    engine.addFactStore(SpatialStore<TileMemory>())
-    engine.addFactStore(SpatialStore<EntityMemory>())
+    engine.addFactStore(SpatialMap<TileMemory>())
+    engine.addFactStore(SpatialMap<EntityMemory>())
 
     val game = Game.startWindowedGame(PerceptionHandler(engine))
     KeyListener(engine, game.input)
