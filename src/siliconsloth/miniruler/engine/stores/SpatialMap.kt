@@ -8,18 +8,16 @@ import siliconsloth.miniruler.math.Vector
 import kotlin.math.ceil
 import kotlin.math.floor
 
-class SpatialMap<T: Spatial>(): FactStore<T> {
-    val BLOCK_SIZE = 64
-
+class SpatialMap<T: Spatial>(val blockSize: Int = 64): FactStore<T> {
     val spatials = mutableMapOf<Vector, MutableSet<T>>()
 
     override fun insert(fact: T) {
-        spatials.getOrPut(fact.pos / BLOCK_SIZE) { mutableSetOf() }
+        spatials.getOrPut(fact.pos / blockSize) { mutableSetOf() }
                 .add(fact)
     }
 
     override fun delete(fact: T) {
-        spatials[fact.pos / BLOCK_SIZE]?.remove(fact)
+        spatials[fact.pos / blockSize]?.remove(fact)
     }
 
     override fun retrieveMatching(filter: Filter<T>): Iterable<T> =
@@ -28,10 +26,10 @@ class SpatialMap<T: Spatial>(): FactStore<T> {
                 is AreaFilter -> {
                     val box = filter.box()
 
-                    val minX = floor(box.min.x.toFloat() / BLOCK_SIZE).toInt()
-                    val maxX = ceil(box.max.x.toFloat() / BLOCK_SIZE).toInt()
-                    val minY = floor(box.min.y.toFloat() / BLOCK_SIZE).toInt()
-                    val maxY = ceil(box.max.y.toFloat() / BLOCK_SIZE).toInt()
+                    val minX = floor(box.min.x.toFloat() / blockSize).toInt()
+                    val maxX = ceil(box.max.x.toFloat() / blockSize).toInt()
+                    val minY = floor(box.min.y.toFloat() / blockSize).toInt()
+                    val maxY = ceil(box.max.y.toFloat() / blockSize).toInt()
 
                     (minX..maxX).map { x ->
                         (minY..maxY).map { y ->
