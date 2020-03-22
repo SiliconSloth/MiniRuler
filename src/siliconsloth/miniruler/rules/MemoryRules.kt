@@ -23,7 +23,7 @@ fun RuleEngine.memoryRules() {
 
     rule {
         val camera by find<CameraLocation>()
-        val memory by find<TileMemory>(screenFilter({camera.pos}))
+        val memory by find<TileMemory>(screenFilter {camera.pos})
         not(EqualityFilter { TileSighting(memory.tile, memory.pos - camera.pos, camera.frame) })
         fire {
             delete(memory)
@@ -32,7 +32,7 @@ fun RuleEngine.memoryRules() {
 
     rule {
         val camera by find<CameraLocation>()
-        val memory by find<EntityMemory>(screenFilter({camera.pos}))
+        val memory by find<EntityMemory>(screenFilter {camera.pos})
         not(EqualityFilter { EntitySighting(memory.entity, memory.pos - camera.pos, memory.facing, camera.frame) })
         fire {
             delete(memory)

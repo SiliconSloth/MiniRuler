@@ -9,7 +9,7 @@ import kotlin.reflect.KClass
 class AggregateMatchSet<T: Any>(val binding: AggregateBinding<T>, val nextBindings: List<Binding<*,*>>, rule: Rule): MatchNode(rule) {
     val matches = mutableSetOf<T>().also { matches ->
         (rule.engine.stores[binding.type] as FactStore<T>?)?.retrieveMatching(binding.filter)?.forEach {
-            matches.add(it as T)
+            matches.add(it)
         }
     }
 

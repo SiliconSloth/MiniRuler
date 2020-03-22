@@ -22,7 +22,7 @@ fun RuleEngine.navigationRules() {
     }
 
     rule {
-        val target by find<MoveTarget>() { target is TileMemory }
+        val target by find<MoveTarget> { target is TileMemory }
         not(EqualityFilter { target.target as TileMemory })
 
         fire {
@@ -31,7 +31,7 @@ fun RuleEngine.navigationRules() {
     }
 
     rule {
-        val target by find<MoveTarget>() { target is EntityMemory }
+        val target by find<MoveTarget> { target is EntityMemory }
         not(EqualityFilter { target.target as EntityMemory })
 
         fire {

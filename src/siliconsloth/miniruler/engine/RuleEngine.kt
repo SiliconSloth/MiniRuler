@@ -7,7 +7,7 @@ import siliconsloth.miniruler.engine.matching.CompleteMatch
 import siliconsloth.miniruler.engine.stores.FactSet
 import siliconsloth.miniruler.engine.stores.FactStore
 
-class RuleEngine(): FactUpdater<Any> {
+class RuleEngine: FactUpdater<Any> {
     data class Update<T: Any>(val fact: T, val isInsert: Boolean, val maintainer: CompleteMatch? = null)
 
     val rules = mutableMapOf<KClass<*>, MutableList<Rule>>()

@@ -15,7 +15,7 @@ class MatchSet<T: Any>(val binding: SimpleBinding<T>, val nextBindings: List<Bin
 
     init {
         (rule.engine.stores[binding.type] as FactStore<T>?)?.retrieveMatching(binding.filter)?.forEach {
-            matchRemaining(it as T)
+            matchRemaining(it)
         }
     }
 

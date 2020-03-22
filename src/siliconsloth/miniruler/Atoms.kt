@@ -1,11 +1,8 @@
 package siliconsloth.miniruler
 
-import com.mojang.ld22.InputHandler
 import com.mojang.ld22.entity.*
 import com.mojang.ld22.entity.particle.SmashParticle
 import com.mojang.ld22.entity.particle.TextParticle
-import com.mojang.ld22.level.tile.GrassTile
-import com.mojang.ld22.level.tile.RockTile
 import com.mojang.ld22.screen.*
 import com.mojang.ld22.screen.Menu as GameMenu
 import com.mojang.ld22.level.tile.Tile as GameTile
