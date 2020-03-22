@@ -18,6 +18,7 @@ class RuleEngine: FactUpdater<Any> {
     val updateQueue = mutableListOf<Map<KClass<*>, List<Update<*>>>>()
 
     private fun <T: Any> applyUpdates(type: KClass<T>, updates: List<Update<T>>) {
+        @Suppress("UNCHECKED_CAST")
         val store = stores.getOrPut(type) { FactSet<T>() } as FactStore<T>
         updates.forEach {
             if (it.isInsert) {
@@ -52,6 +53,7 @@ class RuleEngine: FactUpdater<Any> {
                          .mapValues { it.value.filter { !(it.isInsert && it.maintainer?.dropped ?: false) } }
 
                  batch.forEach {
+                     @Suppress("UNCHECKED_CAST")
                      applyUpdates(it.key as KClass<Any>, it.value as List<Update<Any>>)
                  }
 

@@ -8,6 +8,7 @@ import kotlin.reflect.KClass
 
 class AggregateMatchSet<T: Any>(val binding: AggregateBinding<T>, val nextBindings: List<Binding<*,*>>, rule: Rule): MatchNode(rule) {
     val matches = mutableSetOf<T>().also { matches ->
+        @Suppress("UNCHECKED_CAST")
         (rule.engine.stores[binding.type] as FactStore<T>?)?.retrieveMatching(binding.filter)?.forEach {
             matches.add(it)
         }
@@ -23,6 +24,7 @@ class AggregateMatchSet<T: Any>(val binding: AggregateBinding<T>, val nextBindin
     override fun applyUpdates(updates: Map<KClass<*>, List<RuleEngine.Update<*>>>) {
         nextMatch.drop()
 
+        @Suppress("UNCHECKED_CAST")
         updates[binding.type]?.forEach { (it as RuleEngine.Update<T>).also {
             if (it.isInsert) {
                 if (binding.filter.predicate(it.fact)) {

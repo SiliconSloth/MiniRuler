@@ -14,6 +14,7 @@ class MatchSet<T: Any>(val binding: SimpleBinding<T>, val nextBindings: List<Bin
     val matches = mutableMapOf<T, FreshNode>()
 
     init {
+        @Suppress("UNCHECKED_CAST")
         (rule.engine.stores[binding.type] as FactStore<T>?)?.retrieveMatching(binding.filter)?.forEach {
             matchRemaining(it)
         }
@@ -25,6 +26,7 @@ class MatchSet<T: Any>(val binding: SimpleBinding<T>, val nextBindings: List<Bin
     }
 
     override fun applyUpdates(updates: Map<KClass<*>, List<RuleEngine.Update<*>>>) {
+        @Suppress("UNCHECKED_CAST")
         updates[binding.type]?.forEach { (it as RuleEngine.Update<T>).also {
             if (it.isInsert) {
                 if (binding.filter.predicate(it.fact) && !matches.containsKey(it.fact)) {

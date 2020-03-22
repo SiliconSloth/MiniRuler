@@ -60,6 +60,7 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
 
     inline fun <reified T: Any> exists(filter: Filter<T>): Boolean =
             rule.engine.stores[T::class]?.let {
+                @Suppress("UNCHECKED_CAST")
                 (it as FactStore<T>).retrieveMatching(filter).any()
             } ?: false
 }
