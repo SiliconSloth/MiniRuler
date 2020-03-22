@@ -22,7 +22,7 @@ class SpatialMap<T: Spatial>(val blockSize: Int = 64): FactStore<T> {
 
     override fun retrieveMatching(filter: Filter<T>): Iterable<T> =
             when (filter) {
-                is AllFilter -> spatials.values.flatten()
+                is AllFilter -> allFacts()
                 is AreaFilter -> {
                     val box = filter.box()
 
