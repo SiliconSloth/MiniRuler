@@ -9,7 +9,7 @@ fun RuleEngine.navigationRules() {
         val tree by find<Memory> { entity == Entity.TREE }
 
         fire {
-            insert(PropsedTarget(tree))
+            insert(PossibleTarget(tree))
         }
     }
 
@@ -18,14 +18,24 @@ fun RuleEngine.navigationRules() {
         val item by find<StationaryItem> { camera.frame - since > 20 }
 
         fire {
-            insert(PropsedTarget(item.item))
+            insert(PossibleTarget(item.item))
         }
     }
 
     rule {
         not<MoveTarget>()
         val player by find<Memory> { entity == Entity.PLAYER }
-        val targets by all<PropsedTarget>()
+        val target by find<PossibleTarget>()
+
+        fire {
+            maintain(TargetProposal(target.target, target.target.pos.distance(player.pos)))
+        }
+    }
+
+    rule {
+        not<MoveTarget>()
+        val player by find<Memory> { entity == Entity.PLAYER }
+        val targets by all<TargetProposal>()
 
         fire {
             targets.minBy {
@@ -37,7 +47,7 @@ fun RuleEngine.navigationRules() {
     }
 
     rule {
-        val target by find<MoveTarget>()
+        val target by find<PossibleTarget>()
         not(EqualityFilter { target.target })
 
         fire {
@@ -46,7 +56,16 @@ fun RuleEngine.navigationRules() {
     }
 
     rule {
-        val target by find<PropsedTarget>()
+        val target by find<TargetProposal>()
+        not(EqualityFilter { target.target })
+
+        fire {
+            delete(target)
+        }
+    }
+
+    rule {
+        val target by find<MoveTarget>()
         not(EqualityFilter { target.target })
 
         fire {

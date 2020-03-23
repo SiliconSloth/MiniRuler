@@ -20,6 +20,12 @@ data class Memory(val entity: Entity, override val pos: Vector, val facing: Dire
 interface Action: Fact
 data class KeyPress(val key: Key): Action
 
-data class MoveTarget(val target: Memory): Fact
-data class PropsedTarget(val target: Memory): Fact
+interface Target: Fact {
+    val target: Memory
+}
+
+data class PossibleTarget(override val target: Memory): Target
+data class TargetProposal(override val target: Memory, val distance: Float): Target
+data class MoveTarget(override val target: Memory): Target
+
 data class StationaryItem(val item: Memory, val since: Int): Fact
