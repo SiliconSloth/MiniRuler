@@ -51,13 +51,15 @@ enum class TitleOption {
     }
 }
 
-enum class Tile {
+enum class Entity {
     GRASS, ROCK, WATER, FLOWER, TREE, DIRT, SAND, CACTUS, HOLE, TREE_SAPLING, CACTUS_SAPLING,
     FARMLAND, WHEAT, LAVA, STAIRS_DOWN, STAIRS_UP, INFINITE_FALL, CLOUD, HARD_ROCK,
-    IRON_ORE, GOLD_ORE, GEM_ORE, CLOUD_CACTUS;
+    IRON_ORE, GOLD_ORE, GEM_ORE, CLOUD_CACTUS,
+    AIR_WIZARD, ANVIL, CHEST, FURNACE, ITEM, LANTERN, OVEN, PLAYER, SLIME, SPARK, WORKBENCH, ZOMBIE,
+    SMASH_PARTICLE, TEXT_PARTICLE;
 
     companion object {
-        fun fromGameTile(tile: GameTile): Tile =
+        fun fromGame(tile: GameTile): Entity =
                 when (tile) {
                     GameTile.grass -> GRASS
                     GameTile.rock -> ROCK
@@ -84,15 +86,8 @@ enum class Tile {
                     GameTile.cloudCactus -> CLOUD_CACTUS
                     else -> throw InvalidParameterException("Unknown tile")
                 }
-    }
-}
 
-enum class Entity {
-    AIR_WIZARD, ANVIL, CHEST, FURNACE, ITEM, LANTERN, OVEN, PLAYER, SLIME, SPARK, WORKBENCH, ZOMBIE,
-    SMASH_PARTICLE, TEXT_PARTICLE;
-
-    companion object {
-        fun fromGameEntity(entity: GameEntity): Entity =
+        fun fromGame(entity: GameEntity): Entity =
                 when (entity) {
                     is AirWizard -> AIR_WIZARD
                     is Anvil -> ANVIL

@@ -7,33 +7,16 @@ import siliconsloth.miniruler.engine.RuleEngine
 fun RuleEngine.memoryRules() {
     rule {
         val camera by find<CameraLocation>()
-        val sighting by find<TileSighting> { frame == camera.frame }
+        val sighting by find<Sighting> { frame == camera.frame }
         fire {
-            insert(TileMemory(sighting.tile, camera.pos + sighting.pos))
+            insert(Memory(sighting.entity, camera.pos + sighting.pos, sighting.facing))
         }
     }
 
     rule {
         val camera by find<CameraLocation>()
-        val sighting by find<EntitySighting> { frame == camera.frame }
-        fire {
-            insert(EntityMemory(sighting.entity, camera.pos + sighting.pos, sighting.facing))
-        }
-    }
-
-    rule {
-        val camera by find<CameraLocation>()
-        val memory by find<TileMemory>(screenFilter {camera.pos})
-        not(EqualityFilter { TileSighting(memory.tile, memory.pos - camera.pos, camera.frame) })
-        fire {
-            delete(memory)
-        }
-    }
-
-    rule {
-        val camera by find<CameraLocation>()
-        val memory by find<EntityMemory>(screenFilter {camera.pos})
-        not(EqualityFilter { EntitySighting(memory.entity, memory.pos - camera.pos, memory.facing, camera.frame) })
+        val memory by find<Memory>(screenFilter {camera.pos})
+        not(EqualityFilter { Sighting(memory.entity, memory.pos - camera.pos, memory.facing, camera.frame) })
         fire {
             delete(memory)
         }
@@ -41,16 +24,7 @@ fun RuleEngine.memoryRules() {
 
     rule {
         find<MenuOpen> { menu == Menu.TITLE }
-        val memory by find<TileMemory>()
-
-        fire {
-            delete(memory)
-        }
-    }
-
-    rule {
-        find<MenuOpen> { menu == Menu.TITLE }
-        val memory by find<EntityMemory>()
+        val memory by find<Memory>()
 
         fire {
             delete(memory)
@@ -59,10 +33,10 @@ fun RuleEngine.memoryRules() {
 
     rule {
         val camera by find<CameraLocation>()
-        val sighting by find<EntitySighting> { entity == Entity.ITEM }
+        val sighting by find<Sighting> { entity == Entity.ITEM }
 
         fire {
-            val memory = EntityMemory(sighting.entity, camera.pos + sighting.pos, sighting.facing)
+            val memory = Memory(sighting.entity, camera.pos + sighting.pos, sighting.facing)
             if (exists(EqualityFilter { memory })) {
                 insert(StationaryItem(memory, camera.frame))
             }

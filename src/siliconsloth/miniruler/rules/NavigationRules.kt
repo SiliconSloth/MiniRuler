@@ -8,12 +8,12 @@ fun RuleEngine.navigationRules() {
     rule {
         not<MoveTarget>()
         val camera by find<CameraLocation>()
-        val player by find<EntityMemory> { entity == Entity.PLAYER }
-        val trees by all<TileMemory> { tile == Tile.TREE }
+        val player by find<Memory> { entity == Entity.PLAYER }
+        val trees by all<Memory> { entity == Entity.TREE }
         val items by all<StationaryItem> { camera.frame - since > 20 }
 
         fire {
-            trees.union<Spatial>(items.map { it.item }).minBy {
+            trees.union<Memory>(items.map { it.item }).minBy {
                 it.pos.distance(player.pos)
             }?.let{
                 insert(MoveTarget(it))
@@ -22,8 +22,8 @@ fun RuleEngine.navigationRules() {
     }
 
     rule {
-        val target by find<MoveTarget> { target is TileMemory }
-        not(EqualityFilter { target.target as TileMemory })
+        val target by find<MoveTarget>()
+        not(EqualityFilter { target.target })
 
         fire {
             delete(target)
@@ -31,18 +31,9 @@ fun RuleEngine.navigationRules() {
     }
 
     rule {
-        val target by find<MoveTarget> { target is EntityMemory }
-        not(EqualityFilter { target.target as EntityMemory })
-
-        fire {
-            delete(target)
-        }
-    }
-
-    rule {
-        val target by find<MoveTarget> { target is TileMemory }
+        val target by find<MoveTarget>()
         val camera by find<CameraLocation>()
-        val player by find<EntityMemory> { entity == Entity.PLAYER }
+        val player by find<Memory> { entity == Entity.PLAYER }
         val item by find<StationaryItem> { camera.frame - since > 20
                 && item.pos.distance(player.pos) < target.target.pos.distance(player.pos) }
 
@@ -58,7 +49,7 @@ fun RuleEngine.navigationRules() {
         val rightPress = KeyPress(Key.RIGHT)
 
         val target by find<MoveTarget>()
-        val player by find<EntityMemory> { entity == Entity.PLAYER }
+        val player by find<Memory> { entity == Entity.PLAYER }
 
         fire {
             atomic {

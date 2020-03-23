@@ -13,8 +13,7 @@ import siliconsloth.miniruler.rules.navigationRules
 
 fun main() {
     val engine = RuleEngine()
-    engine.addFactStore(SpatialMap<TileMemory>())
-    engine.addFactStore(SpatialMap<EntityMemory>())
+    engine.addFactStore(SpatialMap<Memory>())
 
     val game = Game.startWindowedGame(PerceptionHandler(engine))
     KeyListener(engine, game.input)

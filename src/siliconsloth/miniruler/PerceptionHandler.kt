@@ -43,6 +43,7 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
         deleteAll<CameraLocation>()
         insert(CameraLocation(Vector(xScroll, yScroll), frame))
 
+        deleteAll<Sighting>()
         updateTiles(tiles, xScroll % 16, yScroll % 16)
         updateEntities(entities, xScroll, yScroll)
 
@@ -54,16 +55,12 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
 
     // Center is relative to tile array.
     private fun AtomicBuilder.updateTiles(tiles: Array<out Array<GameTile>>, xOffset: Int, yOffset: Int) {
-        deleteAll<TileSighting>()
-
         tiles.forEachIndexed { x, column -> column.forEachIndexed { y, tile ->
-            insert(TileSighting(Tile.fromGameTile(tile), Vector(x*16 + 8 - xOffset, y*16 + 8 - yOffset), frame))
+            insert(Sighting(Entity.fromGame(tile), Vector(x*16 + 8 - xOffset, y*16 + 8 - yOffset), Direction.DOWN, frame))
         } }
     }
 
     private fun AtomicBuilder.updateEntities(entities: List<GameEntity>, cameraX: Int, cameraY: Int) {
-        deleteAll<EntitySighting>()
-
         entities.forEach { entity ->
             val facing = if (entity is Mob) {
                 when (entity.dir) {
@@ -76,7 +73,7 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
             } else {
                 Direction.DOWN
             }
-            insert(EntitySighting(Entity.fromGameEntity(entity), Vector(entity.x - cameraX, entity.y - cameraY), facing, frame))
+            insert(Sighting(Entity.fromGame(entity), Vector(entity.x - cameraX, entity.y - cameraY), facing, frame))
         }
     }
 }

@@ -6,8 +6,8 @@ import kotlin.math.abs
 
 fun RuleEngine.attackRules() {
     rule {
-        val player by find<EntityMemory> { entity == Entity.PLAYER }
-        find<MoveTarget> { target is TileMemory && target.tile == Tile.TREE && aimingAt(player, target) }
+        val player by find<Memory> { entity == Entity.PLAYER }
+        find<MoveTarget> { target.entity == Entity.TREE && aimingAt(player, target) }
         find<StaminaLevel> { stamina > 8 }
 
         fire {
@@ -16,8 +16,8 @@ fun RuleEngine.attackRules() {
     }
 
     rule {
-        val player by find<EntityMemory> { entity == Entity.PLAYER }
-        find<MoveTarget> { target is EntityMemory && target.entity == Entity.ITEM
+        val player by find<Memory> { entity == Entity.PLAYER }
+        find<MoveTarget> { target.entity == Entity.ITEM
                 && abs(player.pos.x - target.pos.x) <= 1 && abs(player.pos.y - target.pos.y) <= 1 }
 
         fire {
@@ -26,7 +26,7 @@ fun RuleEngine.attackRules() {
     }
 }
 
-fun aimingAt(actor: EntityMemory, target: Spatial): Boolean {
+fun aimingAt(actor: Memory, target: Spatial): Boolean {
     // Bounding box that target must lie in if the actor is facing down.
     val minX = -6
     val maxX = 6

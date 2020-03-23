@@ -11,8 +11,7 @@ import javax.swing.JPanel
 import kotlin.math.min
 
 class Visualizer(val engine: RuleEngine): JPanel() {
-    val tileMemories = mutableSetOf<TileMemory>()
-    val entityMemories = mutableSetOf<EntityMemory>()
+    val memories = mutableSetOf<Memory>()
     val targets = mutableSetOf<MoveTarget>()
     val stationaries = mutableSetOf<StationaryItem>()
 
@@ -27,22 +26,12 @@ class Visualizer(val engine: RuleEngine): JPanel() {
         }
 
         engine.rule {
-            val memory by find<TileMemory>()
+            val memory by find<Memory>()
             fire {
-                addMemory(memory, tileMemories)
+                addMemory(memory, memories)
             }
             end {
-                removeMemory(memory, tileMemories)
-            }
-        }
-
-        engine.rule {
-            val memory by find<EntityMemory>()
-            fire {
-                addMemory(memory, entityMemories)
-            }
-            end {
-                removeMemory(memory, entityMemories)
+                removeMemory(memory, memories)
             }
         }
 
@@ -80,29 +69,29 @@ class Visualizer(val engine: RuleEngine): JPanel() {
         val g2d = g as Graphics2D
 
         synchronized(this) {
-            val mems: Set<Spatial> = (tileMemories.union(entityMemories))
-            if (mems.isEmpty()) {
+            if (memories.isEmpty()) {
                 return
             }
 
-            val minX = mems.map { it.pos.x }.min()!!
-            val maxX = mems.map { it.pos.x }.max()!!
-            val minY = mems.map { it.pos.y }.min()!!
-            val maxY = mems.map { it.pos.y }.max()!!
+            val minX = memories.map { it.pos.x }.min()!!
+            val maxX = memories.map { it.pos.x }.max()!!
+            val minY = memories.map { it.pos.y }.min()!!
+            val maxY = memories.map { it.pos.y }.max()!!
 
             val scale = min(width.toDouble() / (maxX - minX).toDouble(), height.toDouble() / (maxY - minY).toDouble())
             g2d.scale(scale, scale)
             g2d.translate(-minX, -minY)
 
-            tileMemories.forEach {
-                // Generate arbitrary colours from tile enum.
-                g2d.color = Color((it.tile.ordinal * 31 + 76) % 256, (it.tile.ordinal * 131 + 176) % 256, (it.tile.ordinal * 231 + 276) % 256, 255)
-                g2d.fillRect(it.pos.x - 8, it.pos.y - 8, 16, 16)
-            }
-
-            entityMemories.forEach {
-                g2d.color = Color((it.entity.ordinal * 163 + 87) % 256, (it.entity.ordinal * 3 + 90) % 256, (it.entity.ordinal * 321 + 54) % 256, 255)
-                g2d.fillRect(it.pos.x - 6, it.pos.y - 6, 12, 12)
+            memories.forEach {
+                if (it.entity.ordinal < 23) {
+                    // Generate arbitrary colours from tile enum.
+                    g2d.color = Color((it.entity.ordinal * 31 + 76) % 256, (it.entity.ordinal * 131 + 176) % 256, (it.entity.ordinal * 231 + 276) % 256, 255)
+                    g2d.fillRect(it.pos.x - 8, it.pos.y - 8, 16, 16)
+                } else {
+                    val ord = it.entity.ordinal - 23
+                    g2d.color = Color((ord * 163 + 87) % 256, (ord * 3 + 90) % 256, (ord * 321 + 54) % 256, 255)
+                    g2d.fillRect(it.pos.x - 6, it.pos.y - 6, 12, 12)
+                }
             }
 
             targets.forEach {
