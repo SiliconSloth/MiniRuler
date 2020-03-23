@@ -6,23 +6,47 @@ import siliconsloth.miniruler.engine.filters.EqualityFilter
 
 fun RuleEngine.navigationRules() {
     rule {
-        not<MoveTarget>()
-        val camera by find<CameraLocation>()
-        val player by find<Memory> { entity == Entity.PLAYER }
-        val trees by all<Memory> { entity == Entity.TREE }
-        val items by all<StationaryItem> { camera.frame - since > 20 }
+        val tree by find<Memory> { entity == Entity.TREE }
 
         fire {
-            trees.union<Memory>(items.map { it.item }).minBy {
-                it.pos.distance(player.pos)
+            insert(PropsedTarget(tree))
+        }
+    }
+
+    rule {
+        val camera by find<CameraLocation>()
+        val item by find<StationaryItem> { camera.frame - since > 20 }
+
+        fire {
+            insert(PropsedTarget(item.item))
+        }
+    }
+
+    rule {
+        not<MoveTarget>()
+        val player by find<Memory> { entity == Entity.PLAYER }
+        val targets by all<PropsedTarget>()
+
+        fire {
+            targets.minBy {
+                it.target.pos.distance(player.pos)
             }?.let{
-                insert(MoveTarget(it))
+                insert(MoveTarget(it.target))
             }
         }
     }
 
     rule {
         val target by find<MoveTarget>()
+        not(EqualityFilter { target.target })
+
+        fire {
+            delete(target)
+        }
+    }
+
+    rule {
+        val target by find<PropsedTarget>()
         not(EqualityFilter { target.target })
 
         fire {

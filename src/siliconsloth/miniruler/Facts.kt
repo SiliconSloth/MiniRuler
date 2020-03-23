@@ -21,4 +21,5 @@ interface Action: Fact
 data class KeyPress(val key: Key): Action
 
 data class MoveTarget(val target: Memory): Fact
+data class PropsedTarget(val target: Memory): Fact
 data class StationaryItem(val item: Memory, val since: Int): Fact
