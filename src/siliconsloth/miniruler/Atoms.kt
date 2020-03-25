@@ -51,12 +51,12 @@ enum class TitleOption {
     }
 }
 
-enum class Entity {
-    GRASS, ROCK, WATER, FLOWER, TREE, DIRT, SAND, CACTUS, HOLE, TREE_SAPLING, CACTUS_SAPLING,
-    FARMLAND, WHEAT, LAVA, STAIRS_DOWN, STAIRS_UP, INFINITE_FALL, CLOUD, HARD_ROCK,
-    IRON_ORE, GOLD_ORE, GEM_ORE, CLOUD_CACTUS,
-    AIR_WIZARD, ANVIL, CHEST, FURNACE, ITEM, LANTERN, OVEN, PLAYER, SLIME, SPARK, WORKBENCH, ZOMBIE,
-    SMASH_PARTICLE, TEXT_PARTICLE;
+enum class Entity(val solid: Boolean = false) {
+    GRASS, ROCK(true), WATER, FLOWER, TREE(true), DIRT, SAND, CACTUS(true), HOLE, TREE_SAPLING, CACTUS_SAPLING,
+    FARMLAND, WHEAT, LAVA(true), STAIRS_DOWN, STAIRS_UP, INFINITE_FALL(true), CLOUD, HARD_ROCK(true),
+    IRON_ORE(true), GOLD_ORE(true), GEM_ORE(true), CLOUD_CACTUS(true),
+    AIR_WIZARD(true), ANVIL(true), CHEST(true), FURNACE(true), ITEM, LANTERN(true), OVEN(true), PLAYER(true),
+    SLIME(true), SPARK, WORKBENCH(true), ZOMBIE(true), SMASH_PARTICLE, TEXT_PARTICLE;
 
     companion object {
         fun fromGame(tile: GameTile): Entity =

@@ -2,7 +2,9 @@ package siliconsloth.miniruler.rules
 
 import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
+import siliconsloth.miniruler.engine.filters.AreaFilter
 import siliconsloth.miniruler.engine.filters.EqualityFilter
+import siliconsloth.miniruler.math.Box
 
 fun RuleEngine.navigationRules() {
     rule {
@@ -26,9 +28,19 @@ fun RuleEngine.navigationRules() {
         not<MoveTarget>()
         val player by find<Memory> { entity == Entity.PLAYER }
         val target by find<PossibleTarget>()
+        val obstacles by all<Memory>(AreaFilter { Box(player.pos, target.target.pos, padding=16) })
 
         fire {
-            maintain(TargetProposal(target.target, target.target.pos.distance(player.pos)))
+            val obstructed = obstacles.any { obs ->
+                if (obs == player || obs == target.target || !obs.entity.solid) {
+                    false
+                } else {
+                    obs.pos.distanceSquaredFromLine(player.pos, target.target.pos) < 100
+                }
+            }
+            if (!obstructed) {
+                maintain(TargetProposal(target.target, target.target.pos.distance(player.pos)))
+            }
         }
     }
 
@@ -39,7 +51,7 @@ fun RuleEngine.navigationRules() {
 
         fire {
             targets.minBy {
-                it.target.pos.distance(player.pos)
+                it.target.pos.distanceSquared(player.pos)
             }?.let{
                 insert(MoveTarget(it.target))
             }
@@ -73,17 +85,17 @@ fun RuleEngine.navigationRules() {
         }
     }
 
-    rule {
-        val target by find<MoveTarget>()
-        val camera by find<CameraLocation>()
-        val player by find<Memory> { entity == Entity.PLAYER }
-        val item by find<StationaryItem> { camera.frame - since > 20
-                && item.pos.distance(player.pos) < target.target.pos.distance(player.pos) }
-
-        fire {
-            replace(target, MoveTarget(item.item))
-        }
-    }
+//    rule {
+//        val target by find<MoveTarget>()
+//        val camera by find<CameraLocation>()
+//        val player by find<Memory> { entity == Entity.PLAYER }
+//        val item by find<StationaryItem> { camera.frame - since > 20
+//                && item.pos.distance(player.pos) < target.target.pos.distance(player.pos) }
+//
+//        fire {
+//            replace(target, MoveTarget(item.item))
+//        }
+//    }
 
     rule {
         val upPress = KeyPress(Key.UP)
