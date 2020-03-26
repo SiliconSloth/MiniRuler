@@ -10,14 +10,14 @@ import siliconsloth.miniruler.engine.stores.FactStore
 class RuleEngine: FactUpdater<Any> {
     data class Update<T: Any>(val fact: T, val isInsert: Boolean, val maintainer: CompleteMatch? = null)
 
-    data class QueuedMatch(val match: CompleteMatch, val dropping: Boolean)
+    data class QueuedMatch(val match: CompleteMatch, val ending: Boolean)
 
     val rules = mutableMapOf<KClass<*>, MutableList<Rule>>()
     val stores = mutableMapOf<KClass<*>, FactStore<out Any>>()
     val maintainers = mutableMapOf<Any, MutableList<CompleteMatch>>()
 
     var running = false
-    val updateQueue = mutableListOf<Map<KClass<*>, List<Update<*>>>>()
+    val updateQueue = mutableMapOf<KClass<*>, MutableList<Update<*>>>()
     val matchQueue = mutableListOf<QueuedMatch>()
 
     private fun <T: Any> applyUpdates(type: KClass<T>, updates: List<Update<T>>) {
@@ -48,36 +48,37 @@ class RuleEngine: FactUpdater<Any> {
     }
 
     fun applyUpdates(updates: Map<KClass<*>, List<Update<*>>>) {
-        updateQueue.add(updates)
-         if (!running) {
-             running = true
-             while (updateQueue.isNotEmpty()) {
-                 while (updateQueue.isNotEmpty()) {
-                     val batch = updateQueue.removeAt(0)
-                             .mapValues { it.value.filter { !(it.isInsert && it.maintainer?.ended ?: false) } }
+        updates.forEach { (type, ups) ->
+            updateQueue.getOrPut(type) { mutableListOf() }.addAll(ups)
+        }
 
-                     batch.forEach {
-                         @Suppress("UNCHECKED_CAST")
-                         applyUpdates(it.key as KClass<Any>, it.value as List<Update<Any>>)
-                     }
+        if (!running) {
+            running = true
+            while (updateQueue.isNotEmpty()) {
+                val batch = updateQueue.mapValues { it.value.filter { !(it.isInsert && it.maintainer?.ended ?: false) } }
+                updateQueue.clear()
 
-                     val applicable = batch.keys.map { rules[it] ?: mutableListOf() }.flatten().distinct()
-                     applicable.forEach {
-                         it.applyUpdates(batch)
-                     }
-                 }
+                batch.forEach {
+                    @Suppress("UNCHECKED_CAST")
+                    applyUpdates(it.key as KClass<Any>, it.value as List<Update<Any>>)
+                }
 
-                 matchQueue.forEach {
-                     if (it.dropping) {
-                         it.match.end()
-                     } else {
-                         it.match.fire()
-                     }
-                 }
-                 matchQueue.clear()
-             }
-             running = false
-         }
+                val applicable = batch.keys.map { rules[it] ?: mutableListOf() }.flatten().distinct()
+                applicable.forEach {
+                    it.applyUpdates(batch)
+                }
+
+                matchQueue.forEach {
+                    if (it.ending) {
+                        it.match.end()
+                    } else {
+                        it.match.fire()
+                    }
+                }
+                matchQueue.clear()
+            }
+            running = false
+        }
     }
 
     fun queueMatch(match: CompleteMatch, dropping: Boolean = false) {
