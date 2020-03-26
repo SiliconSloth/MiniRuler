@@ -2,6 +2,7 @@ package siliconsloth.miniruler.rules
 
 import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
+import siliconsloth.miniruler.engine.filters.EqualityFilter
 import kotlin.math.abs
 
 fun RuleEngine.attackRules() {
@@ -16,12 +17,19 @@ fun RuleEngine.attackRules() {
     }
 
     rule {
+        val upPress = KeyPress(Key.UP)
+        val downPress = KeyPress(Key.DOWN)
+
         val player by find<Memory> { entity == Entity.PLAYER }
         find<MoveTarget> { target.entity == Entity.ITEM
                 && abs(player.pos.x - target.pos.x) <= 1 && abs(player.pos.y - target.pos.y) <= 1 }
 
         fire {
-            insert(KeyPress(Key.UP))
+            if (exists(EqualityFilter { downPress })) {
+                replace(downPress, upPress)
+            } else {
+                replace(upPress, downPress)
+            }
         }
     }
 }
