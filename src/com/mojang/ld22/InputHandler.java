@@ -17,6 +17,7 @@ public class InputHandler implements KeyListener {
 		public void toggle(boolean pressed) {
 			if (pressed != down) {
 				down = pressed;
+				updateSomethingDown();
 			}
 			if (pressed) {
 				presses++;
@@ -33,6 +34,7 @@ public class InputHandler implements KeyListener {
 		}
 	}
 
+	private boolean somethingDown = false;
 	public List<Key> keys = new ArrayList<Key>();
 
 	public Key up = new Key();
@@ -54,8 +56,24 @@ public class InputHandler implements KeyListener {
 		}
 	}
 
+	private void updateSomethingDown() {
+		for (Key key : keys) {
+			if (key.down) {
+				somethingDown = true;
+				return;
+			}
+		}
+		somethingDown = false;
+	}
+
+	public boolean isSomethingDown() {
+		return somethingDown;
+	}
+
 	public InputHandler(Game game) {
-		game.addKeyListener(this);
+		if (game != null) {
+			game.addKeyListener(this);
+		}
 	}
 
 	public void keyPressed(KeyEvent ke) {

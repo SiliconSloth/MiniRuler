@@ -16,7 +16,7 @@ fun main() {
     engine.addFactStore(SpatialMap<Memory>())
 
     val game = Game.startWindowedGame(PerceptionHandler(engine))
-    KeyListener(engine, game.input)
+    KeyListener(engine, game.botInput)
     Visualizer(engine).display()
 
     engine.menuRules()

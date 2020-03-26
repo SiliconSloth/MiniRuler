@@ -15,8 +15,6 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 import com.mojang.ld22.entity.*;
-import com.mojang.ld22.entity.particle.SmashParticle;
-import com.mojang.ld22.entity.particle.TextParticle;
 import com.mojang.ld22.gfx.Color;
 import com.mojang.ld22.gfx.Font;
 import com.mojang.ld22.gfx.Screen;
@@ -42,8 +40,8 @@ public class Game extends Canvas implements Runnable {
 	private boolean running = false;
 	private Screen screen;
 	private Screen lightScreen;
-	private InputHandler playerInput = new InputHandler(this);
-	private InputHandler botInput = new InputHandler(this);
+	private InputHandler userInput = new InputHandler(this);
+	private InputHandler botInput = new InputHandler(null);
 	private GameListener gameListener;
 
 	private int[] colors = new int[256];
@@ -73,7 +71,11 @@ public class Game extends Canvas implements Runnable {
 	}
 
 	public InputHandler getInput() {
-		return playerInput;
+		return userInput.isSomethingDown()? userInput : botInput;
+	}
+
+	public InputHandler getBotInput() {
+		return botInput;
 	}
 
 	public void setGameListener(GameListener gameListener) {
