@@ -52,17 +52,19 @@ class RuleEngine: FactUpdater<Any> {
          if (!running) {
              running = true
              while (updateQueue.isNotEmpty()) {
-                 val batch = updateQueue.removeAt(0)
-                         .mapValues { it.value.filter { !(it.isInsert && it.maintainer?.ended ?: false) } }
+                 while (updateQueue.isNotEmpty()) {
+                     val batch = updateQueue.removeAt(0)
+                             .mapValues { it.value.filter { !(it.isInsert && it.maintainer?.ended ?: false) } }
 
-                 batch.forEach {
-                     @Suppress("UNCHECKED_CAST")
-                     applyUpdates(it.key as KClass<Any>, it.value as List<Update<Any>>)
-                 }
+                     batch.forEach {
+                         @Suppress("UNCHECKED_CAST")
+                         applyUpdates(it.key as KClass<Any>, it.value as List<Update<Any>>)
+                     }
 
-                 val applicable = batch.keys.map { rules[it] ?: mutableListOf() }.flatten().distinct()
-                 applicable.forEach {
-                     it.applyUpdates(batch)
+                     val applicable = batch.keys.map { rules[it] ?: mutableListOf() }.flatten().distinct()
+                     applicable.forEach {
+                         it.applyUpdates(batch)
+                     }
                  }
 
                  matchQueue.forEach {
