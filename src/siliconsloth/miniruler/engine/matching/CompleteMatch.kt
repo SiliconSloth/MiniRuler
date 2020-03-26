@@ -20,7 +20,7 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
     }
 
     override fun drop() {
-        rule.engine.queueMatch(this, dropping = true)
+        rule.engine.queueMatch(this, ending = true)
     }
 
     fun fire() {
