@@ -3,10 +3,13 @@ package siliconsloth.miniruler
 import com.mojang.ld22.entity.*
 import com.mojang.ld22.entity.particle.SmashParticle
 import com.mojang.ld22.entity.particle.TextParticle
+import com.mojang.ld22.item.*
+import com.mojang.ld22.item.resource.Resource
 import com.mojang.ld22.screen.*
 import com.mojang.ld22.screen.Menu as GameMenu
 import com.mojang.ld22.level.tile.Tile as GameTile
 import com.mojang.ld22.entity.Entity as GameEntity
+import com.mojang.ld22.item.Item as GameItem
 import java.security.InvalidParameterException
 
 enum class Key {
@@ -104,6 +107,121 @@ enum class Entity(val solid: Boolean = false) {
                     is SmashParticle -> SMASH_PARTICLE
                     is TextParticle -> TEXT_PARTICLE
                     else -> throw InvalidParameterException("Unknown entity")
+                }
+    }
+}
+
+enum class Item {
+    WOOD, STONE, FLOWER, ACORN, DIRT, SAND, CACTUS, SEEDS, WHEAT, BREAD, APPLE,
+    COAL, IRON_ORE, GOLD_ORE, IRON_INGOT, GOLD_INGOT,
+    SLIME, GLASS, CLOTH, CLOUD, GEM,
+
+    WOOD_SHOVEL, WOOD_HOE, WOOD_SWORD, WOOD_PICKAXE, WOOD_AXE,
+    ROCK_SHOVEL, ROCK_HOE, ROCK_SWORD, ROCK_PICKAXE, ROCK_AXE,
+    IRON_SHOVEL, IRON_HOE, IRON_SWORD, IRON_PICKAXE, IRON_AXE,
+    GOLD_SHOVEL, GOLD_HOE, GOLD_SWORD, GOLD_PICKAXE, GOLD_AXE,
+    GEM_SHOVEL, GEM_HOE, GEM_SWORD, GEM_PICKAXE, GEM_AXE,
+    POWER_GLOVE,
+
+    ANVIL, CHEST, FURNACE, LANTERN, OVEN, WORKBENCH;
+    
+    companion object {
+        fun fromGame(item: GameItem): Item =
+                when (item) {
+                    is ResourceItem -> fromGame(item)
+                    is ToolItem -> fromGame(item)
+                    is PowerGloveItem -> fromGame(item)
+                    is FurnitureItem -> fromGame(item)
+                    else -> throw InvalidParameterException("Unknown item type")
+                }
+
+        fun fromGame(item: ResourceItem): Item =
+                when (item.resource) {
+                    Resource.wood -> WOOD
+                    Resource.stone -> STONE
+                    Resource.flower -> FLOWER
+                    Resource.acorn -> ACORN
+                    Resource.dirt -> DIRT
+                    Resource.sand -> SAND
+                    Resource.cactusFlower -> CACTUS
+                    Resource.seeds -> SEEDS
+                    Resource.wheat -> WHEAT
+                    Resource.bread -> BREAD
+                    Resource.apple -> APPLE
+                    Resource.coal -> COAL
+                    Resource.ironOre -> IRON_ORE
+                    Resource.goldOre -> GOLD_ORE
+                    Resource.ironIngot -> IRON_INGOT
+                    Resource.goldIngot -> GOLD_INGOT
+                    Resource.slime -> SLIME
+                    Resource.glass -> GLASS
+                    Resource.cloth -> CLOTH
+                    Resource.cloud -> CLOUD
+                    Resource.gem -> GEM
+                    else -> throw InvalidParameterException("Unknown resource")
+                }
+        
+        fun fromGame(item: ToolItem): Item =
+                when (item.level) {
+                    0 -> when (item.type) {
+                        ToolType.shovel -> WOOD_SHOVEL
+                        ToolType.hoe -> WOOD_HOE
+                        ToolType.sword -> WOOD_SWORD
+                        ToolType.pickaxe -> WOOD_PICKAXE
+                        ToolType.axe -> WOOD_AXE
+                        else -> throw InvalidParameterException("Unknown tool type")
+                    }
+                    
+                    1 -> when (item.type) {
+                        ToolType.shovel -> ROCK_SHOVEL
+                        ToolType.hoe -> ROCK_HOE
+                        ToolType.sword -> ROCK_SWORD
+                        ToolType.pickaxe -> ROCK_PICKAXE
+                        ToolType.axe -> ROCK_AXE
+                        else -> throw InvalidParameterException("Unknown tool type")
+                    }
+                    
+                    2 -> when (item.type) {
+                        ToolType.shovel -> IRON_SHOVEL
+                        ToolType.hoe -> IRON_HOE
+                        ToolType.sword -> IRON_SWORD
+                        ToolType.pickaxe -> IRON_PICKAXE
+                        ToolType.axe -> IRON_AXE
+                        else -> throw InvalidParameterException("Unknown tool type")
+                    }
+                    
+                    3 -> when (item.type) {
+                        ToolType.shovel -> GOLD_SHOVEL
+                        ToolType.hoe -> GOLD_HOE
+                        ToolType.sword -> GOLD_SWORD
+                        ToolType.pickaxe -> GOLD_PICKAXE
+                        ToolType.axe -> GOLD_AXE
+                        else -> throw InvalidParameterException("Unknown tool type")
+                    }
+                    
+                    4 -> when (item.type) {
+                        ToolType.shovel -> GEM_SHOVEL
+                        ToolType.hoe -> GEM_HOE
+                        ToolType.sword -> GEM_SWORD
+                        ToolType.pickaxe -> GEM_PICKAXE
+                        ToolType.axe -> GEM_AXE
+                        else -> throw InvalidParameterException("Unknown tool type")
+                    }
+
+                    else -> throw InvalidParameterException("Unknown tool level")
+                }
+
+        fun fromGame(item: PowerGloveItem): Item = POWER_GLOVE
+
+        fun fromGame(item: FurnitureItem): Item =
+                when (item.furniture) {
+                    is Anvil -> ANVIL
+                    is Chest -> CHEST
+                    is Furnace -> FURNACE
+                    is Lantern -> LANTERN
+                    is Oven -> OVEN
+                    is Workbench -> WORKBENCH
+                    else -> throw InvalidParameterException("Unknown furniture")
                 }
     }
 }

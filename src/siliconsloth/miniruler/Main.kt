@@ -6,10 +6,7 @@ import siliconsloth.miniruler.engine.filters.AreaFilter
 import siliconsloth.miniruler.engine.stores.SpatialMap
 import siliconsloth.miniruler.math.Box
 import siliconsloth.miniruler.math.Vector
-import siliconsloth.miniruler.rules.attackRules
-import siliconsloth.miniruler.rules.memoryRules
-import siliconsloth.miniruler.rules.menuRules
-import siliconsloth.miniruler.rules.navigationRules
+import siliconsloth.miniruler.rules.*
 
 fun main() {
     val engine = RuleEngine()
@@ -23,6 +20,7 @@ fun main() {
     engine.memoryRules()
     engine.navigationRules()
     engine.attackRules()
+    engine.inventoryRules()
 }
 
 fun <T: Spatial> screenFilter(camera: () -> Vector) = AreaFilter<T> { Box(
