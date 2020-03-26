@@ -7,7 +7,7 @@ import com.mojang.ld22.item.Item;
 
 public class InventoryMenu extends Menu {
 	private Player player;
-	private int selected = 0;
+	public int selected = 0;
 
 	public InventoryMenu(Player player) {
 		this.player = player;
@@ -19,6 +19,8 @@ public class InventoryMenu extends Menu {
 	}
 
 	public void tick() {
+		int oldSelected = selected;
+
 		if (game.getInput().menu.clicked) game.setMenu(null);
 
 		if (game.getInput().up.clicked) selected--;
@@ -33,6 +35,10 @@ public class InventoryMenu extends Menu {
 			Item item = player.inventory.items.remove(selected);
 			player.activeItem = item;
 			game.setMenu(null);
+		}
+
+		if (selected != oldSelected) {
+			game.getGameListener().onInventorySelect(selected);
 		}
 	}
 

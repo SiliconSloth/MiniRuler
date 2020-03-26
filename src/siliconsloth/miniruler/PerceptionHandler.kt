@@ -34,11 +34,16 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
 
         if (oldMenu is InventoryMenu) {
             deleteAll<InventoryItem>()
+            deleteAll<InventorySelection>()
             inventory.clear()
+        }
+        if (newMenu is InventoryMenu) {
+            insert(InventorySelection(newMenu.selected))
         }
     }
 
     override fun onTitleOptionSelect(selection: Int) = engine.atomic {
+        deleteAll<TitleSelection>()
         insert(TitleSelection(TitleOption.fromSelection(selection)))
     }
 
@@ -67,6 +72,11 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
             delete(inventory[index])
             inventory.removeAt(index)
         }
+    }
+
+    override fun onInventorySelect(selection: Int) = engine.atomic {
+        deleteAll<InventorySelection>()
+        insert(InventorySelection(selection))
     }
 
     override fun onRender(tiles: Array<out Array<GameTile>>, entities: List<GameEntity>,
