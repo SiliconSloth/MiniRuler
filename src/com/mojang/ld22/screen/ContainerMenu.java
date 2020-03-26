@@ -20,15 +20,15 @@ public class ContainerMenu extends Menu {
 	}
 
 	public void tick() {
-		if (input.menu.clicked) game.setMenu(null);
+		if (game.getInput().menu.clicked) game.setMenu(null);
 
-		if (input.left.clicked) {
+		if (game.getInput().left.clicked) {
 			window = 0;
 			int tmp = selected;
 			selected = oSelected;
 			oSelected = tmp;
 		}
-		if (input.right.clicked) {
+		if (game.getInput().right.clicked) {
 			window = 1;
 			int tmp = selected;
 			selected = oSelected;
@@ -42,14 +42,14 @@ public class ContainerMenu extends Menu {
 		if (selected < 0) selected = 0;
 		if (selected >= len) selected = len - 1;
 
-		if (input.up.clicked) selected--;
-		if (input.down.clicked) selected++;
+		if (game.getInput().up.clicked) selected--;
+		if (game.getInput().down.clicked) selected++;
 
 		if (len == 0) selected = 0;
 		if (selected < 0) selected += len;
 		if (selected >= len) selected -= len;
 
-		if (input.attack.clicked && len > 0) {
+		if (game.getInput().attack.clicked && len > 0) {
 			i2.add(oSelected, i.items.remove(selected));
 			if (selected >= i.items.size()) selected = i.items.size() - 1;
 		}

@@ -16,8 +16,8 @@ public class TitleMenu extends Menu {
 	public void tick() {
 		int selectedBefore = selected;
 
-		if (input.up.clicked) selected--;
-		if (input.down.clicked) selected++;
+		if (game.getInput().up.clicked) selected--;
+		if (game.getInput().down.clicked) selected++;
 
 		int len = options.length;
 		if (selected < 0) selected += len;
@@ -27,7 +27,7 @@ public class TitleMenu extends Menu {
 			game.getGameListener().onTitleOptionSelect(selected);
 		}
 
-		if (input.attack.clicked || input.menu.clicked) {
+		if (game.getInput().attack.clicked || game.getInput().menu.clicked) {
 			if (selected == 0) {
 				Sound.test.play();
 				game.resetGame();

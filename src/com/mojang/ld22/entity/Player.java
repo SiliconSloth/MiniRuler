@@ -20,7 +20,6 @@ import com.mojang.ld22.screen.InventoryMenu;
 import com.mojang.ld22.sound.Sound;
 
 public class Player extends Mob {
-	private InputHandler input;
 	private int attackTime, attackDir;
 
 	public Game game;
@@ -35,9 +34,8 @@ public class Player extends Mob {
 	private int onStairDelay;
 	public int invulnerableTime = 0;
 
-	public Player(Game game, InputHandler input) {
+	public Player(Game game) {
 		this.game = game;
-		this.input = input;
 		x = 24;
 		y = 24;
 		stamina = maxStamina;
@@ -83,10 +81,10 @@ public class Player extends Mob {
 
 		int xa = 0;
 		int ya = 0;
-		if (input.up.down) ya--;
-		if (input.down.down) ya++;
-		if (input.left.down) xa--;
-		if (input.right.down) xa++;
+		if (game.getInput().up.down) ya--;
+		if (game.getInput().down.down) ya++;
+		if (game.getInput().left.down) xa--;
+		if (game.getInput().right.down) xa++;
 		if (isSwimming() && tickTime % 60 == 0) {
 			if (stamina > 0) {
 				stamina--;
@@ -99,7 +97,7 @@ public class Player extends Mob {
 			move(xa, ya);
 		}
 
-		if (input.attack.clicked) {
+		if (game.getInput().attack.clicked) {
 			if (stamina == 0) {
 
 			} else {
@@ -108,7 +106,7 @@ public class Player extends Mob {
 				attack();
 			}
 		}
-		if (input.menu.clicked) {
+		if (game.getInput().menu.clicked) {
 			if (!use()) {
 				game.setMenu(new InventoryMenu(this));
 			}

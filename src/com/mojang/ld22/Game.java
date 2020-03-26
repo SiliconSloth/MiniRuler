@@ -42,7 +42,8 @@ public class Game extends Canvas implements Runnable {
 	private boolean running = false;
 	private Screen screen;
 	private Screen lightScreen;
-	private InputHandler input = new InputHandler(this);
+	private InputHandler playerInput = new InputHandler(this);
+	private InputHandler botInput = new InputHandler(this);
 	private GameListener gameListener;
 
 	private int[] colors = new int[256];
@@ -64,7 +65,7 @@ public class Game extends Canvas implements Runnable {
 		Menu oldMenu = this.menu;
 		this.menu = menu;
 		if (menu != null) {
-			menu.init(this, input);
+			menu.init(this);
 		}
 		if (gameListener != null) {
 			gameListener.onMenuChange(oldMenu, menu);
@@ -72,7 +73,7 @@ public class Game extends Canvas implements Runnable {
 	}
 
 	public InputHandler getInput() {
-		return input;
+		return playerInput;
 	}
 
 	public void setGameListener(GameListener gameListener) {
@@ -108,7 +109,7 @@ public class Game extends Canvas implements Runnable {
 		levels[0] = new Level(128, 128, -3, levels[1]);
 
 		level = levels[currentLevel];
-		player = new Player(this, input);
+		player = new Player(this);
 		player.findStartPos(level);
 
 		level.add(player);
@@ -222,11 +223,11 @@ public class Game extends Canvas implements Runnable {
 	public void tick() {
 		tickCount++;
 		if (!hasFocus()) {
-			input.releaseAll();
+			getInput().releaseAll();
 		} else {
 			if (!player.removed && !hasWon) gameTime++;
 
-			input.tick();
+			getInput().tick();
 			if (menu != null) {
 				menu.tick();
 			} else {

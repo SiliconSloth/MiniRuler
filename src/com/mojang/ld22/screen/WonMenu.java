@@ -13,7 +13,7 @@ public class WonMenu extends Menu {
 	public void tick() {
 		if (inputDelay > 0)
 			inputDelay--;
-		else if (input.attack.clicked || input.menu.clicked) {
+		else if (game.getInput().attack.clicked || game.getInput().menu.clicked) {
 			game.setMenu(new TitleMenu());
 		}
 	}

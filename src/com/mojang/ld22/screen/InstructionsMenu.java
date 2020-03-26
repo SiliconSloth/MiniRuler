@@ -12,7 +12,7 @@ public class InstructionsMenu extends Menu {
 	}
 
 	public void tick() {
-		if (input.attack.clicked || input.menu.clicked) {
+		if (game.getInput().attack.clicked || game.getInput().menu.clicked) {
 			game.setMenu(parent);
 		}
 	}
