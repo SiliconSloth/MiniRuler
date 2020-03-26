@@ -25,7 +25,6 @@ fun RuleEngine.navigationRules() {
     }
 
     rule {
-        not<MoveTarget>()
         val player by find<Memory> { entity == Entity.PLAYER }
         val target by find<PossibleTarget>()
         val obstacles by all<Memory>(AreaFilter { Box(player.pos, target.target.pos, padding=16) })
@@ -59,6 +58,15 @@ fun RuleEngine.navigationRules() {
     }
 
     rule {
+        val oldTarget by find<MoveTarget> { target.entity == Entity.TREE }
+        val itemTarget by find<TargetProposal> { target.entity == Entity.ITEM }
+
+        fire {
+            replace(oldTarget, MoveTarget(itemTarget.target))
+        }
+    }
+
+    rule {
         val target by find<PossibleTarget>()
         not(EqualityFilter { target.target })
 
@@ -84,18 +92,6 @@ fun RuleEngine.navigationRules() {
             delete(target)
         }
     }
-
-//    rule {
-//        val target by find<MoveTarget>()
-//        val camera by find<CameraLocation>()
-//        val player by find<Memory> { entity == Entity.PLAYER }
-//        val item by find<StationaryItem> { camera.frame - since > 20
-//                && item.pos.distance(player.pos) < target.target.pos.distance(player.pos) }
-//
-//        fire {
-//            replace(target, MoveTarget(item.item))
-//        }
-//    }
 
     rule {
         val upPress = KeyPress(Key.UP)
