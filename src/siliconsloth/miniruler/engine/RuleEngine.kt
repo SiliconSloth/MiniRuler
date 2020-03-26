@@ -10,12 +10,15 @@ import siliconsloth.miniruler.engine.stores.FactStore
 class RuleEngine: FactUpdater<Any> {
     data class Update<T: Any>(val fact: T, val isInsert: Boolean, val maintainer: CompleteMatch? = null)
 
+    data class QueuedMatch(val match: CompleteMatch, val dropping: Boolean)
+
     val rules = mutableMapOf<KClass<*>, MutableList<Rule>>()
     val stores = mutableMapOf<KClass<*>, FactStore<out Any>>()
     val maintainers = mutableMapOf<Any, MutableList<CompleteMatch>>()
 
     var running = false
     val updateQueue = mutableListOf<Map<KClass<*>, List<Update<*>>>>()
+    val matchQueue = mutableListOf<QueuedMatch>()
 
     private fun <T: Any> applyUpdates(type: KClass<T>, updates: List<Update<T>>) {
         @Suppress("UNCHECKED_CAST")
@@ -50,7 +53,7 @@ class RuleEngine: FactUpdater<Any> {
              running = true
              while (updateQueue.isNotEmpty()) {
                  val batch = updateQueue.removeAt(0)
-                         .mapValues { it.value.filter { !(it.isInsert && it.maintainer?.dropped ?: false) } }
+                         .mapValues { it.value.filter { !(it.isInsert && it.maintainer?.ended ?: false) } }
 
                  batch.forEach {
                      @Suppress("UNCHECKED_CAST")
@@ -61,9 +64,22 @@ class RuleEngine: FactUpdater<Any> {
                  applicable.forEach {
                      it.applyUpdates(batch)
                  }
+
+                 matchQueue.forEach {
+                     if (it.dropping) {
+                         it.match.end()
+                     } else {
+                         it.match.fire()
+                     }
+                 }
+                 matchQueue.clear()
              }
              running = false
          }
+    }
+
+    fun queueMatch(match: CompleteMatch, dropping: Boolean = false) {
+        matchQueue.add(QueuedMatch(match, dropping))
     }
 
     fun atomic(updates: AtomicBuilder.() -> Unit) =

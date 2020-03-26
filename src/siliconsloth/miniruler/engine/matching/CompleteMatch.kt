@@ -4,23 +4,33 @@ import siliconsloth.miniruler.engine.FactUpdater
 import siliconsloth.miniruler.engine.Rule
 import siliconsloth.miniruler.engine.builders.MatchAtomicBuilder
 import siliconsloth.miniruler.engine.RuleEngine
+import siliconsloth.miniruler.engine.bindings.Binding
 import siliconsloth.miniruler.engine.filters.Filter
 import siliconsloth.miniruler.engine.stores.FactStore
 import kotlin.reflect.KClass
 
 class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
+    val bindValues = rule.bindings.map { it to it.value }.toMap()
+
     val maintaining = mutableListOf<Any>()
-    var dropped = false
+    var ended = false
 
     init {
-        rule.fire?.invoke(this)
-    }
-
-    override fun applyUpdates(updates: Map<KClass<*>, List<RuleEngine.Update<*>>>) {
+        rule.engine.queueMatch(this)
     }
 
     override fun drop() {
-        dropped = true
+        rule.engine.queueMatch(this, dropping = true)
+    }
+
+    fun fire() {
+        restoreBindings()
+        rule.fire?.invoke(this)
+    }
+
+    fun end() {
+        ended = true
+        restoreBindings()
         rule.end?.invoke(this@CompleteMatch)
 
         atomic {
@@ -33,6 +43,16 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
                 }
             }
         }
+    }
+
+    fun restoreBindings() {
+        bindValues.forEach { binding, value ->
+            @Suppress("UNCHECKED_CAST")
+            (binding as Binding<*, Any>).value = value
+        }
+    }
+
+    override fun applyUpdates(updates: Map<KClass<*>, List<RuleEngine.Update<*>>>) {
     }
 
     fun atomic(updates: MatchAtomicBuilder.() -> Unit) {
