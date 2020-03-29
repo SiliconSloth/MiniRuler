@@ -1,6 +1,7 @@
 package siliconsloth.miniruler
 
 import com.mojang.ld22.GameListener
+import com.mojang.ld22.entity.ItemEntity
 import com.mojang.ld22.entity.Mob
 import com.mojang.ld22.item.ResourceItem
 import com.mojang.ld22.screen.InventoryMenu
@@ -101,7 +102,7 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
     // Center is relative to tile array.
     private fun AtomicBuilder.updateTiles(tiles: Array<out Array<GameTile>>, xOffset: Int, yOffset: Int) {
         tiles.forEachIndexed { x, column -> column.forEachIndexed { y, tile ->
-            insert(Sighting(Entity.fromGame(tile), Vector(x*16 + 8 - xOffset, y*16 + 8 - yOffset), Direction.DOWN, frame))
+            insert(Sighting(Entity.fromGame(tile), Vector(x*16 + 8 - xOffset, y*16 + 8 - yOffset), Direction.DOWN, null, frame))
         } }
     }
 
@@ -118,7 +119,8 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
             } else {
                 Direction.DOWN
             }
-            insert(Sighting(Entity.fromGame(entity), Vector(entity.x - cameraX, entity.y - cameraY), facing, frame))
+            insert(Sighting(Entity.fromGame(entity), Vector(entity.x - cameraX, entity.y - cameraY), facing,
+                    (entity as? ItemEntity)?.item?.let { Item.fromGame(it) }, frame))
         }
     }
 }

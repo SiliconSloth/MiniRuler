@@ -9,14 +9,14 @@ fun RuleEngine.memoryRules() {
         val camera by find<CameraLocation>()
         val sighting by find<Sighting> { frame == camera.frame }
         fire {
-            insert(Memory(sighting.entity, camera.pos + sighting.pos, sighting.facing))
+            insert(Memory(sighting.entity, camera.pos + sighting.pos, sighting.facing, sighting.item))
         }
     }
 
     rule {
         val camera by find<CameraLocation>()
         val memory by find<Memory>(screenFilter {camera.pos})
-        not(EqualityFilter { Sighting(memory.entity, memory.pos - camera.pos, memory.facing, camera.frame) })
+        not(EqualityFilter { Sighting(memory.entity, memory.pos - camera.pos, memory.facing, memory.item, camera.frame) })
         fire {
             delete(memory)
         }
@@ -36,7 +36,7 @@ fun RuleEngine.memoryRules() {
         val sighting by find<Sighting> { entity == Entity.ITEM }
 
         fire {
-            val memory = Memory(sighting.entity, camera.pos + sighting.pos, sighting.facing)
+            val memory = Memory(sighting.entity, camera.pos + sighting.pos, sighting.facing, sighting.item)
             if (exists(EqualityFilter { memory })) {
                 insert(StationaryItem(memory, camera.frame))
             }

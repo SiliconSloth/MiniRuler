@@ -19,8 +19,8 @@ data class InventorySelection(val position: Int): Perception
 data class CameraLocation(val pos: Vector, val frame: Int): Perception
 data class StaminaLevel(val stamina: Int): Perception
 
-data class Sighting(val entity: Entity, override val pos: Vector, val facing: Direction, val frame: Int): Perception, Spatial
-data class Memory(val entity: Entity, override val pos: Vector, val facing: Direction): Spatial
+data class Sighting(val entity: Entity, override val pos: Vector, val facing: Direction, val item: Item?, val frame: Int): Perception, Spatial
+data class Memory(val entity: Entity, override val pos: Vector, val facing: Direction, val item: Item?): Spatial
 data class InventoryMemory(val item: Item, val count: Int): Fact
 
 interface Action: Fact
