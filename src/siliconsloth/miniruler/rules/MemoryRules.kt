@@ -34,12 +34,11 @@ fun RuleEngine.memoryRules() {
     rule {
         val camera by find<CameraLocation>()
         val sighting by find<Sighting> { entity == Entity.ITEM }
+        not<StationaryItem> { item.item == sighting.item!! && item.pos == camera.pos + sighting.pos }
 
         fire {
             val memory = Memory(sighting.entity, camera.pos + sighting.pos, sighting.facing, sighting.item)
-            if (exists(EqualityFilter { memory })) {
-                insert(StationaryItem(memory, camera.frame))
-            }
+            insert(StationaryItem(memory, camera.frame))
         }
     }
 
