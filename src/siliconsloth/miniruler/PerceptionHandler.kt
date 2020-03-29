@@ -34,8 +34,8 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
         }
 
         if (oldMenu is InventoryMenu) {
-            deleteAll<InventoryItem>()
             deleteAll<InventorySelection>()
+            deleteAll<InventoryItem>()
             inventory.clear()
         }
         if (newMenu is InventoryMenu) {
