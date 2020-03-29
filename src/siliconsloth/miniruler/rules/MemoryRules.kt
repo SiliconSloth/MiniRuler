@@ -38,11 +38,10 @@ fun RuleEngine.memoryRules() {
     // create one marking the current frame as the frame the item appeared at its current location.
     rule {
         val camera by find<CameraLocation>()
-        val sighting by find<Sighting> { entity == Entity.ITEM }
-        not<StationaryItem> { item.item == sighting.item!! && item.pos == camera.pos + sighting.pos }
+        val memory by find<Memory> { entity == Entity.ITEM }
+        not<StationaryItem> { item.item == memory.item!! && item.pos == memory.pos }
 
         fire {
-            val memory = Memory(sighting.entity, camera.pos + sighting.pos, sighting.facing, sighting.item)
             insert(StationaryItem(memory, camera.frame))
         }
     }
