@@ -47,7 +47,7 @@ class Visualizer(val engine: RuleEngine): JPanel() {
 
         engine.rule {
             val camera by find<CameraLocation>()
-            val stat by find<StationaryItem> { camera.frame - since > 20 }
+            val stat by find<StationaryItem> { camera.frame - since > 40 }
             fire {
                 addMemory(stat, stationaries)
             }

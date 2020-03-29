@@ -17,7 +17,7 @@ fun RuleEngine.navigationRules() {
 
     rule {
         val camera by find<CameraLocation>()
-        val item by find<StationaryItem> { camera.frame - since > 20 }
+        val item by find<StationaryItem> { camera.frame - since > 40 }
 
         fire {
             insert(PossibleTarget(item.item))
