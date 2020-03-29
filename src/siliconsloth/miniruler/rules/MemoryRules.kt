@@ -5,6 +5,7 @@ import siliconsloth.miniruler.engine.filters.EqualityFilter
 import siliconsloth.miniruler.engine.RuleEngine
 
 fun RuleEngine.memoryRules() {
+    // Memorize all visible tiles and entities.
     rule {
         val camera by find<CameraLocation>()
         val sighting by find<Sighting> { frame == camera.frame }
@@ -13,6 +14,7 @@ fun RuleEngine.memoryRules() {
         }
     }
 
+    // Delete memories that are within the boundaries of the screen, but do not have the corresponding entity present.
     rule {
         val camera by find<CameraLocation>()
         val memory by find<Memory>(screenFilter {camera.pos})
@@ -22,6 +24,7 @@ fun RuleEngine.memoryRules() {
         }
     }
 
+    // Clear all memories when the game restarts.
     rule {
         find<MenuOpen> { menu == Menu.TITLE }
         val memory by find<Memory>()
@@ -31,6 +34,8 @@ fun RuleEngine.memoryRules() {
         }
     }
 
+    // If a dropped item does not have a corresponding StationaryItem yet,
+    // create one marking the current frame as the frame the item appeared at its current location.
     rule {
         val camera by find<CameraLocation>()
         val sighting by find<Sighting> { entity == Entity.ITEM }
@@ -42,6 +47,7 @@ fun RuleEngine.memoryRules() {
         }
     }
 
+    // When a dropped item disappears delete the corresponding StationaryItem.
     rule {
         val stat by find<StationaryItem>()
         not(EqualityFilter { stat.item } )
