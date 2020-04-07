@@ -50,6 +50,9 @@ public class Player extends Mob {
 
 	public void setActiveItem(Item item) {
 		activeItem = item;
+		if (game.getGameListener() != null) {
+			game.getGameListener().onActiveItemChange(activeItem);
+		}
 	}
 
 	public void tick() {

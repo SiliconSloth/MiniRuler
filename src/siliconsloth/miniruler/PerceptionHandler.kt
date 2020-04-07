@@ -80,6 +80,11 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
         insert(InventorySelection(selection))
     }
 
+    override fun onActiveItemChange(item: GameItem?) = engine.atomic {
+        deleteAll<HeldItem>()
+        item?.let { insert(HeldItem(Item.fromGame(it))) }
+    }
+
     override fun onRender(tiles: Array<out Array<GameTile>>, entities: List<GameEntity>,
                           xScroll: Int, yScroll: Int, stamina: Int) = engine.atomic {
         if (menu == Menu.TITLE || menu == Menu.INSTRUCTIONS || menu == Menu.ABOUT) {

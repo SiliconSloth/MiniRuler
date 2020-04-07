@@ -12,5 +12,6 @@ public interface GameListener {
     void onTitleOptionSelect(int selection);
     void onInventoryRender(List<Item> items);
     void onInventorySelect(int selection);
+    void onActiveItemChange(Item item);
     void onRender(Tile[][] tiles, List<Entity> entities, int xScroll, int yScroll, int stamina);
 }
