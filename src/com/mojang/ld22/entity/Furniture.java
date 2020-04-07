@@ -19,10 +19,10 @@ public class Furniture extends Entity {
 
 	public void tick() {
 		if (shouldTake != null) {
-			if (shouldTake.activeItem instanceof PowerGloveItem) {
+			if (shouldTake.getActiveItem() instanceof PowerGloveItem) {
 				remove();
-				shouldTake.inventory.add(0, shouldTake.activeItem);
-				shouldTake.activeItem = new FurnitureItem(this);
+				shouldTake.inventory.add(0, shouldTake.getActiveItem());
+				shouldTake.setActiveItem(new FurnitureItem(this));
 			}
 			shouldTake = null;
 		}

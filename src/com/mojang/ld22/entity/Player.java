@@ -44,6 +44,14 @@ public class Player extends Mob {
 		inventory.add(new PowerGloveItem());
 	}
 
+	public Item getActiveItem() {
+		return activeItem;
+	}
+
+	public void setActiveItem(Item item) {
+		activeItem = item;
+	}
+
 	public void tick() {
 		super.tick();
 
@@ -170,7 +178,7 @@ public class Player extends Mob {
 					}
 				}
 				if (activeItem.isDepleted()) {
-					activeItem = null;
+					setActiveItem(null);
 				}
 			}
 		}

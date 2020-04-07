@@ -12,9 +12,9 @@ public class InventoryMenu extends Menu {
 	public InventoryMenu(Player player) {
 		this.player = player;
 
-		if (player.activeItem != null) {
-			player.inventory.items.add(0, player.activeItem);
-			player.activeItem = null;
+		if (player.getActiveItem() != null) {
+			player.inventory.items.add(0, player.getActiveItem());
+			player.setActiveItem(null);
 		}
 	}
 
@@ -33,7 +33,7 @@ public class InventoryMenu extends Menu {
 
 		if (game.getInput().attack.clicked && len > 0) {
 			Item item = player.inventory.items.remove(selected);
-			player.activeItem = item;
+			player.setActiveItem(item);
 			game.setMenu(null);
 		}
 

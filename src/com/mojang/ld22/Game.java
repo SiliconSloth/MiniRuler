@@ -348,8 +348,8 @@ public class Game extends Canvas implements Runnable {
 					screen.render(i * 8, screen.h - 8, 1 + 12 * 32, Color.get(000, 110, 000, 000), 0);
 			}
 		}
-		if (player.activeItem != null) {
-			player.activeItem.renderInventory(screen, 10 * 8, screen.h - 16);
+		if (player.getActiveItem() != null) {
+			player.getActiveItem().renderInventory(screen, 10 * 8, screen.h - 16);
 		}
 
 		if (menu != null) {
