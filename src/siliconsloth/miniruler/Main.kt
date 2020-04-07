@@ -6,11 +6,17 @@ import siliconsloth.miniruler.engine.filters.AreaFilter
 import siliconsloth.miniruler.engine.stores.SpatialMap
 import siliconsloth.miniruler.math.Box
 import siliconsloth.miniruler.math.Vector
+import siliconsloth.miniruler.planner.LowerBounded
+import siliconsloth.miniruler.planner.Planner
+import siliconsloth.miniruler.planner.State
 import siliconsloth.miniruler.rules.*
 
 fun main() {
     val engine = RuleEngine()
     engine.addFactStore(SpatialMap<Memory>())
+
+    val goal = State(mapOf(PICK_COUNT to LowerBounded(1)))
+    val planner = Planner(goal, ALL_ACTIONS)
 
     val game = Game.startWindowedGame(PerceptionHandler(engine))
     KeyListener(engine, game.botInput)
@@ -21,6 +27,7 @@ fun main() {
     engine.navigationRules()
     engine.attackRules()
     engine.inventoryRules()
+    engine.planningRules(planner)
 }
 
 fun <T: Spatial> screenFilter(camera: () -> Vector) = AreaFilter<T> { Box(
