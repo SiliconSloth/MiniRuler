@@ -24,8 +24,7 @@ data class Sighting(val entity: Entity, override val pos: Vector, val facing: Di
 data class Memory(val entity: Entity, override val pos: Vector, val facing: Direction, val item: Item?): Spatial
 data class InventoryMemory(val item: Item, val count: Int): Fact
 
-interface Action: Fact
-data class KeyPress(val key: Key): Action
+data class KeyPress(val key: Key)
 
 interface Target: Fact {
     val target: Memory
