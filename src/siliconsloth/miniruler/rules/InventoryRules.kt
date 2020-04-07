@@ -66,12 +66,4 @@ fun RuleEngine.inventoryRules() {
             replace(inv, InventoryMemory(inv.item, inv.count + 1))
         }
     }
-
-    rule {
-        val items by all<InventoryMemory> { count > 0 }
-
-        fire {
-            println(items)
-        }
-    }
 }
