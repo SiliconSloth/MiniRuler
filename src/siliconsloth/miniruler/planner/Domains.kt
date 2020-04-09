@@ -2,11 +2,17 @@ package siliconsloth.miniruler.planner
 
 import java.lang.UnsupportedOperationException
 
+/**
+ * Represents the set of values that a variable of type T is allowed to take in some context.
+ */
 interface Domain<T> {
     fun intersect(other: Domain<out T>): Domain<out T>
     fun supersetOf(other: Domain<out T>): Boolean
 }
 
+/**
+ * The set of all values of type T.
+ */
 class AnyValue<T>: Domain<T> {
     override fun intersect(other: Domain<out T>): Domain<out T> =
             other
@@ -17,22 +23,30 @@ class AnyValue<T>: Domain<T> {
     override fun equals(other: Any?): Boolean =
             other is AnyValue<*>
 
+    // All instances of AnyValue should share same hash code.
     override fun hashCode(): Int = 128
 }
 
+/**
+ * The empty set.
+ */
 class NoValue: Domain<Nothing> {
     override fun intersect(other: Domain<out Nothing>): Domain<Nothing> =
             this
 
-    override fun equals(other: Any?): Boolean =
-            other is NoValue
-
     override fun supersetOf(other: Domain<out Nothing>): Boolean =
             other is NoValue
 
+    override fun equals(other: Any?): Boolean =
+            other is NoValue
+
+    // All instances of NoValue should share same hash code.
     override fun hashCode(): Int = 129
 }
 
+/**
+ * The set of integers greater than or equal to min.
+ */
 data class LowerBounded(val min: Int): Domain<Int> {
     override fun intersect(other: Domain<out Int>): Domain<out Int> =
             when (other) {
@@ -53,6 +67,9 @@ data class LowerBounded(val min: Int): Domain<Int> {
             }
 }
 
+/**
+ * A singleton containing one value of type T.
+ */
 data class SingleValue<T>(val value: T): Domain<T> {
     override fun intersect(other: Domain<out T>): Domain<out T> =
             when (other) {
