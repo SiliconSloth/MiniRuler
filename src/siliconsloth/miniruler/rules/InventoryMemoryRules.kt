@@ -4,7 +4,7 @@ import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.engine.filters.EqualityFilter
 
-fun RuleEngine.inventoryRules() {
+fun RuleEngine.inventoryMemoryRules() {
     // When the inventory is open ensure the memorized counts are accurate.
     rule {
         val inv by find<InventoryItem>()
