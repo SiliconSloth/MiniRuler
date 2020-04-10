@@ -55,6 +55,8 @@ fun RuleEngine.planningRules(planner: Planner) {
         }
     }
 
+    // If the agent is aware of any workbenches existing anywhere in the world,
+    // that counts as "next to".
     rule {
         val benches by all<Memory> { entity == Entity.WORKBENCH }
 
