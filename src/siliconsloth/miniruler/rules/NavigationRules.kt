@@ -99,6 +99,8 @@ fun RuleEngine.navigationRules() {
         val leftPress = KeyPress(Key.LEFT)
         val rightPress = KeyPress(Key.RIGHT)
 
+        find<CurrentAction> { action == CHOP_TREES }
+
         val target by find<MoveTarget>()
         val player by find<Memory> { entity == Entity.PLAYER }
 

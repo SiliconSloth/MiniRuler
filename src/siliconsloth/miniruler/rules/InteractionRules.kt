@@ -7,6 +7,8 @@ import kotlin.math.abs
 
 fun RuleEngine.attackRules() {
     rule {
+        find<CurrentAction> { action == CHOP_TREES }
+
         val player by find<Memory> { entity == Entity.PLAYER }
         find<MoveTarget> { target.entity == Entity.TREE && aimingAt(player, target) }
         find<StaminaLevel> { stamina > 8 }
@@ -19,6 +21,8 @@ fun RuleEngine.attackRules() {
     rule {
         val upPress = KeyPress(Key.UP)
         val downPress = KeyPress(Key.DOWN)
+
+        find<CurrentAction> { action == CHOP_TREES }
 
         val player by find<Memory> { entity == Entity.PLAYER }
         find<MoveTarget> { target.entity == Entity.ITEM

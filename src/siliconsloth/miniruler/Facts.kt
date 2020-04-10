@@ -1,6 +1,7 @@
 package siliconsloth.miniruler
 
 import siliconsloth.miniruler.math.Vector
+import siliconsloth.miniruler.planner.Action
 import siliconsloth.miniruler.planner.Variable
 
 interface Fact
@@ -38,3 +39,4 @@ data class MoveTarget(override val target: Memory): Target
 data class StationaryItem(val item: Memory, val since: Int): Fact
 
 data class VariableValue(val variable: Variable<*>, val value: Any?)
+data class CurrentAction(val action: Action)

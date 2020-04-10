@@ -76,6 +76,7 @@ fun RuleEngine.planningRules(planner: Planner) {
             val state = State(varValues.map { it.variable to SingleValue(it.value) }.toMap())
             val action = planner.chooseAction(state)
             println(action)
+            action?.let { maintain(CurrentAction(it)) }
         }
     }
 }
