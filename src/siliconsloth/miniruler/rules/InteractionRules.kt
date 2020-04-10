@@ -3,6 +3,8 @@ package siliconsloth.miniruler.rules
 import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.engine.filters.EqualityFilter
+import siliconsloth.miniruler.math.Box
+import siliconsloth.miniruler.math.Vector
 import kotlin.math.abs
 
 fun RuleEngine.attackRules() {
@@ -38,7 +40,10 @@ fun RuleEngine.attackRules() {
     }
 }
 
-fun aimingAt(actor: Memory, target: Spatial): Boolean {
+fun aimingAt(actor: Memory, target: Spatial): Boolean =
+        target.pos in aimBox(actor)
+
+fun aimBox(actor: Memory): Box {
     // Bounding box that target must lie in if the actor is facing down.
     val minX = -6
     val maxX = 6
@@ -71,6 +76,5 @@ fun aimingAt(actor: Memory, target: Spatial): Boolean {
         Direction.RIGHT -> -minX
     }
 
-    return (target.pos.x - actor.pos.x) in minX2..maxX2
-            && (target.pos.y - actor.pos.y) in minY2..maxY2
+    return Box(Vector(minX2, minY2) + actor.pos, Vector(maxX2, maxY2) + actor.pos)
 }
