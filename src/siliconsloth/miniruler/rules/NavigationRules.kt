@@ -7,6 +7,7 @@ import siliconsloth.miniruler.engine.filters.EqualityFilter
 import siliconsloth.miniruler.math.Box
 
 fun RuleEngine.navigationRules() {
+    // Target trees.
     rule {
         val tree by find<Memory> { entity == Entity.TREE }
 
@@ -15,8 +16,10 @@ fun RuleEngine.navigationRules() {
         }
     }
 
+    // Target items that have remained in the same location for more than 40 frames, so have probably stopped moving.
+    // If the item is not yet stationary, the game will not let the player pick it up.
     rule {
-        val camera by find<CameraLocation>()
+        val camera by find<CameraLocation>()    // The camera can tell us the current frame number
         val item by find<StationaryItem> { camera.frame - since > 40 }
 
         fire {
@@ -24,9 +27,12 @@ fun RuleEngine.navigationRules() {
         }
     }
 
+    // Create TargetProposals for all possible targets that are in line-of-sight of the player,
+    // with no solid obstacles in the way.
     rule {
         val player by find<Memory> { entity == Entity.PLAYER }
         val target by find<PossibleTarget>()
+        // All entities in the area between the player and target
         val obstacles by all<Memory>(AreaFilter { Box(player.pos, target.target.pos, padding=16) })
 
         fire {
@@ -34,6 +40,7 @@ fun RuleEngine.navigationRules() {
                 if (obs == player || obs == target.target || !obs.entity.solid) {
                     false
                 } else {
+                    // Assume all entities have circular collision boxes. Only solid entities are considered.
                     obs.pos.distanceSquaredFromLine(player.pos, target.target.pos) < 100
                 }
             }
@@ -43,6 +50,8 @@ fun RuleEngine.navigationRules() {
         }
     }
 
+    // If the agent doesn't currently have a target to move towards,
+    // choose the nearest TargetProposal as the new target.
     rule {
         not<MoveTarget>()
         val player by find<Memory> { entity == Entity.PLAYER }
@@ -57,6 +66,7 @@ fun RuleEngine.navigationRules() {
         }
     }
 
+    // Prioritise targeting items over trees.
     rule {
         val oldTarget by find<MoveTarget> { target.entity == Entity.TREE }
         val itemTarget by find<TargetProposal> { target.entity == Entity.ITEM }
@@ -66,6 +76,7 @@ fun RuleEngine.navigationRules() {
         }
     }
 
+    // If an entity disappears all corresponding target facts should be deleted.
     rule {
         val target by find<PossibleTarget>()
         not(EqualityFilter { target.target })
@@ -75,6 +86,7 @@ fun RuleEngine.navigationRules() {
         }
     }
 
+    // If an entity disappears all corresponding target facts should be deleted.
     rule {
         val target by find<TargetProposal>()
         not(EqualityFilter { target.target })
@@ -84,6 +96,7 @@ fun RuleEngine.navigationRules() {
         }
     }
 
+    // If an entity disappears all corresponding target facts should be deleted.
     rule {
         val target by find<MoveTarget>()
         not(EqualityFilter { target.target })
@@ -93,6 +106,7 @@ fun RuleEngine.navigationRules() {
         }
     }
 
+    // Press keys to walk towards the current target.
     rule {
         val upPress = KeyPress(Key.UP)
         val downPress = KeyPress(Key.DOWN)
@@ -109,6 +123,7 @@ fun RuleEngine.navigationRules() {
                 val t = target.target.pos
                 val p = player.pos
 
+                // Try to get within 1 unit of the target position along both axes.
                 if (t.x > p.x + 1) {
                     replace(leftPress, rightPress)
                 } else if (t.x < p.x - 1) {
