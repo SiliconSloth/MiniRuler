@@ -33,7 +33,7 @@ interface Target: Fact {
 }
 
 data class PossibleTarget(override val target: Memory): Target
-data class TargetProposal(override val target: Memory, val distance: Float): Target
+data class TargetProposal(override val target: Memory): Target
 data class MoveTarget(override val target: Memory): Target
 
 data class StationaryItem(val item: Memory, val since: Int): Fact

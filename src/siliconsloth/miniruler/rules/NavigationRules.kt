@@ -38,7 +38,7 @@ fun RuleEngine.navigationRules() {
                 }
             }
             if (!obstructed) {
-                maintain(TargetProposal(target.target, target.target.pos.distance(player.pos)))
+                maintain(TargetProposal(target.target))
             }
         }
     }
