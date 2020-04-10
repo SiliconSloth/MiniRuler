@@ -27,6 +27,7 @@ fun main() {
     engine.navigationRules()
     engine.attackRules()
     engine.inventoryMemoryRules()
+    engine.inventoryRules()
     engine.planningRules(planner)
 }
 
