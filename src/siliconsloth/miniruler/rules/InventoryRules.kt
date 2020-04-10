@@ -12,4 +12,20 @@ fun RuleEngine.inventoryRules() {
             maintain(KeyPress(Key.MENU))
         }
     }
+
+    rule {
+        find<CurrentAction> { action == SELECT_WORKBENCH }
+        val selection by find<InventorySelection>()
+        val item by find<InventoryItem> { item == Item.WORKBENCH }
+
+        fire {
+            if (item.position < selection.position) {
+                maintain(KeyPress(Key.UP))
+            } else if (item.position > selection.position) {
+                maintain(KeyPress(Key.DOWN))
+            } else {
+                maintain(KeyPress(Key.ATTACK))
+            }
+        }
+    }
 }
