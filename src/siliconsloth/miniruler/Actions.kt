@@ -44,7 +44,7 @@ val OPEN_CRAFTING = Action("OPEN_CRAFTING", State(mapOf(
         MENU to Set(Menu.CRAFTING)
 ))
 
-val CRAFT_PCIKAXE = Action("CRAFT_PCIKAXE", State(mapOf(
+val CRAFT_PCIKAXE = Action("CRAFT_PICKAXE", State(mapOf(
         MENU to SingleValue(Menu.CRAFTING),
         WOOD_COUNT to LowerBounded(5)
 )), mapOf(
