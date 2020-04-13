@@ -8,6 +8,7 @@ import siliconsloth.miniruler.math.Vector
 import kotlin.math.abs
 
 fun RuleEngine.attackRules() {
+    // If the player is aiming at a tree and has sufficient stamina, attack it.
     rule {
         find<CurrentAction> { action == CHOP_TREES }
 
@@ -20,6 +21,8 @@ fun RuleEngine.attackRules() {
         }
     }
 
+    // If the player is standing on top of a item it is trying to collect, keep moving in place
+    // until the item is collected. Minicraft only allows items to be picked up while moving.
     rule {
         val upPress = KeyPress(Key.UP)
         val downPress = KeyPress(Key.DOWN)
