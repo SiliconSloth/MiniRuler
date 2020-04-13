@@ -12,12 +12,22 @@ import com.mojang.ld22.entity.Entity as GameEntity
 import com.mojang.ld22.item.Item as GameItem
 import java.security.InvalidParameterException
 
-enum class Key {
-    UP, DOWN, LEFT, RIGHT, ATTACK, MENU
-}
-
 enum class Direction {
     UP, DOWN, LEFT, RIGHT
+}
+
+enum class Key {
+    UP, DOWN, LEFT, RIGHT, ATTACK, MENU;
+
+    companion object {
+        fun fromDirection(direction: Direction): Key =
+                when (direction) {
+                    Direction.UP -> UP
+                    Direction.DOWN -> DOWN
+                    Direction.LEFT -> LEFT
+                    Direction.RIGHT -> RIGHT
+                }
+    }
 }
 
 enum class Menu {

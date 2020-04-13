@@ -2,6 +2,7 @@ package siliconsloth.miniruler.rules
 
 import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
+import siliconsloth.miniruler.engine.filters.AreaFilter
 import siliconsloth.miniruler.engine.filters.EqualityFilter
 import siliconsloth.miniruler.math.Box
 import siliconsloth.miniruler.math.Vector
@@ -38,6 +39,33 @@ fun RuleEngine.attackRules() {
                 replace(downPress, upPress)
             } else {
                 replace(upPress, downPress)
+            }
+        }
+    }
+
+    // When trying to place a workbench, turn to point in a direction where there is empty space in front of the player
+    // then place the workbench.
+    rule {
+        find<CurrentAction> { action == PLACE_WORKBENCH }
+        val player by find<Memory> { entity == Entity.PLAYER }
+        val obstacles by all<Memory>(AreaFilter { Box(player.pos, player.pos, padding=30) })
+
+        fire {
+            val obstructed = obstacles.any { it.entity.solid && aimingAt(player, it) }
+            if (obstructed) {
+                // If there is an obstacle in front of the player, find a direction in which there is no obstacle.
+                Direction.values().forEach { dir ->
+                    // Rotate the player and check for obstacles again.
+                    val rotated = Memory(player.entity, player.pos, dir, player.item)
+                    val obs = obstacles.any { it.entity.solid && aimingAt(rotated, it) }
+
+                    if (!obs) {
+                        maintain(KeyPress(Key.fromDirection(dir)))
+                        return@forEach
+                    }
+                }
+            } else {
+                maintain(KeyPress(Key.ATTACK))
             }
         }
     }
