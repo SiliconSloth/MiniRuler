@@ -47,7 +47,7 @@ fun aimBox(actor: Memory): Box {
     // Bounding box that target must lie in if the actor is facing down.
     val minX = -6
     val maxX = 6
-    val minY = 0
+    val minY = 2
     val maxY = 24
 
     // Rotate according to direction.
