@@ -78,6 +78,20 @@ fun RuleEngine.attackRules() {
             }
         }
     }
+
+    // If trying to open the crafting menu while facing a workbench, press the Menu key.
+    rule {
+        find<CurrentAction> { action == OPEN_CRAFTING }
+        not<MenuOpen>()
+        val player by find<Memory> { entity == Entity.PLAYER }
+        val aims by all<Memory>(AreaFilter { aimBox(player) })
+
+        fire {
+            if (aims.any { it.entity == Entity.WORKBENCH }) {
+                maintain(KeyPress(Key.MENU))
+            }
+        }
+    }
 }
 
 fun aimingAt(actor: Memory, target: Spatial): Boolean =
