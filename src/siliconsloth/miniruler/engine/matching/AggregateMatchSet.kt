@@ -23,22 +23,20 @@ class AggregateMatchSet<T: Any>(val binding: AggregateBinding<T>, val nextBindin
     }
 
     override fun applyUpdates(updates: Map<KClass<*>, List<RuleEngine.Update<*>>>) {
-        var changed = false
+        val oldMatches = HashSet(matches)
 
         @Suppress("UNCHECKED_CAST")
         updates[binding.type]?.forEach { (it as RuleEngine.Update<T>).also {
             if (it.isInsert) {
                 if (binding.filter.predicate(it.fact)) {
                     matches.add(it.fact)
-                    changed = true
                 }
             } else {
                 matches.remove(it.fact)
-                changed = true
             }
         }}
 
-        if (changed) {
+        if (matches != oldMatches) {
             nextMatch.drop()
             nextMatch = matchRemaining()
         } else {
