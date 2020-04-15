@@ -12,6 +12,7 @@ import siliconsloth.miniruler.engine.matching.CompleteMatch
 
 class RuleBuilder(val engine: RuleEngine) {
     val bindings = mutableListOf<Binding<*,*>>()
+    var delay = 0
     var fire: (CompleteMatch.() -> Unit)? = null
     var end: (CompleteMatch.() -> Unit)? = null
 
@@ -52,5 +53,5 @@ class RuleBuilder(val engine: RuleEngine) {
     }
 
     fun build(): Rule =
-            Rule(bindings, fire, end, engine)
+            Rule(bindings, delay, fire, end, engine)
 }

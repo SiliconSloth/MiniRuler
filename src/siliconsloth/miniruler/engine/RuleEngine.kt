@@ -10,8 +10,6 @@ import siliconsloth.miniruler.engine.stores.FactStore
 class RuleEngine: FactUpdater<Any> {
     data class Update<T: Any>(val fact: T, val isInsert: Boolean, val maintainer: CompleteMatch? = null)
 
-    data class QueuedMatch(val match: CompleteMatch, val ending: Boolean)
-
     /**
      * All the rules in the engine, grouped by the fact types they bind to.
      * Note that a rule can appear more than once, if it binds to multiple types.
@@ -36,7 +34,7 @@ class RuleEngine: FactUpdater<Any> {
     // Some variables used by applyUpdates().
     var running = false
     val updateQueue = mutableMapOf<KClass<*>, MutableList<Update<*>>>()
-    val matchQueue = mutableListOf<QueuedMatch>()
+    val allMatches = mutableListOf<CompleteMatch>()
 
     inline fun <reified T: Any> addFactStore(store: FactStore<T>) {
         stores[T::class] = store
@@ -66,7 +64,8 @@ class RuleEngine: FactUpdater<Any> {
             // Keep going until the rules stop triggering updates.
             while (updateQueue.isNotEmpty()) {
                 // Remove any insertions of facts maintained by matches that have already ended.
-                val batch = updateQueue.mapValues { it.value.filter { !(it.isInsert && it.maintainer?.ended ?: false) } }
+                val batch = updateQueue.mapValues { it.value.filter {
+                    !(it.isInsert && it.maintainer?.state == CompleteMatch.State.ENDED) } }
                 updateQueue.clear()
 
                 // Update the fact stores.
@@ -76,21 +75,17 @@ class RuleEngine: FactUpdater<Any> {
                 }
 
                 // Update the match trees of every rule that binds with fact types updated by this update.
-                // This process will cause new and ended matches to be added to matchQueue.
+                // This process will cause new matches to be added to allMatches.
                 val applicable = batch.keys.map { rules[it] ?: mutableListOf() }.flatten().distinct()
                 applicable.forEach {
                     it.applyUpdates(batch)
                 }
 
-                // Execute all rule firings and endings caused by this update.
-                matchQueue.forEach {
-                    if (it.ending) {
-                        it.match.end()
-                    } else {
-                        it.match.fire()
-                    }
-                }
-                matchQueue.clear()
+                // Decrement the countdowns of all matches and fire/end matches as needed.
+                // This may cause the queuing of new fact updates.
+                allMatches.forEach { it.tick() }
+                // Ended matches will not perform any further actions and so can be discarded.
+                allMatches.filter { it.state != CompleteMatch.State.ENDED }
             }
             running = false
         }
@@ -116,8 +111,8 @@ class RuleEngine: FactUpdater<Any> {
         }
     }
 
-    fun queueMatch(match: CompleteMatch, ending: Boolean = false) {
-        matchQueue.add(QueuedMatch(match, ending))
+    fun addMatch(match: CompleteMatch) {
+        allMatches.add(match)
     }
 
     fun atomic(updates: AtomicBuilder.() -> Unit) =
