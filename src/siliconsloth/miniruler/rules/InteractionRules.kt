@@ -43,6 +43,15 @@ fun RuleEngine.attackRules() {
         }
     }
 
+    // Before trying to place the workbench release all previously held keys to prevent unwanted movement.
+    rule {
+        find<CurrentAction> { action == PLACE_WORKBENCH }
+
+        fire {
+            Key.values().forEach { delete(KeyPress(it)) }
+        }
+    }
+
     // When trying to place a workbench, turn to point in a direction where there is empty space in front of the player
     // then place the workbench.
     rule {
