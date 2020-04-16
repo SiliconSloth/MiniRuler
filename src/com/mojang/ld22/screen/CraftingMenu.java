@@ -1,9 +1,6 @@
 package com.mojang.ld22.screen;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import com.mojang.ld22.crafting.Recipe;
 import com.mojang.ld22.entity.Player;
@@ -16,7 +13,7 @@ import com.mojang.ld22.sound.Sound;
 
 public class CraftingMenu extends Menu {
 	private Player player;
-	private int selected = 0;
+	public int selected = 0;
 
 	private List<Recipe> recipes;
 
@@ -38,6 +35,8 @@ public class CraftingMenu extends Menu {
 	}
 
 	public void tick() {
+		int oldSelected = selected;
+
 		if (game.getInput().menu.clicked) game.setMenu(null);
 
 		if (game.getInput().up.clicked) selected--;
@@ -60,6 +59,10 @@ public class CraftingMenu extends Menu {
 				recipes.get(i).checkCanCraft(player);
 			}
 		}
+
+		if (selected != oldSelected && game.getGameListener() != null) {
+			game.getGameListener().onListSelect(selected);
+		}
 	}
 
 	public void render(Screen screen) {
@@ -67,6 +70,14 @@ public class CraftingMenu extends Menu {
 		Font.renderFrame(screen, "Cost", 12, 4, 19, 11);
 		Font.renderFrame(screen, "Crafting", 0, 1, 11, 11);
 		renderItemList(screen, 0, 1, 11, 11, recipes, selected);
+
+		if (game.getGameListener() != null) {
+			List<Item> items = new LinkedList<>();
+			for (Recipe recipe : recipes) {
+				items.add(recipe.resultTemplate);
+			}
+			game.getGameListener().onItemListRender(items);
+		}
 
 		if (recipes.size() > 0) {
 			Recipe recipe = recipes.get(selected);

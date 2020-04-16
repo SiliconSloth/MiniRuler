@@ -4,6 +4,7 @@ import com.mojang.ld22.GameListener
 import com.mojang.ld22.entity.ItemEntity
 import com.mojang.ld22.entity.Mob
 import com.mojang.ld22.item.ResourceItem
+import com.mojang.ld22.screen.CraftingMenu
 import com.mojang.ld22.screen.InventoryMenu
 import com.mojang.ld22.level.tile.Tile as GameTile
 import com.mojang.ld22.screen.Menu as GameMenu
@@ -17,7 +18,7 @@ import java.lang.RuntimeException
 
 class PerceptionHandler(private val engine: RuleEngine): GameListener {
     private var menu: Menu? = null
-    private var inventory = mutableListOf<InventoryItem>()
+    private var itemList = mutableListOf<ListItem>()
     private var frame = 0
 
     override fun onMenuChange(oldMenu: GameMenu?, newMenu: GameMenu?) = engine.atomic {
@@ -33,13 +34,16 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
             insert(TitleSelection(TitleOption.fromSelection(newMenu.selected)))
         }
 
-        if (oldMenu is InventoryMenu) {
-            deleteAll<InventorySelection>()
-            deleteAll<InventoryItem>()
-            inventory.clear()
-        }
+        // Delete item list of previous menu.
+        deleteAll<ListSelection>()
+        deleteAll<ListItem>()
+        itemList.clear()
+
         if (newMenu is InventoryMenu) {
-            insert(InventorySelection(newMenu.selected))
+            insert(ListSelection(newMenu.selected))
+        }
+        if (newMenu is CraftingMenu) {
+            insert(ListSelection(newMenu.selected))
         }
     }
 
@@ -48,36 +52,36 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
         insert(TitleSelection(TitleOption.fromSelection(selection)))
     }
 
-    override fun onInventoryRender(items: List<GameItem>) = engine.atomic {
-        // Replace the items in inventory with the new ones, if they differ.
+    override fun onItemListRender(items: List<GameItem>) = engine.atomic {
+        // Replace the items in the list with the new ones, if they differ.
         var index = 0
         items.forEach { gameItem ->
-            val item = InventoryItem(Item.fromGame(gameItem), if (gameItem is ResourceItem) gameItem.count else 1, index)
+            val item = ListItem(Item.fromGame(gameItem), if (gameItem is ResourceItem) gameItem.count else 1, index)
 
-            if (index < inventory.size) {
+            if (index < itemList.size) {
                 // Only replace if different.
-                if (inventory[index] != item) {
-                    replace(inventory[index], item)
-                    inventory[index] = item
+                if (itemList[index] != item) {
+                    replace(itemList[index], item)
+                    itemList[index] = item
                 }
             } else {
                 insert(item)
-                inventory.add(item)
+                itemList.add(item)
             }
 
             index++
         }
 
-        // Remove any excess items in inventory.
-        while (index < inventory.size) {
-            delete(inventory[index])
-            inventory.removeAt(index)
+        // Remove any excess items in list.
+        while (index < itemList.size) {
+            delete(itemList[index])
+            itemList.removeAt(index)
         }
     }
 
-    override fun onInventorySelect(selection: Int) = engine.atomic {
-        deleteAll<InventorySelection>()
-        insert(InventorySelection(selection))
+    override fun onListSelect(selection: Int) = engine.atomic {
+        deleteAll<ListSelection>()
+        insert(ListSelection(selection))
     }
 
     override fun onActiveItemChange(item: GameItem?) = engine.atomic {

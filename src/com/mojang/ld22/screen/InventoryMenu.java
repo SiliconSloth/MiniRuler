@@ -38,7 +38,7 @@ public class InventoryMenu extends Menu {
 		}
 
 		if (selected != oldSelected && game.getGameListener() != null) {
-			game.getGameListener().onInventorySelect(selected);
+			game.getGameListener().onListSelect(selected);
 		}
 	}
 
@@ -46,7 +46,7 @@ public class InventoryMenu extends Menu {
 		Font.renderFrame(screen, "inventory", 1, 1, 12, 11);
 		renderItemList(screen, 1, 1, 12, 11, player.inventory.items, selected);
 		if (game.getGameListener() != null) {
-			game.getGameListener().onInventoryRender(player.inventory.items);
+			game.getGameListener().onItemListRender(player.inventory.items);
 		}
 	}
 }

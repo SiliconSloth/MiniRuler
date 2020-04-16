@@ -10,8 +10,8 @@ import java.util.List;
 public interface GameListener {
     void onMenuChange(Menu oldMenu, Menu newMenu);
     void onTitleOptionSelect(int selection);
-    void onInventoryRender(List<Item> items);
-    void onInventorySelect(int selection);
+    void onItemListRender(List<Item> items);
+    void onListSelect(int selection);
     void onActiveItemChange(Item item);
     void onRender(Tile[][] tiles, List<Entity> entities, int xScroll, int yScroll, int stamina);
 }

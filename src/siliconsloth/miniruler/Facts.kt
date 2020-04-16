@@ -15,8 +15,8 @@ interface Perception: Fact
 data class MenuOpen(val menu: Menu): Perception
 data class TitleSelection(val option: TitleOption): Perception
 
-data class InventoryItem(val item: Item, val count: Int, val position: Int): Perception
-data class InventorySelection(val position: Int): Perception
+data class ListItem(val item: Item, val count: Int, val position: Int): Perception
+data class ListSelection(val position: Int): Perception
 
 data class CameraLocation(val pos: Vector, val frame: Int): Perception
 data class StaminaLevel(val stamina: Int): Perception

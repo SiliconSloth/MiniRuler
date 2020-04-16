@@ -7,7 +7,8 @@ import siliconsloth.miniruler.engine.filters.EqualityFilter
 fun RuleEngine.inventoryMemoryRules() {
     // When the inventory is open ensure the memorized counts are accurate.
     rule {
-        val inv by find<InventoryItem>()
+        find<MenuOpen> { menu == Menu.INVENTORY }
+        val inv by find<ListItem>()
         val mem by find<InventoryMemory> { item == inv.item && count != inv.count }
 
         fire {
@@ -17,9 +18,9 @@ fun RuleEngine.inventoryMemoryRules() {
 
     // Set counts to zero for items not visible in the inventory.
     rule {
-        find<InventorySelection>()  // Indicates that menu is open
+        find<MenuOpen> { menu == Menu.INVENTORY }
         val mem by find<InventoryMemory> { count > 0 }
-        not<InventoryItem> { item == mem.item }
+        not<ListItem> { item == mem.item }
 
         fire {
             replace(mem, InventoryMemory(mem.item, 0))

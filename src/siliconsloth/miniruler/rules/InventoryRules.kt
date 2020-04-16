@@ -13,10 +13,21 @@ fun RuleEngine.inventoryRules() {
         }
     }
 
+    // Release all keys upon opening crafting.
     rule {
-        find<CurrentAction> { action == SELECT_WORKBENCH }
-        val selection by find<InventorySelection>()
-        val item by find<InventoryItem> { item == Item.WORKBENCH }
+        find<MenuOpen> { menu == Menu.CRAFTING }
+
+        fire {
+            Key.values().forEach { delete(KeyPress(it)) }
+        }
+    }
+
+    // Select the desired item in the list.
+    rule {
+        val action by find<CurrentAction> { action == SELECT_WORKBENCH || action == CRAFT_PCIKAXE }
+        val selection by find<ListSelection>()
+        val item by find<ListItem> { item == (if (action.action == SELECT_WORKBENCH)
+                                                    Item.WORKBENCH else Item.WOOD_PICKAXE) }
 
         fire {
             if (item.position < selection.position) {
