@@ -68,11 +68,12 @@ fun RuleEngine.inventoryMemoryRules() {
         }
     }
 
-    // When an item stops being held, assume it was placed or consumed and decrement its inventory count.
+    // When an item other than the power glove stops being held,
+    // assume it was placed or consumed and decrement its inventory count.
     // If the item was actually un-held by the inventory being opened, the inventory count will immediately be corrected
     // by the open inventory.
     rule {
-        val held by find<HeldItem>()
+        val held by find<HeldItem> { item != Item.POWER_GLOVE }
         val memory by find<InventoryMemory>{ item == held.item }
 
         end {
