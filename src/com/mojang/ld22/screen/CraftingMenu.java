@@ -86,6 +86,10 @@ public class CraftingMenu extends Menu {
 			screen.render(xo, 2 * 8, recipe.resultTemplate.getSprite(), recipe.resultTemplate.getColor(), 0);
 			Font.draw("" + hasResultItems, screen, xo + 8, 2 * 8, Color.get(-1, 555, 555, 555));
 
+			if (game.getGameListener() != null) {
+				game.getGameListener().onHaveIndicatorRender(recipe.resultTemplate, hasResultItems);
+			}
+
 			List<Item> costs = recipe.costs;
 			for (int i = 0; i < costs.size(); i++) {
 				Item item = costs.get(i);

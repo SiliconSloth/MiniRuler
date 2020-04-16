@@ -82,4 +82,14 @@ fun RuleEngine.inventoryMemoryRules() {
             }
         }
     }
+
+    // When the Have indicator is visible in a crafting menu, update the inventory count to match it.
+    rule {
+        val have by find<HaveIndicator>()
+        val memory by find<InventoryMemory> { item == have.item && count != have.count }
+
+        fire {
+            replace(memory, InventoryMemory(memory.item, have.count))
+        }
+    }
 }

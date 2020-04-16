@@ -84,6 +84,11 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
         insert(ListSelection(selection))
     }
 
+    override fun onHaveIndicatorRender(item: GameItem, count: Int) = engine.atomic {
+        deleteAll<HaveIndicator>()
+        insert(HaveIndicator(Item.fromGame(item), count))
+    }
+
     override fun onActiveItemChange(item: GameItem?) = engine.atomic {
         deleteAll<HeldItem>()
         item?.let { insert(HeldItem(Item.fromGame(it))) }
