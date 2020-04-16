@@ -174,6 +174,19 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
         maintain(fact)
     }
 
+    inline fun <reified T: Any> all(noinline condition: T.() -> Boolean): Iterable<T> =
+            all(Filter(condition))
+
+    /**
+     * Retrieve all facts in the engine that match the given filter,
+     * without having to bind against it.
+     */
+    inline fun <reified T: Any> all(filter: Filter<T>): Iterable<T> =
+            rule.engine.stores[T::class]?.let {
+                @Suppress("UNCHECKED_CAST")
+                (it as FactStore<T>).retrieveMatching(filter)
+            } ?: listOf()
+
     inline fun <reified T: Any> exists(noinline condition: T.() -> Boolean): Boolean =
             exists(Filter(condition))
 
@@ -182,8 +195,5 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
      * without having to bind against it.
      */
     inline fun <reified T: Any> exists(filter: Filter<T>): Boolean =
-            rule.engine.stores[T::class]?.let {
-                @Suppress("UNCHECKED_CAST")
-                (it as FactStore<T>).retrieveMatching(filter).any()
-            } ?: false
+            all(filter).any()
 }
