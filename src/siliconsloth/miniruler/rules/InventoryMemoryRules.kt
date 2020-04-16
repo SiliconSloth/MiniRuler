@@ -22,6 +22,8 @@ fun RuleEngine.inventoryMemoryRules() {
         val mem by find<InventoryMemory> { count > 0 }
         not<ListItem> { item == mem.item }
 
+        delay = 3   // Wait for the item list to load
+
         fire {
             replace(mem, InventoryMemory(mem.item, 0))
         }
