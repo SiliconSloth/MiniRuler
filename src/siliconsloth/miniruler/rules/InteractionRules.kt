@@ -84,7 +84,7 @@ fun RuleEngine.attackRules() {
         find<CurrentAction> { action == OPEN_CRAFTING }
         not<MenuOpen>()
         val player by find<Memory> { entity == Entity.PLAYER }
-        val aims by all<Memory>(AreaFilter { aimBox(player) })
+        val aims by all<Memory>(AreaFilter { aimBox(player, 8) })
 
         fire {
             if (aims.any { it.entity == Entity.WORKBENCH }) {
@@ -95,14 +95,14 @@ fun RuleEngine.attackRules() {
 }
 
 fun aimingAt(actor: Memory, target: Spatial): Boolean =
-        target.pos in aimBox(actor)
+        target.pos in aimBox(actor, 24)
 
-fun aimBox(actor: Memory): Box {
+fun aimBox(actor: Memory, reach: Int): Box {
     // Bounding box that target must lie in if the actor is facing down.
     val minX = -6
     val maxX = 6
     val minY = 2
-    val maxY = 24
+    val maxY = reach
 
     // Rotate according to direction.
     val minX2 = when (actor.facing) {
