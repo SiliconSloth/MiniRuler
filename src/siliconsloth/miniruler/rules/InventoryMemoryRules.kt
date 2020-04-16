@@ -67,4 +67,19 @@ fun RuleEngine.inventoryMemoryRules() {
             replace(inv, InventoryMemory(inv.item, inv.count + 1))
         }
     }
+
+    // When an item stops being held, assume it was placed or consumed and decrement its inventory count.
+    // If the item was actually un-held by the inventory being opened, the inventory count will immediately be corrected
+    // by the open inventory.
+    rule {
+        val held by find<HeldItem>()
+        val memory by find<InventoryMemory>{ item == held.item }
+
+        end {
+            // Ensure the match ended due to the item no longer being held, not the inventory count changing.
+            if (exists(EqualityFilter { memory })) {
+                replace(memory, InventoryMemory(memory.item, memory.count - 1))
+            }
+        }
+    }
 }
