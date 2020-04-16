@@ -92,6 +92,21 @@ fun RuleEngine.attackRules() {
             }
         }
     }
+
+    // If trying to pick up a workbench while facing one with the power glove, press the Attack key.
+    rule {
+        find<CurrentAction> { action == PICK_UP_WORKBENCH }
+        find<HeldItem> { item == Item.POWER_GLOVE }
+        not<MenuOpen>()
+        val player by find<Memory> { entity == Entity.PLAYER }
+        val aims by all<Memory>(AreaFilter { aimBox(player, 8) })
+
+        fire {
+            if (aims.any { it.entity == Entity.WORKBENCH }) {
+                maintain(KeyPress(Key.ATTACK))
+            }
+        }
+    }
 }
 
 fun aimingAt(actor: Memory, target: Spatial): Boolean =
