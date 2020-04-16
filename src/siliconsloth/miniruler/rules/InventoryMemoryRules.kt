@@ -92,4 +92,15 @@ fun RuleEngine.inventoryMemoryRules() {
             replace(memory, InventoryMemory(memory.item, have.count))
         }
     }
+
+    // When something is picked up with the power glove, add it to the inventory.
+    rule {
+        val held by find<HeldItem>()
+        find<LastHeldItem> { item == Item.POWER_GLOVE }
+
+        fire {
+            val memory = all<InventoryMemory> { item == held.item }.iterator().next()
+            replace(memory, InventoryMemory(memory.item, memory.count + 1))
+        }
+    }
 }

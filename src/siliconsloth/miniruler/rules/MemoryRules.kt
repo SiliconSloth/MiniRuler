@@ -55,4 +55,22 @@ fun RuleEngine.memoryRules() {
             delete(stat)
         }
     }
+
+    rule {
+        val item by find<HeldItem>()
+
+        end {
+            insert(LastHeldItem(item.item))
+        }
+    }
+
+    // Only remember the last held item for a short period of time.
+    rule {
+        val item by find<LastHeldItem>()
+        delay = 3
+
+        fire {
+            delete(item)
+        }
+    }
 }
