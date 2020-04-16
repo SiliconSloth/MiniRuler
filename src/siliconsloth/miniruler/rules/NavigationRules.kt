@@ -9,21 +9,33 @@ import siliconsloth.miniruler.math.Box
 fun RuleEngine.navigationRules() {
     // Target trees.
     rule {
+        find<CurrentAction> { action == CHOP_TREES }
         val tree by find<Memory> { entity == Entity.TREE }
 
         fire {
-            insert(PossibleTarget(tree))
+            maintain(PossibleTarget(tree))
         }
     }
 
     // Target items that have remained in the same location for more than 40 frames, so have probably stopped moving.
     // If the item is not yet stationary, the game will not let the player pick it up.
     rule {
+        find<CurrentAction> { action == CHOP_TREES }
         val camera by find<CameraLocation>()    // The camera can tell us the current frame number
         val item by find<StationaryItem> { camera.frame - since > 40 }
 
         fire {
-            insert(PossibleTarget(item.item))
+            maintain(PossibleTarget(item.item))
+        }
+    }
+
+    // Target workbenches if trying to open one.
+    rule {
+        find<CurrentAction> { action == OPEN_CRAFTING }
+        val bench by find<Memory> { entity == Entity.WORKBENCH }
+
+        fire {
+            maintain(PossibleTarget(bench))
         }
     }
 
@@ -78,28 +90,18 @@ fun RuleEngine.navigationRules() {
 
     // If an entity disappears all corresponding target facts should be deleted.
     rule {
-        val target by find<PossibleTarget>()
-        not(EqualityFilter { target.target })
-
-        fire {
-            delete(target)
-        }
-    }
-
-    // If an entity disappears all corresponding target facts should be deleted.
-    rule {
-        val target by find<TargetProposal>()
-        not(EqualityFilter { target.target })
-
-        fire {
-            delete(target)
-        }
-    }
-
-    // If an entity disappears all corresponding target facts should be deleted.
-    rule {
         val target by find<MoveTarget>()
         not(EqualityFilter { target.target })
+
+        fire {
+            delete(target)
+        }
+    }
+
+    // Stop targeting trees and items if no longer gathering wood.
+    rule {
+        not<CurrentAction> { action == CHOP_TREES }
+        val target by find<MoveTarget> { target.entity == Entity.TREE || target.entity == Entity.ITEM }
 
         fire {
             delete(target)
@@ -112,8 +114,6 @@ fun RuleEngine.navigationRules() {
         val downPress = KeyPress(Key.DOWN)
         val leftPress = KeyPress(Key.LEFT)
         val rightPress = KeyPress(Key.RIGHT)
-
-        find<CurrentAction> { action == CHOP_TREES }
 
         val target by find<MoveTarget>()
         val player by find<Memory> { entity == Entity.PLAYER }
