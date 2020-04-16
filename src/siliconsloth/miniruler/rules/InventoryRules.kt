@@ -24,10 +24,10 @@ fun RuleEngine.inventoryRules() {
 
     // Select the desired item in the list.
     rule {
-        val action by find<CurrentAction> { action == SELECT_WORKBENCH || action == CRAFT_PCIKAXE }
+        val action by find<CurrentAction> { action is Select || action == CRAFT_PCIKAXE }
         val selection by find<ListSelection>()
-        val item by find<ListItem> { item == (if (action.action == SELECT_WORKBENCH)
-                                                    Item.WORKBENCH else Item.WOOD_PICKAXE) }
+        val item by find<ListItem> { item == (if (action.action is Select)
+                                                    (action.action as Select).item else Item.WOOD_PICKAXE) }
 
         fire {
             if (item.position < selection.position) {

@@ -8,18 +8,10 @@ import siliconsloth.miniruler.planner.State
 
 fun RuleEngine.planningRules(planner: Planner) {
     rule {
-        val inv by find<InventoryMemory> { item == Item.WOOD }
+        val inv by find<InventoryMemory>()
 
         fire {
-            maintain(VariableValue(WOOD_COUNT, inv.count))
-        }
-    }
-
-    rule {
-        val inv by find<InventoryMemory> { item == Item.WOOD_PICKAXE }
-
-        fire {
-            maintain(VariableValue(PICK_COUNT, inv.count))
+            maintain(VariableValue(itemCount(inv.item), inv.count))
         }
     }
 

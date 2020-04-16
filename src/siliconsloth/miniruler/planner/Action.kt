@@ -1,6 +1,6 @@
 package siliconsloth.miniruler.planner
 
-class Action(val name: String, val prerequisite: State, val operations: Map<Variable<*>, Operation<*>>):
+open class Action(val name: String, val prerequisite: State, val operations: Map<Variable<*>, Operation<*>>):
         VariableContainer<Operation<*>?> {
 
     // For VariableContainer

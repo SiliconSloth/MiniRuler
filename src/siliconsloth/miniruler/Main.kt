@@ -8,6 +8,7 @@ import siliconsloth.miniruler.math.Box
 import siliconsloth.miniruler.math.Vector
 import siliconsloth.miniruler.planner.LowerBounded
 import siliconsloth.miniruler.planner.Planner
+import siliconsloth.miniruler.planner.SingleValue
 import siliconsloth.miniruler.planner.State
 import siliconsloth.miniruler.rules.*
 
@@ -15,7 +16,7 @@ fun main() {
     val engine = RuleEngine()
     engine.addFactStore(SpatialMap<Memory>())
 
-    val goal = State(mapOf(PICK_COUNT to LowerBounded(1)))
+    val goal = State(mapOf(HOLDING to SingleValue(Item.WOOD_PICKAXE), itemCount(Item.WORKBENCH) to LowerBounded(1)))
     val planner = Planner(goal, ALL_ACTIONS)
 
     val game = Game.startWindowedGame(PerceptionHandler(engine))
