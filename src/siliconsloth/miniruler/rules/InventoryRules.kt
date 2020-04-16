@@ -4,14 +4,14 @@ import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
 
 fun RuleEngine.inventoryRules() {
-    rule {
+    // If trying to open the inventory, first turn away from any nearby workbenches.
+    faceClear({
         find<CurrentAction> { action == OPEN_INVENTORY }
-        not<MenuOpen>()
-
-        fire {
-            maintain(KeyPress(Key.MENU))
-        }
-    }
+    }, {
+        it.entity == Entity.WORKBENCH
+    }, {
+        maintain(KeyPress(Key.MENU))
+    })
 
     // Release all keys upon opening crafting.
     rule {
