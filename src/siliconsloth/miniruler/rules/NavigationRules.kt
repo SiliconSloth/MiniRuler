@@ -115,6 +115,7 @@ fun RuleEngine.navigationRules() {
         val leftPress = KeyPress(Key.LEFT)
         val rightPress = KeyPress(Key.RIGHT)
 
+        not<MenuOpen>()
         val target by find<MoveTarget>()
         val player by find<Memory> { entity == Entity.PLAYER }
 
