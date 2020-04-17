@@ -63,7 +63,7 @@ fun RuleEngine.planningRules(planner: Planner) {
 
     rule {
         val varValues by all<VariableValue>()
-        delay = 3   // Allow time for all values to be updated
+        delay = 6   // Allow time for all values to be updated
 
         fire {
             val state = State(varValues.map { it.variable to SingleValue(it.value) }.toMap())
