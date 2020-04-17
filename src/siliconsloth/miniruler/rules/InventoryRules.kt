@@ -13,9 +13,9 @@ fun RuleEngine.inventoryRules() {
         maintain(KeyPress(Key.MENU))
     })
 
-    // Release all keys upon opening crafting.
+    // Release all keys upon opening menu.
     rule {
-        find<MenuOpen> { menu == Menu.CRAFTING }
+        find<MenuOpen>()
 
         fire {
             Key.values().forEach { delete(KeyPress(it)) }
