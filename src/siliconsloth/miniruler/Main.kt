@@ -13,7 +13,7 @@ import siliconsloth.miniruler.planner.State
 import siliconsloth.miniruler.rules.*
 
 fun main() {
-    val engine = RuleEngine()
+    val engine = RuleEngine(100)
     engine.addFactStore(SpatialMap<Memory>())
 
     val goal = State(mapOf(itemCount(Item.STONE) to LowerBounded(100), itemCount(Item.WORKBENCH) to LowerBounded(1)))

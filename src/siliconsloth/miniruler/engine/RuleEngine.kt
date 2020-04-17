@@ -7,8 +7,10 @@ import siliconsloth.miniruler.engine.matching.CompleteMatch
 import siliconsloth.miniruler.engine.stores.FactSet
 import siliconsloth.miniruler.engine.stores.FactStore
 
-class RuleEngine: FactUpdater<Any> {
+class RuleEngine(val reportInterval: Int = 0): FactUpdater<Any> {
     data class Update<T: Any>(val fact: T, val isInsert: Boolean, val maintainer: CompleteMatch? = null)
+
+    var reportCountdown = reportInterval
 
     /**
      * All the rules in the engine, grouped by the fact types they bind to.
@@ -41,7 +43,9 @@ class RuleEngine: FactUpdater<Any> {
     }
 
     fun rule(definition: RuleBuilder.() -> Unit) {
-        val rule = RuleBuilder(this).apply(definition).build()
+        val callLine = Throwable().stackTrace[1]
+        val rule = RuleBuilder(callLine.toString(), this).apply(definition).build()
+
         rule.bindings.forEach {
             rules.getOrPut(it.type) { mutableListOf() }.add(rule)
         }
@@ -86,6 +90,23 @@ class RuleEngine: FactUpdater<Any> {
                 allMatches.forEach { it.tick() }
                 // Ended matches will not perform any further actions and so can be discarded.
                 allMatches.filter { it.state != CompleteMatch.State.ENDED }
+
+                if (reportInterval > 0) {
+                    if (reportCountdown > 1) {
+                        reportCountdown--
+                    } else {
+                        reportCountdown = reportInterval
+
+                        println("Rule Firings:")
+                        println("-------------------------")
+                        rules.values.flatten().forEach { rule ->
+                            if (rule.fireCount > 0) {
+                                println(rule.fireCount.toString().padEnd(5) + " " + rule.name)
+                                rule.fireCount = 0
+                            }
+                        }
+                    }
+                }
             }
             running = false
         }

@@ -109,7 +109,9 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
         // The binding values may be referenced by fire(), so restore this match's values to the bindings.
         restoreBindings()
         rule.fire?.invoke(this)
+
         state = State.FIRED
+        rule.fireCount++
     }
 
     /**

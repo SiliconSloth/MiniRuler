@@ -10,7 +10,7 @@ import siliconsloth.miniruler.engine.filters.AllFilter
 import siliconsloth.miniruler.engine.filters.Filter
 import siliconsloth.miniruler.engine.matching.CompleteMatch
 
-class RuleBuilder(val engine: RuleEngine) {
+class RuleBuilder(var name: String, val engine: RuleEngine) {
     val bindings = mutableListOf<Binding<*,*>>()
     var delay = 0
     var fire: (CompleteMatch.() -> Unit)? = null
@@ -53,5 +53,5 @@ class RuleBuilder(val engine: RuleEngine) {
     }
 
     fun build(): Rule =
-            Rule(bindings, delay, fire, end, engine)
+            Rule(name, bindings, delay, fire, end, engine)
 }
