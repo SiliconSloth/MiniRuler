@@ -97,8 +97,8 @@ fun aimingAt(actor: Memory, target: Spatial): Boolean =
 
 fun aimBox(actor: Memory, reach: Int): Box {
     // Bounding box that target must lie in if the actor is facing down.
-    val minX = -6
-    val maxX = 6
+    val minX = -8
+    val maxX = 8
     val minY = 2
     val maxY = reach
 
