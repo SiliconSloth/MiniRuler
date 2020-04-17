@@ -34,6 +34,7 @@ public class Game extends Canvas implements Runnable {
 	public static final int HEIGHT = 120;
 	public static final int WIDTH = 160;
 	private static final int SCALE = 3;
+	private static final boolean REQUIRE_FOCUS = false;
 
 	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 	private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
@@ -224,7 +225,7 @@ public class Game extends Canvas implements Runnable {
 
 	public void tick() {
 		tickCount++;
-		if (!hasFocus()) {
+		if (REQUIRE_FOCUS && !hasFocus()) {
 			getInput().releaseAll();
 		} else {
 			if (!player.removed && !hasWon) gameTime++;
@@ -298,7 +299,7 @@ public class Game extends Canvas implements Runnable {
 
 		renderGui();
 
-		if (!hasFocus()) renderFocusNagger();
+		if (REQUIRE_FOCUS && !hasFocus()) renderFocusNagger();
 
 		if (gameListener != null) {
 			gameListener.onRender(renderedTiles, renderedEntities, xScroll, yScroll, player.stamina);
