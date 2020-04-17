@@ -16,7 +16,7 @@ fun main() {
     val engine = RuleEngine()
     engine.addFactStore(SpatialMap<Memory>())
 
-    val goal = State(mapOf(HOLDING to SingleValue(Item.WOOD_PICKAXE), itemCount(Item.WORKBENCH) to LowerBounded(1)))
+    val goal = State(mapOf(itemCount(Item.STONE) to LowerBounded(100), itemCount(Item.WORKBENCH) to LowerBounded(1)))
     val planner = Planner(goal, ALL_ACTIONS)
 
     val game = Game.startWindowedGame(PerceptionHandler(engine))

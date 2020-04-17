@@ -71,5 +71,13 @@ val PICK_UP_WORKBENCH = Action("PICK_UP_WORKBENCH", State(mapOf(
         itemCount(Item.WORKBENCH) to Add(1)
 ))
 
+val MINE_ROCK = Action("MINE_ROCK", State(mapOf(
+        MENU to SingleValue(null),
+        HOLDING to SingleValue(Item.WOOD_PICKAXE)
+)), mapOf(
+        itemCount(Item.STONE) to AddArbitrary(),
+        NEXT_TO to Set(null)
+))
+
 val ALL_ACTIONS = listOf(CHOP_TREES, OPEN_INVENTORY, PLACE_WORKBENCH, OPEN_CRAFTING, CRAFT_PCIKAXE,
-        CLOSE_CRAFTING, PICK_UP_WORKBENCH) + Item.values().map { Select(it) }
+        CLOSE_CRAFTING, PICK_UP_WORKBENCH, MINE_ROCK) + Item.values().map { Select(it) }
