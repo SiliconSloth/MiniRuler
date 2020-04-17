@@ -49,12 +49,8 @@ fun RuleEngine.navigationRules() {
 
         fire {
             val obstructed = obstacles.any { obs ->
-                if (obs == player || obs == target.target || !obs.entity.solid) {
-                    false
-                } else {
-                    // Assume all entities have circular collision boxes. Only solid entities are considered.
-                    obs.pos.distanceSquaredFromLine(player.pos, target.target.pos) < 100
-                }
+                obs != player && obs != target.target && obs.entity.solid &&
+                    Box(obs.pos, obs.pos, padding = 8).intersectsSegment(player.pos, target.target.pos)
             }
             if (!obstructed) {
                 maintain(TargetProposal(target.target))
