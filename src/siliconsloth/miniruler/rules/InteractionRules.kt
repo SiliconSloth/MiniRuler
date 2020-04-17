@@ -11,11 +11,11 @@ import kotlin.math.abs
 fun RuleEngine.attackRules() {
     // If the player is aiming at a tree and has sufficient stamina, attack it.
     rule {
-        find<CurrentAction> { action == CHOP_TREES }
+        find<CurrentAction> { action == CHOP_TREES || action == MINE_ROCK }
 
         val player by find<Memory> { entity == Entity.PLAYER }
-        find<MoveTarget> { target.entity == Entity.TREE && aimingAt(player, target) }
-        find<StaminaLevel> { stamina > 4 }
+        find<MoveTarget> { (target.entity == Entity.TREE || target.entity == Entity.ROCK) && aimingAt(player, target) }
+        find<StaminaLevel> { stamina > 6 }
 
         fire {
             maintain(KeyPress(Key.ATTACK))

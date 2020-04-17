@@ -17,10 +17,20 @@ fun RuleEngine.navigationRules() {
         }
     }
 
+    // Target rocks.
+    rule {
+        find<CurrentAction> { action == MINE_ROCK }
+        val rock by find<Memory> { entity == Entity.ROCK }
+
+        fire {
+            maintain(PossibleTarget(rock))
+        }
+    }
+
     // Target items that have remained in the same location for more than 40 frames, so have probably stopped moving.
     // If the item is not yet stationary, the game will not let the player pick it up.
     rule {
-        find<CurrentAction> { action == CHOP_TREES }
+        find<CurrentAction> { action == CHOP_TREES || action == MINE_ROCK }
         val camera by find<CameraLocation>()    // The camera can tell us the current frame number
         val item by find<StationaryItem> { camera.frame - since > 40 }
 
@@ -74,9 +84,9 @@ fun RuleEngine.navigationRules() {
         }
     }
 
-    // Prioritise targeting items over trees.
+    // Prioritise targeting items over anything else.
     rule {
-        val oldTarget by find<MoveTarget> { target.entity == Entity.TREE }
+        val oldTarget by find<MoveTarget> { target.entity != Entity.ITEM }
         val itemTarget by find<TargetProposal> { target.entity == Entity.ITEM }
 
         fire {
@@ -94,10 +104,11 @@ fun RuleEngine.navigationRules() {
         }
     }
 
-    // Stop targeting trees and items if no longer gathering wood.
+    // Stop targeting trees, rocks and items if no longer gathering wood.
     rule {
-        not<CurrentAction> { action == CHOP_TREES }
-        val target by find<MoveTarget> { target.entity == Entity.TREE || target.entity == Entity.ITEM }
+        not<CurrentAction> { action == CHOP_TREES || action == MINE_ROCK }
+        val target by find<MoveTarget> { target.entity == Entity.TREE || target.entity == Entity.ROCK
+                                        || target.entity == Entity.ITEM }
 
         fire {
             delete(target)
