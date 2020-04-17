@@ -15,7 +15,7 @@ fun RuleEngine.attackRules() {
 
         val player by find<Memory> { entity == Entity.PLAYER }
         find<MoveTarget> { target.entity == Entity.TREE && aimingAt(player, target) }
-        find<StaminaLevel> { stamina > 8 }
+        find<StaminaLevel> { stamina > 4 }
 
         fire {
             maintain(KeyPress(Key.ATTACK))
