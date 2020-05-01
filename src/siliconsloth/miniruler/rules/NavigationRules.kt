@@ -100,6 +100,7 @@ fun RuleEngine.navigationRules() {
         not(EqualityFilter { target.target })
 
         fire {
+            println(target.target)
             delete(target)
         }
     }
