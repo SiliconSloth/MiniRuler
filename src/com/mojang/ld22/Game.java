@@ -115,6 +115,28 @@ public class Game extends Canvas implements Runnable {
 		player = new Player(this);
 		player.findStartPos(level);
 
+		for (int y = 0; y < 128; y++) {
+			for (int x = 0; x < 128; x++) {
+				Tile tile;
+				if (x >= 4 && x < 124 && y >= 4 && y < 124) {
+					float r = random.nextFloat();
+					if (r < 0.04) {
+						tile = Tile.tree;
+					} else if (r < 0.08) {
+						tile = Tile.rock;
+					} else if (r < 0.4) {
+						tile = Tile.hardRock;
+					} else {
+						tile = Tile.grass;
+					}
+				} else {
+					tile = Tile.hardRock;
+				}
+				level.setTile(x, y, tile, 0);
+			}
+		}
+		level.setTile(player.x / 16, player.y / 16, Tile.grass, 0);
+
 		level.add(player);
 
 		for (int i = 0; i < 5; i++) {
