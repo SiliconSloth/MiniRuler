@@ -13,8 +13,8 @@ import com.mojang.ld22.entity.Entity as GameEntity
 import com.mojang.ld22.item.Item as GameItem
 import java.security.InvalidParameterException
 
-enum class Direction {
-    UP, DOWN, LEFT, RIGHT
+enum class Direction(val vector: Vector) {
+    UP(Vector(0,-1)), DOWN(Vector(0,1)), LEFT(Vector(-1,0)), RIGHT(Vector(1,0))
 }
 
 enum class Key {
