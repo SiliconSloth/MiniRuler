@@ -6,6 +6,7 @@ import com.mojang.ld22.entity.particle.TextParticle
 import com.mojang.ld22.item.*
 import com.mojang.ld22.item.resource.Resource
 import com.mojang.ld22.screen.*
+import siliconsloth.miniruler.math.Vector
 import com.mojang.ld22.screen.Menu as GameMenu
 import com.mojang.ld22.level.tile.Tile as GameTile
 import com.mojang.ld22.entity.Entity as GameEntity
@@ -64,12 +65,14 @@ enum class TitleOption {
     }
 }
 
-enum class Entity(val solid: Boolean = false) {
+enum class Entity(val solid: Boolean = false, val r: Vector = Vector(8,8)) {
     GRASS, ROCK(true), WATER, FLOWER, TREE(true), DIRT, SAND, CACTUS(true), HOLE, TREE_SAPLING, CACTUS_SAPLING,
     FARMLAND, WHEAT, LAVA(true), STAIRS_DOWN, STAIRS_UP, INFINITE_FALL(true), CLOUD, HARD_ROCK(true),
     IRON_ORE(true), GOLD_ORE(true), GEM_ORE(true), CLOUD_CACTUS(true),
-    AIR_WIZARD(true), ANVIL(true), CHEST(true), FURNACE(true), ITEM, LANTERN(true), OVEN(true), PLAYER(true),
-    SLIME(true), SPARK, WORKBENCH(true), ZOMBIE(true), SMASH_PARTICLE, TEXT_PARTICLE;
+    AIR_WIZARD(true, Vector(4,3)), ANVIL(true, Vector(3,2)), CHEST(true, Vector(3,3)), FURNACE(true, Vector(3,2)),
+    ITEM(false, Vector(3,3)), LANTERN(true, Vector(3,2)), OVEN(true, Vector(3,2)), PLAYER(true, Vector(4,3)),
+    SLIME(true, Vector(4,3)), SPARK(false, Vector(0,0)), WORKBENCH(true, Vector(3,2)), ZOMBIE(true, Vector(4,3)),
+    SMASH_PARTICLE(false, Vector(6,6)), TEXT_PARTICLE(false, Vector(6,6));
 
     companion object {
         fun fromGame(tile: GameTile): Entity =
