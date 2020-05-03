@@ -12,7 +12,8 @@ import kotlin.math.min
 
 class Visualizer(val engine: RuleEngine): JPanel() {
     val memories = mutableSetOf<Memory>()
-    val targets = mutableSetOf<MoveTarget>()
+    val targets = mutableSetOf<PossibleTarget>()
+    val waypoints = mutableSetOf<Waypoint>()
     val stationaries = mutableSetOf<StationaryItem>()
 
     init {
@@ -36,12 +37,22 @@ class Visualizer(val engine: RuleEngine): JPanel() {
         }
 
         engine.rule {
-            val target by find<MoveTarget>()
+            val target by find<PossibleTarget>()
             fire {
                 addMemory(target, targets)
             }
             end {
                 removeMemory(target, targets)
+            }
+        }
+
+        engine.rule {
+            val waypoint by find<Waypoint>()
+            fire {
+                addMemory(waypoint, waypoints)
+            }
+            end {
+                removeMemory(waypoint, waypoints)
             }
         }
 
@@ -94,13 +105,18 @@ class Visualizer(val engine: RuleEngine): JPanel() {
                 }
             }
 
+            g2d.color = Color(0, 255, 0, 255)
             targets.forEach {
-                g2d.color = Color(0, 255, 0, 255)
                 g2d.fillRect(it.target.pos.x - 5, it.target.pos.y - 5, 10, 10)
             }
 
+            g2d.color = Color(255, 0, 255, 255)
+            waypoints.forEach {
+                g2d.fillRect(it.pos.x - 1, it.pos.y - 1, 2, 2)
+            }
+
+            g2d.color = Color(0, 255, 255, 255)
             stationaries.forEach {
-                g2d.color = Color(0, 255, 255, 255)
                 g2d.fillRect(it.item.pos.x - 2, it.item.pos.y - 2, 4, 4)
             }
         }

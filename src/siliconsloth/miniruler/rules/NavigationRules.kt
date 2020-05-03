@@ -2,11 +2,9 @@ package siliconsloth.miniruler.rules
 
 import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
-import siliconsloth.miniruler.engine.filters.AreaFilter
-import siliconsloth.miniruler.engine.filters.EqualityFilter
-import siliconsloth.miniruler.math.Box
+import siliconsloth.miniruler.pathfinder.PathFinder
 
-fun RuleEngine.navigationRules() {
+fun RuleEngine.navigationRules(pathFinder: PathFinder) {
     // Target trees.
     rule {
         find<CurrentAction> { action == CHOP_TREES }
@@ -49,70 +47,24 @@ fun RuleEngine.navigationRules() {
         }
     }
 
-    // Create TargetProposals for all possible targets that are in line-of-sight of the player,
-    // with no solid obstacles in the way.
     rule {
+        val targets by all<PossibleTarget>()
+
+        fire {
+            pathFinder.setGoals(targets.map { it.target })
+        }
+    }
+
+    rule {
+        all<PossibleTarget>()   // Recompute path whenever targets change
         val player by find<Memory> { entity == Entity.PLAYER }
-        val target by find<PossibleTarget>()
-        // All entities in the area between the player and target
-        val obstacles by all<Memory>(AreaFilter { Box(player.pos, target.target.pos, padding=16) })
 
         fire {
-            val obstructed = obstacles.any { obs ->
-                obs != player && obs != target.target && obs.entity.solid &&
-                    Box(obs.pos, obs.pos, padding = 8).intersectsSegment(player.pos, target.target.pos)
+            val waypoint = pathFinder.nextWaypoint(player.pos)
+            if (waypoint != null) {
+                maintain(Waypoint(waypoint))
+                maintain(MoveTarget(pathFinder.chosenGoal!!))
             }
-            if (!obstructed) {
-                maintain(TargetProposal(target.target))
-            }
-        }
-    }
-
-    // If the agent doesn't currently have a target to move towards,
-    // choose the nearest TargetProposal as the new target.
-    rule {
-        not<MoveTarget>()
-        val player by find<Memory> { entity == Entity.PLAYER }
-        val targets by all<TargetProposal>()
-
-        fire {
-            targets.minBy {
-                it.target.pos.distanceSquared(player.pos)
-            }?.let{
-                insert(MoveTarget(it.target))
-            }
-        }
-    }
-
-    // Prioritise targeting items over anything else.
-    rule {
-        val oldTarget by find<MoveTarget> { target.entity != Entity.ITEM }
-        val itemTarget by find<TargetProposal> { target.entity == Entity.ITEM }
-
-        fire {
-            replace(oldTarget, MoveTarget(itemTarget.target))
-        }
-    }
-
-    // If an entity disappears all corresponding target facts should be deleted.
-    rule {
-        val target by find<MoveTarget>()
-        not(EqualityFilter { target.target })
-
-        fire {
-            println(target.target)
-            delete(target)
-        }
-    }
-
-    // Stop targeting trees, rocks and items if no longer gathering wood.
-    rule {
-        not<CurrentAction> { action == CHOP_TREES || action == MINE_ROCK }
-        val target by find<MoveTarget> { target.entity == Entity.TREE || target.entity == Entity.ROCK
-                                        || target.entity == Entity.ITEM }
-
-        fire {
-            delete(target)
         }
     }
 
@@ -124,12 +76,12 @@ fun RuleEngine.navigationRules() {
         val rightPress = KeyPress(Key.RIGHT)
 
         not<MenuOpen>()
-        val target by find<MoveTarget>()
+        val target by find<Waypoint>()
         val player by find<Memory> { entity == Entity.PLAYER }
 
         fire {
             atomic {
-                val t = target.target.pos
+                val t = target.pos
                 val p = player.pos
 
                 // Try to get within 1 unit of the target position along both axes.

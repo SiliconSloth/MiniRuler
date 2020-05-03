@@ -6,15 +6,16 @@ import siliconsloth.miniruler.engine.filters.AreaFilter
 import siliconsloth.miniruler.engine.stores.SpatialMap
 import siliconsloth.miniruler.math.Box
 import siliconsloth.miniruler.math.Vector
+import siliconsloth.miniruler.pathfinder.PathFinder
 import siliconsloth.miniruler.planner.LowerBounded
 import siliconsloth.miniruler.planner.Planner
-import siliconsloth.miniruler.planner.SingleValue
 import siliconsloth.miniruler.planner.State
 import siliconsloth.miniruler.rules.*
 
 fun main() {
-    val engine = RuleEngine(100)
-    engine.addFactStore(SpatialMap<Memory>())
+    val engine = RuleEngine()
+    val spatialStore = SpatialMap<Memory>()
+    engine.addFactStore(spatialStore)
 
     val goal = State(mapOf(itemCount(Item.STONE) to LowerBounded(100), itemCount(Item.WORKBENCH) to LowerBounded(1)))
     val planner = Planner(goal, ALL_ACTIONS)
@@ -25,7 +26,7 @@ fun main() {
 
     engine.menuRules()
     engine.memoryRules()
-    engine.navigationRules()
+    engine.navigationRules(PathFinder(spatialStore))
     engine.attackRules()
     engine.inventoryMemoryRules()
     engine.inventoryRules()

@@ -3,9 +3,11 @@ package siliconsloth.miniruler.math
 import kotlin.math.max
 import kotlin.math.min
 
-class Box(corner1: Vector, corner2: Vector, padding: Int = 0) {
-    val min = Vector(min(corner1.x, corner2.x) - padding, min(corner1.y, corner2.y) - padding)
-    val max = Vector(max(corner1.x, corner2.x) + padding, max(corner1.y, corner2.y) + padding)
+class Box(corner1: Vector, corner2: Vector, padding: Vector = Vector(0,0)) {
+    val min = Vector(min(corner1.x, corner2.x), min(corner1.y, corner2.y)) - padding
+    val max = Vector(max(corner1.x, corner2.x), max(corner1.y, corner2.y)) + padding
+
+    constructor(corner1: Vector, corner2: Vector, padding: Int) : this(corner1, corner2, Vector(padding, padding))
 
     operator fun contains(v: Vector) =
             v.x in min.x..max.x && v.y in min.y..max.y
@@ -30,4 +32,11 @@ class Box(corner1: Vector, corner2: Vector, padding: Int = 0) {
 
         return Range(tx1, tx2).intersect(Range(ty1, ty2))?.intersect(Range(0f, 1f)) != null
     }
+
+    // Intersects if non-zero intersection along both axes.
+    fun intersects(other: Box): Boolean =
+            Range(min.x.toFloat(), max.x.toFloat()).intersect(Range(other.min.x.toFloat(), other.max.x.toFloat()))
+                    ?.let { it.min < it.max } != false &&
+                    Range(min.y.toFloat(), max.y.toFloat()).intersect(Range(other.min.y.toFloat(), other.max.y.toFloat()))
+                            ?.let { it.min < it.max } != false
 }
