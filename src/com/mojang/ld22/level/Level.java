@@ -242,28 +242,28 @@ public class Level {
 	}
 
 	public void trySpawn(int count) {
-//		for (int i = 0; i < count; i++) {
-//			Mob mob;
-//
-//			int minLevel = 1;
-//			int maxLevel = 1;
-//			if (depth < 0) {
-//				maxLevel = (-depth) + 1;
-//			}
-//			if (depth > 0) {
-//				minLevel = maxLevel = 4;
-//			}
-//
-//			int lvl = random.nextInt(maxLevel - minLevel + 1) + minLevel;
-//			if (random.nextInt(2) == 0)
-//				mob = new Slime(lvl);
-//			else
-//				mob = new Zombie(lvl);
-//
-//			if (mob.findStartPos(this)) {
-//				this.add(mob);
-//			}
-//		}
+		for (int i = 0; i < count; i++) {
+			Mob mob;
+
+			int minLevel = 1;
+			int maxLevel = 1;
+			if (depth < 0) {
+				maxLevel = (-depth) + 1;
+			}
+			if (depth > 0) {
+				minLevel = maxLevel = 4;
+			}
+
+			int lvl = random.nextInt(maxLevel - minLevel + 1) + minLevel;
+			if (random.nextInt(2) == 0)
+				mob = new Slime(lvl);
+			else
+				mob = new Zombie(lvl);
+
+			if (mob.findStartPos(this)) {
+				this.add(mob);
+			}
+		}
 	}
 
 	public void tick() {
