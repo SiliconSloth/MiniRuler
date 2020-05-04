@@ -67,7 +67,10 @@ class PathFinder(val store: SpatialMap<Memory>) {
                                     it != g && it.pos == tile && it.entity.solid
                                             && it.entity.r == Vector(8, 8)
                                 }) {
-                            newGoals[tile] = g
+
+                            if (newGoals[tile]?.let { goalCost(it) > goalCost(g) } != false) {
+                                newGoals[tile] = g
+                            }
                         }
                     }
                 }
