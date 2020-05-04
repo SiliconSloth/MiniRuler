@@ -49,7 +49,7 @@ class PathFinder(val store: SpatialMap<Memory>) {
     fun setGoals(gs: Iterable<Memory>) {
         val newGoals = mutableMapOf<Vector, Memory>()
         gs.forEach { g ->
-            val approaches = if (g.entity.r == Vector(8,8)) {
+            val approaches = if (g.entity.solid) {
                 Direction.values().map { g.pos + it.vector * 16 }
             } else {
                 listOf(g.pos)
