@@ -12,7 +12,7 @@ import kotlin.math.min
 
 class Visualizer(val engine: RuleEngine): JPanel() {
     val memories = mutableSetOf<Memory>()
-    val targets = mutableSetOf<PossibleTarget>()
+    val targets = mutableSetOf<MoveTarget>()
     val waypoints = mutableSetOf<Waypoint>()
     val stationaries = mutableSetOf<StationaryItem>()
 
@@ -37,7 +37,7 @@ class Visualizer(val engine: RuleEngine): JPanel() {
         }
 
         engine.rule {
-            val target by find<PossibleTarget>()
+            val target by find<MoveTarget>()
             fire {
                 addMemory(target, targets)
             }
