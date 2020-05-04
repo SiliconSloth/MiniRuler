@@ -34,11 +34,13 @@ class Box(corner1: Vector, corner2: Vector, padding: Vector = Vector(0,0)) {
     }
 
     // Intersects if non-zero intersection along both axes.
-    fun intersects(other: Box): Boolean =
-            Range(min.x.toFloat(), max.x.toFloat()).intersect(Range(other.min.x.toFloat(), other.max.x.toFloat()))
-                    ?.let { it.min < it.max } != false &&
-                    Range(min.y.toFloat(), max.y.toFloat()).intersect(Range(other.min.y.toFloat(), other.max.y.toFloat()))
-                            ?.let { it.min < it.max } != false
+    fun intersects(other: Box): Boolean = (
+                Range(min.x.toFloat(), max.x.toFloat()).intersect(Range(other.min.x.toFloat(), other.max.x.toFloat()))
+                        ?.let { it.min < it.max } == true
+            ) && (
+                Range(min.y.toFloat(), max.y.toFloat()).intersect(Range(other.min.y.toFloat(), other.max.y.toFloat()))
+                    ?.let { it.min < it.max } == true
+            )
 
     override fun toString(): String =
             "Box($min, $max)"
