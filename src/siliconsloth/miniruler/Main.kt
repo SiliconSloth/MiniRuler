@@ -20,13 +20,15 @@ fun main() {
     val goal = State(mapOf(itemCount(Item.STONE) to LowerBounded(100), itemCount(Item.WORKBENCH) to LowerBounded(1)))
     val planner = Planner(goal, ALL_ACTIONS)
 
+    val pathFinder = PathFinder(spatialStore)
+
     val game = Game.startWindowedGame(PerceptionHandler(engine))
     KeyListener(engine, game.botInput)
-    Visualizer(engine).display()
+    Visualizer(engine, pathFinder).display()
 
     engine.menuRules()
     engine.memoryRules()
-    engine.navigationRules(PathFinder(spatialStore))
+    engine.navigationRules(pathFinder)
     engine.attackRules()
     engine.inventoryMemoryRules()
     engine.inventoryRules()

@@ -2,6 +2,9 @@ package siliconsloth.miniruler
 
 import com.mojang.ld22.Game
 import siliconsloth.miniruler.engine.RuleEngine
+import siliconsloth.miniruler.math.Box
+import siliconsloth.miniruler.math.Vector
+import siliconsloth.miniruler.pathfinder.PathFinder
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics
@@ -10,7 +13,7 @@ import javax.swing.JFrame
 import javax.swing.JPanel
 import kotlin.math.min
 
-class Visualizer(val engine: RuleEngine): JPanel() {
+class Visualizer(val engine: RuleEngine, val pathFinder: PathFinder): JPanel() {
     val memories = mutableSetOf<Memory>()
     val targets = mutableSetOf<MoveTarget>()
     val waypoints = mutableSetOf<Waypoint>()
@@ -106,8 +109,9 @@ class Visualizer(val engine: RuleEngine): JPanel() {
             }
 
             g2d.color = Color(0, 255, 0, 255)
-            targets.forEach {
-                g2d.fillRect(it.target.pos.x - 5, it.target.pos.y - 5, 10, 10)
+            targets.forEach { t ->
+                g2d.fillRect(t.target.pos.x - t.target.entity.r.x, t.target.pos.y - t.target.entity.r.y,
+                        t.target.entity.r.x * 2, t.target.entity.r.y * 2)
             }
 
             g2d.color = Color(255, 0, 255, 255)
