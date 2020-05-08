@@ -48,6 +48,7 @@ fun RuleEngine.memoryRules() {
 
     // When a dropped item disappears delete the corresponding StationaryItem.
     rule {
+        delay = 10
         val stat by find<StationaryItem>()
         not(EqualityFilter { stat.item } )
 

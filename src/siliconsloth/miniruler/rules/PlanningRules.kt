@@ -11,7 +11,7 @@ fun RuleEngine.planningRules(planner: Planner) {
         val inv by find<InventoryMemory>()
 
         fire {
-            maintain(VariableValue(itemCount(inv.item), inv.count))
+            maintain(VariableValue(itemCount(inv.item), inv.lower))
         }
     }
 
@@ -70,6 +70,11 @@ fun RuleEngine.planningRules(planner: Planner) {
             val action = planner.chooseAction(state)
             println(action)
             action?.let { maintain(CurrentAction(it)) }
+            if (action == CHOP_TREES) {
+                maintain(ResourceTarget(Item.WOOD, 5))
+            } else if (action == MINE_ROCK) {
+                maintain(ResourceTarget(Item.STONE, 100))
+            }
         }
     }
 }

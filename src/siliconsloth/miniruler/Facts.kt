@@ -25,7 +25,7 @@ data class StaminaLevel(val stamina: Int): Perception
 data class HeldItem(val item: Item): Perception
 data class LastHeldItem(val item: Item) : Perception
 
-data class InventoryMemory(val item: Item, val count: Int): Fact
+data class InventoryMemory(val item: Item, val lower: Int, val upper: Int): Fact
 data class Sighting(val entity: Entity, override val pos: Vector, val facing: Direction, val item: Item?, val frame: Int): Perception, Spatial
 data class Memory(val entity: Entity, override val pos: Vector, val facing: Direction, val item: Item?): Spatial {
     fun intersects(other: Memory): Boolean =
@@ -46,3 +46,4 @@ data class StationaryItem(val item: Memory, val since: Int): Fact
 
 data class VariableValue(val variable: Variable<*>, val value: Any?)
 data class CurrentAction(val action: Action)
+data class ResourceTarget(val item: Item, val count: Int)

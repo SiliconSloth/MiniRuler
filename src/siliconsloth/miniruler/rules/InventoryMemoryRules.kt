@@ -9,23 +9,23 @@ fun RuleEngine.inventoryMemoryRules() {
     rule {
         find<MenuOpen> { menu == Menu.INVENTORY }
         val inv by find<ListItem>()
-        val mem by find<InventoryMemory> { item == inv.item && count != inv.count }
+        val mem by find<InventoryMemory> { item == inv.item && (lower != inv.count || upper != inv.count) }
 
         fire {
-            replace(mem, InventoryMemory(inv.item, inv.count))
+            replace(mem, InventoryMemory(inv.item, inv.count, inv.count))
         }
     }
 
     // Set counts to zero for items not visible in the inventory.
     rule {
         find<MenuOpen> { menu == Menu.INVENTORY }
-        val mem by find<InventoryMemory> { count > 0 }
+        val mem by find<InventoryMemory> { lower > 0 }
         not<ListItem> { item == mem.item }
 
         delay = 3   // Wait for the item list to load
 
         fire {
-            replace(mem, InventoryMemory(mem.item, 0))
+            replace(mem, InventoryMemory(mem.item, 0, 0))
         }
     }
 
@@ -47,9 +47,9 @@ fun RuleEngine.inventoryMemoryRules() {
             atomic {
                 Item.values().forEach {
                     if (it == Item.WORKBENCH || it == Item.POWER_GLOVE) {
-                        insert(InventoryMemory(it, 1))
+                        insert(InventoryMemory(it, 1, 1))
                     } else {
-                        insert(InventoryMemory(it, 0))
+                        insert(InventoryMemory(it, 0, 0))
                     }
                 }
             }
@@ -61,12 +61,13 @@ fun RuleEngine.inventoryMemoryRules() {
         val camera by find<CameraLocation>()
         val player by find<Memory> { entity == Entity.PLAYER }
         // Only detect items that have stopped moving; moving items will "disappear" frequently without being picked up.
-        val stat by find<StationaryItem> { item.pos.distanceSquared(player.pos) < 100 && camera.frame - since > 40 }
+        val stat by find<StationaryItem> { item.intersects(player) && camera.frame - since > 40 }
         not(EqualityFilter { stat.item } )
         val inv by find<InventoryMemory> { item == stat.item.item!! }
 
         fire {
-            replace(inv, InventoryMemory(inv.item, inv.count + 1))
+            delete(stat)
+            replace(inv, InventoryMemory(inv.item, inv.lower, inv.upper + 2))
         }
     }
 
@@ -81,7 +82,7 @@ fun RuleEngine.inventoryMemoryRules() {
         end {
             // Ensure the match ended due to the item no longer being held, not the inventory count changing.
             if (exists(EqualityFilter { memory })) {
-                replace(memory, InventoryMemory(memory.item, memory.count - 1))
+                replace(memory, InventoryMemory(memory.item, memory.lower - 1, memory.upper - 1))
             }
         }
     }
@@ -89,10 +90,10 @@ fun RuleEngine.inventoryMemoryRules() {
     // When the Have indicator is visible in a crafting menu, update the inventory count to match it.
     rule {
         val have by find<HaveIndicator>()
-        val memory by find<InventoryMemory> { item == have.item && count != have.count }
+        val memory by find<InventoryMemory> { item == have.item && (lower != have.count || upper != have.count) }
 
         fire {
-            replace(memory, InventoryMemory(memory.item, have.count))
+            replace(memory, InventoryMemory(memory.item, have.count, have.count))
         }
     }
 
@@ -103,7 +104,18 @@ fun RuleEngine.inventoryMemoryRules() {
 
         fire {
             val memory = all<InventoryMemory> { item == held.item }.iterator().next()
-            replace(memory, InventoryMemory(memory.item, memory.count + 1))
+            replace(memory, InventoryMemory(memory.item, memory.lower + 1, memory.upper + 1))
+        }
+    }
+
+    // Check the inventory when the agent suspects that the item count may have reached the target.
+    rule {
+        not<MenuOpen>()
+        val target by find<ResourceTarget>()
+        find<InventoryMemory> { item == target.item && lower < target.count && upper >= target.count }
+
+        fire {
+            maintain((KeyPress(Key.MENU)))
         }
     }
 }
