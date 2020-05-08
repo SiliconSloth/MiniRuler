@@ -6,7 +6,6 @@ import siliconsloth.miniruler.engine.filters.AreaFilter
 import siliconsloth.miniruler.engine.filters.EqualityFilter
 import siliconsloth.miniruler.math.Box
 import siliconsloth.miniruler.math.Vector
-import kotlin.math.abs
 
 fun RuleEngine.attackRules() {
     // If the player is aiming at a tree and has sufficient stamina, attack it.
@@ -28,11 +27,10 @@ fun RuleEngine.attackRules() {
         val upPress = KeyPress(Key.UP)
         val downPress = KeyPress(Key.DOWN)
 
-        find<CurrentAction> { action == CHOP_TREES }
+        find<CurrentAction> { action == CHOP_TREES || action == MINE_ROCK }
 
         val player by find<Memory> { entity == Entity.PLAYER }
-        find<MoveTarget> { target.entity == Entity.ITEM
-                && abs(player.pos.x - target.pos.x) <= 1 && abs(player.pos.y - target.pos.y) <= 1 }
+        find<MoveTarget> { target.entity == Entity.ITEM && player.intersects(target) }
 
         fire {
             if (exists(EqualityFilter { downPress })) {

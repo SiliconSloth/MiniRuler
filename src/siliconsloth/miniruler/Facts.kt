@@ -1,5 +1,6 @@
 package siliconsloth.miniruler
 
+import siliconsloth.miniruler.math.Box
 import siliconsloth.miniruler.math.Vector
 import siliconsloth.miniruler.planner.Action
 import siliconsloth.miniruler.planner.Variable
@@ -24,9 +25,12 @@ data class StaminaLevel(val stamina: Int): Perception
 data class HeldItem(val item: Item): Perception
 data class LastHeldItem(val item: Item) : Perception
 
-data class Sighting(val entity: Entity, override val pos: Vector, val facing: Direction, val item: Item?, val frame: Int): Perception, Spatial
-data class Memory(val entity: Entity, override val pos: Vector, val facing: Direction, val item: Item?): Spatial
 data class InventoryMemory(val item: Item, val count: Int): Fact
+data class Sighting(val entity: Entity, override val pos: Vector, val facing: Direction, val item: Item?, val frame: Int): Perception, Spatial
+data class Memory(val entity: Entity, override val pos: Vector, val facing: Direction, val item: Item?): Spatial {
+    fun intersects(other: Memory): Boolean =
+            Box(pos, pos, entity.r).intersects(Box(other.pos, other.pos, other.entity.r))
+}
 
 data class KeyPress(val key: Key)
 
