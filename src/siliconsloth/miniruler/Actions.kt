@@ -31,6 +31,12 @@ val OPEN_INVENTORY = Action("OPEN_INVENTORY", State(mapOf(
         MENU to Set(Menu.INVENTORY)
 ))
 
+val CLOSE_INVENTORY = Action("CLOSE_INVENTORY", State(mapOf(
+        MENU to SingleValue(Menu.INVENTORY)
+)), mapOf(
+        MENU to Set(null)
+))
+
 val PLACE_WORKBENCH = Action("PLACE_WORKBENCH", State(mapOf(
         MENU to SingleValue(null),
         HOLDING to SingleValue(Item.WORKBENCH)
@@ -79,5 +85,5 @@ val MINE_ROCK = Action("MINE_ROCK", State(mapOf(
         NEXT_TO to Set(null)
 ))
 
-val ALL_ACTIONS = listOf(CHOP_TREES, OPEN_INVENTORY, PLACE_WORKBENCH, OPEN_CRAFTING, CRAFT_PCIKAXE,
+val ALL_ACTIONS = listOf(CHOP_TREES, OPEN_INVENTORY, CLOSE_INVENTORY, PLACE_WORKBENCH, OPEN_CRAFTING, CRAFT_PCIKAXE,
         CLOSE_CRAFTING, PICK_UP_WORKBENCH, MINE_ROCK) + Item.values().map { Select(it) }

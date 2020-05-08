@@ -41,6 +41,15 @@ fun RuleEngine.inventoryRules() {
     }
 
     rule {
+        find<CurrentAction> { action == CLOSE_INVENTORY }
+        find<MenuOpen> { menu == Menu.INVENTORY }
+
+        fire {
+            maintain(KeyPress(Key.MENU))
+        }
+    }
+
+    rule {
         find<CurrentAction> { action == CLOSE_CRAFTING }
         find<MenuOpen> { menu == Menu.CRAFTING }
 
