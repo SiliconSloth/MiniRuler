@@ -26,6 +26,8 @@ class MatchSet<T: Any>(val binding: SimpleBinding<T>, val nextBindings: List<Bin
     }
 
     override fun applyUpdates(updates: Map<KClass<*>, List<RuleEngine.Update<*>>>) {
+        matches.values.forEach { it.fresh = false }
+
         @Suppress("UNCHECKED_CAST")
         updates[binding.type]?.forEach { (it as RuleEngine.Update<T>).also {
             if (it.isInsert) {
@@ -40,9 +42,7 @@ class MatchSet<T: Any>(val binding: SimpleBinding<T>, val nextBindings: List<Bin
 
         if (nextBindings.isNotEmpty()) {
             matches.forEach {
-                if (it.value.fresh) {
-                    it.value.fresh = false
-                } else {
+                if (!it.value.fresh) {
                     binding.value = it.key
                     it.value.node.applyUpdates(updates)
                 }
