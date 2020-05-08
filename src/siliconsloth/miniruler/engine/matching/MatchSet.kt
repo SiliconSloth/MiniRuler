@@ -54,4 +54,7 @@ class MatchSet<T: Any>(val binding: SimpleBinding<T>, val nextBindings: List<Bin
         binding.value = it.key
         it.value.node.drop()
     }
+
+    override fun toString(): String =
+            "MatchSet" + matches.mapValues { it.value.node }
 }
