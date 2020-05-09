@@ -63,6 +63,8 @@ fun RuleEngine.navigationRules(pathFinder: PathFinder) {
             val waypoint = pathFinder.nextWaypoint(player.pos)
             if (waypoint != null) {
                 maintain(Waypoint(waypoint))
+            }
+            if (pathFinder.chosenGoal != null) {
                 maintain(MoveTarget(pathFinder.chosenGoal!!))
             }
         }

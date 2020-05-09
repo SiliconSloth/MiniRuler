@@ -23,18 +23,25 @@ fun goalCost(goal: Memory): Int =
 class PathFinder(val store: SpatialMap<Memory>) {
     interface Action {
         val pos: Vector
-        fun costFrom(before: Vector): Int
+        fun costFrom(before: Vector, hasGoals: Boolean): Int
     }
+
     data class Move(override val pos: Vector): Action {
-        override fun costFrom(before: Vector): Int =
+        override fun costFrom(before: Vector, hasGoals: Boolean): Int =
                 before.distance(pos).toInt()
     }
+
     data class AcceptGoal(val goal: Memory): Action {
         override val pos: Vector
         get() = goal.pos
 
-        override fun costFrom(before: Vector): Int =
+        override fun costFrom(before: Vector, hasGoals: Boolean): Int =
                 before.distance(pos).toInt() + goalCost(goal)
+    }
+
+    data class Explore(override val pos: Vector): Action {
+        override fun costFrom(before: Vector, hasGoals: Boolean): Int =
+            before.distance(pos).toInt() + if (hasGoals) 800 else 0
     }
 
     var path = listOf<Vector>()
@@ -82,23 +89,35 @@ class PathFinder(val store: SpatialMap<Memory>) {
     fun nextWaypoint(current: Vector): Vector? {
         val tile = (current / 16) * 16 + Vector(8,8)
 
-        if (goals.isEmpty()) {
-            return null
-        }
-
-        if (tile !in path) {
+        if (!(tile in path && pathClear())) {
             path = findPath(tile)
         }
 
-        val nextInd = path.indexOf(tile)+1
-        return if (nextInd == path.size) { tile } else { path[nextInd] }
+        val nextInd = path.lastIndexOf(tile)+1
+        if (nextInd < path.size) {
+            return path[nextInd]
+        } else if (goals.isEmpty()) {
+            path = findPath(tile)
+            return path[1]
+        } else {
+            return tile
+        }
     }
 
     fun tileClear(pos: Vector): Boolean =
             !store.retrieveMatching(Filter { it.pos == pos && it.entity.solid }).any()
 
+    fun tileExplorable(pos: Vector): Boolean {
+        val tiles = store.retrieveMatching(AreaFilter { Box(pos, pos, padding = 40) })
+        return (!tiles.any { it.pos == pos && it.entity.r == Vector(8,8) })
+                && tiles.count { it.entity != Entity.WATER } > 4
+    }
+
+    fun pathClear(): Boolean =
+            path.all { tileClear(it) }
+
     fun computeHeuristic(pos: Vector): Float =
-        goals.map { (k, v) -> k.distance(pos) + goalCost(v) }.min()!!
+        goals.map { (k, v) -> k.distance(pos) + goalCost(v) }.min() ?: 0f
 
     fun findPath(start: Vector): List<Vector> {
         val frontier = PriorityQueue<Pair<Action, Float>>(compareBy { it.second })
@@ -119,11 +138,15 @@ class PathFinder(val store: SpatialMap<Memory>) {
                         nextAtions.add(AcceptGoal(goals[current]!!))
                     }
 
+                    if (tileExplorable(current)) {
+                        nextAtions.add(Explore(current))
+                    }
+
                     nextAtions.addAll(Direction.values().map { it.vector*16 + current }
                             .filter { tileClear(it) }.map { Move(it) })
 
                     nextAtions.forEach { next ->
-                        val newDist = dists[currentAction]!! + next.costFrom(current)
+                        val newDist = dists[currentAction]!! + next.costFrom(current, goals.isNotEmpty())
                         if (dists[next]?.let { newDist < it } != false) {
                             cameFrom[next] = current
                             dists[next] = newDist
@@ -142,6 +165,11 @@ class PathFinder(val store: SpatialMap<Memory>) {
 
                 is AcceptGoal -> {
                     chosenGoal = currentAction.goal
+                    return buildPath(currentAction, cameFrom)
+                }
+
+                is Explore -> {
+                    chosenGoal = null
                     return buildPath(currentAction, cameFrom)
                 }
             }
