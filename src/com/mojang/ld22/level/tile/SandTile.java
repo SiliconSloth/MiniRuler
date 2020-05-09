@@ -13,12 +13,15 @@ import com.mojang.ld22.item.ToolType;
 import com.mojang.ld22.item.resource.Resource;
 import com.mojang.ld22.level.Level;
 
+import java.util.Random;
+
 public class SandTile extends Tile {
 	public SandTile(int id) {
 		super(id);
 		connectsToSand = true;
 	}
 
+	@Override
 	public void render(Screen screen, Level level, int x, int y) {
 		int col = Color.get(level.sandColor + 2, level.sandColor, level.sandColor - 110, level.sandColor - 110);
 		int transitionColor = Color.get(level.sandColor - 110, level.sandColor, level.sandColor - 110, level.dirtColor);
@@ -57,24 +60,27 @@ public class SandTile extends Tile {
 			screen.render(x * 16 + 8, y * 16 + 8, (r ? 13 : 12) + (d ? 2 : 1) * 32, transitionColor, 0);
 	}
 
-	public void tick(Level level, int x, int y) {
+	@Override
+	public void tick(Level level, int x, int y, Random random) {
 		int d = level.getData(x, y);
 		if (d > 0) level.setData(x, y, d - 1);
 	}
 
-	public void steppedOn(Level level, int x, int y, Entity entity) {
+	@Override
+	public void steppedOn(Level level, int x, int y, Entity entity, Random random) {
 		if (entity instanceof Mob) {
 			level.setData(x, y, 10);
 		}
 	}
 
-	public boolean interact(Level level, int xt, int yt, Player player, Item item, int attackDir) {
+	@Override
+	public boolean interact(Level level, int xt, int yt, Player player, Item item, int attackDir, Random random) {
 		if (item instanceof ToolItem) {
 			ToolItem tool = (ToolItem) item;
 			if (tool.type == ToolType.shovel) {
 				if (player.payStamina(4 - tool.level)) {
 					level.setTile(xt, yt, Tile.dirt, 0);
-					level.add(new ItemEntity(new ResourceItem(Resource.sand), xt * 16 + random.nextInt(10) + 3, yt * 16 + random.nextInt(10) + 3));
+					level.add(new ItemEntity(new ResourceItem(Resource.sand), xt * 16 + random.nextInt(10) + 3, yt * 16 + random.nextInt(10) + 3, random));
 					return true;
 				}
 			}

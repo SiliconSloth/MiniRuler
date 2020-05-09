@@ -8,6 +8,8 @@ import com.mojang.ld22.level.Level;
 import com.mojang.ld22.level.tile.Tile;
 import com.mojang.ld22.screen.ListItem;
 
+import java.util.Random;
+
 public class Item implements ListItem {
 	public int getColor() {
 		return 0;
@@ -30,7 +32,7 @@ public class Item implements ListItem {
 	public void renderIcon(Screen screen, int x, int y) {
 	}
 
-	public boolean interactOn(Tile tile, Level level, int xt, int yt, Player player, int attackDir) {
+	public boolean interactOn(Tile tile, Level level, int xt, int yt, Player player, int attackDir, Random random) {
 		return false;
 	}
 	

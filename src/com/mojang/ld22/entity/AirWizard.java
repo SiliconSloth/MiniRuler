@@ -6,6 +6,8 @@ import com.mojang.ld22.item.ResourceItem;
 import com.mojang.ld22.item.resource.Resource;
 import com.mojang.ld22.sound.Sound;
 
+import java.util.Random;
+
 public class AirWizard extends Mob {
 	private int xa, ya;
 	private int randomWalkTime = 0;
@@ -13,14 +15,15 @@ public class AirWizard extends Mob {
 	private int attackTime = 0;
 	private int attackType = 0;
 
-	public AirWizard() {
+	public AirWizard(Random random) {
 		x = random.nextInt(64 * 16);
 		y = random.nextInt(64 * 16);
 		health = maxHealth = 2000;
 	}
 
-	public void tick() {
-		super.tick();
+	@Override
+	public void tick(Random random) {
+		super.tick(random);
 
 		if (attackDelay > 0) {
 			dir = (attackDelay - 45) / 4 % 4;
@@ -42,7 +45,7 @@ public class AirWizard extends Mob {
 			attackTime--;
 			double dir = attackTime * 0.25 * (attackTime % 2 * 2 - 1);
 			double speed = (0.7) + attackType * 0.2;
-			level.add(new Spark(this, Math.cos(dir) * speed, Math.sin(dir) * speed));
+			level.add(new Spark(this, Math.cos(dir) * speed, Math.sin(dir) * speed, random));
 			return;
 		}
 
@@ -67,7 +70,7 @@ public class AirWizard extends Mob {
 		}
 
 		int speed = (tickTime % 4) == 0 ? 0 : 1;
-		if (!move(xa * speed, ya * speed) || random.nextInt(100) == 0) {
+		if (!move(xa * speed, ya * speed, random) || random.nextInt(100) == 0) {
 			randomWalkTime = 30;
 			xa = (random.nextInt(3) - 1);
 			ya = (random.nextInt(3) - 1);
@@ -86,14 +89,16 @@ public class AirWizard extends Mob {
 		}
 	}
 
-	protected void doHurt(int damage, int attackDir) {
-		super.doHurt(damage, attackDir);
+	@Override
+	protected void doHurt(int damage, int attackDir, Random random) {
+		super.doHurt(damage, attackDir, random);
 		if (attackDelay == 0 && attackTime == 0) {
 			attackDelay = 60 * 2;
 		}
 	}
 
-	public void render(Screen screen) {
+	@Override
+	public void render(Screen screen, Random random) {
 		int xt = 8;
 		int yt = 14;
 
@@ -140,14 +145,16 @@ public class AirWizard extends Mob {
 		screen.render(xo + 8 - 8 * flip2, yo + 8, xt + 1 + (yt + 1) * 32, col2, flip2);
 	}
 
-	protected void touchedBy(Entity entity) {
+	@Override
+	protected void touchedBy(Entity entity, Random random) {
 		if (entity instanceof Player) {
-			entity.hurt(this, 3, dir);
+			entity.hurt(this, 3, dir, random);
 		}
 	}
 
-	protected void die() {
-		super.die();
+	@Override
+	protected void die(Random random) {
+		super.die(random);
 		if (level.player != null) {
 			level.player.score += 1000;
 			level.player.gameWon();

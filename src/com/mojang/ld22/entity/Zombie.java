@@ -5,12 +5,14 @@ import com.mojang.ld22.gfx.Screen;
 import com.mojang.ld22.item.ResourceItem;
 import com.mojang.ld22.item.resource.Resource;
 
+import java.util.Random;
+
 public class Zombie extends Mob {
 	private int xa, ya;
 	private int lvl;
 	private int randomWalkTime = 0;
 
-	public Zombie(int lvl) {
+	public Zombie(int lvl, Random random) {
 		this.lvl = lvl;
 		x = random.nextInt(64 * 16);
 		y = random.nextInt(64 * 16);
@@ -18,8 +20,9 @@ public class Zombie extends Mob {
 
 	}
 
-	public void tick() {
-		super.tick();
+	@Override
+	public void tick(Random random) {
+		super.tick(random);
 
 		if (level.player != null && randomWalkTime == 0) {
 			int xd = level.player.x - x;
@@ -35,7 +38,7 @@ public class Zombie extends Mob {
 		}
 
 		int speed = tickTime & 1;
-		if (!move(xa * speed, ya * speed) || random.nextInt(200) == 0) {
+		if (!move(xa * speed, ya * speed, random) || random.nextInt(200) == 0) {
 			randomWalkTime = 60;
 			xa = (random.nextInt(3) - 1) * random.nextInt(2);
 			ya = (random.nextInt(3) - 1) * random.nextInt(2);
@@ -43,7 +46,8 @@ public class Zombie extends Mob {
 		if (randomWalkTime > 0) randomWalkTime--;
 	}
 
-	public void render(Screen screen) {
+	@Override
+	public void render(Screen screen, Random random) {
 		int xt = 0;
 		int yt = 14;
 
@@ -80,18 +84,20 @@ public class Zombie extends Mob {
 		screen.render(xo + 8 - 8 * flip2, yo + 8, xt + 1 + (yt + 1) * 32, col, flip2);
 	}
 
-	protected void touchedBy(Entity entity) {
+	@Override
+	protected void touchedBy(Entity entity, Random random) {
 		if (entity instanceof Player) {
-			entity.hurt(this, lvl + 1, dir);
+			entity.hurt(this, lvl + 1, dir, random);
 		}
 	}
 
-	protected void die() {
-		super.die();
+	@Override
+	protected void die(Random random) {
+		super.die(random);
 
 		int count = random.nextInt(2) + 1;
 		for (int i = 0; i < count; i++) {
-			level.add(new ItemEntity(new ResourceItem(Resource.cloth), x + random.nextInt(11) - 5, y + random.nextInt(11) - 5));
+			level.add(new ItemEntity(new ResourceItem(Resource.cloth), x + random.nextInt(11) - 5, y + random.nextInt(11) - 5, random));
 		}
 
 		if (level.player != null) {

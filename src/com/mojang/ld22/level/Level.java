@@ -14,7 +14,7 @@ import com.mojang.ld22.level.levelgen.LevelGen;
 import com.mojang.ld22.level.tile.Tile;
 
 public class Level {
-	private Random random = new Random();
+	private final Random random;
 
 	public int w, h;
 
@@ -39,25 +39,26 @@ public class Level {
 	};
 
 	@SuppressWarnings("unchecked")
-	public Level(int w, int h, int level, Level parentLevel) {
+	public Level(int w, int h, int level, Level parentLevel, Random random) {
 		if (level < 0) {
 			dirtColor = 222;
 		}
 		this.depth = level;
 		this.w = w;
 		this.h = h;
+		this.random = random;
 		byte[][] maps;
 
 		if (level == 1) {
 			dirtColor = 444;
 		}
 		if (level == 0)
-			maps = LevelGen.createAndValidateTopMap(w, h);
+			maps = LevelGen.createAndValidateTopMap(w, h, random);
 		else if (level < 0) {
-			maps = LevelGen.createAndValidateUndergroundMap(w, h, -level);
+			maps = LevelGen.createAndValidateUndergroundMap(w, h, -level, random);
 			monsterDensity = 4;
 		} else {
-			maps = LevelGen.createAndValidateSkyMap(w, h); // Sky level
+			maps = LevelGen.createAndValidateSkyMap(w, h, random); // Sky level
 			monsterDensity = 4;
 		}
 
@@ -100,7 +101,7 @@ public class Level {
 		}
 		
 		if (level==1) {
-			AirWizard aw = new AirWizard();
+			AirWizard aw = new AirWizard(random);
 			aw.x = w*8;
 			aw.y = h*8;
 			add(aw);
@@ -188,7 +189,7 @@ public class Level {
 	private void sortAndRender(Screen screen, List<Entity> list) {
 		Collections.sort(list, spriteSorter);
 		for (int i = 0; i < list.size(); i++) {
-			list.get(i).render(screen);
+			list.get(i).render(screen, random);
 		}
 	}
 
@@ -256,11 +257,11 @@ public class Level {
 
 			int lvl = random.nextInt(maxLevel - minLevel + 1) + minLevel;
 			if (random.nextInt(2) == 0)
-				mob = new Slime(lvl);
+				mob = new Slime(lvl, random);
 			else
-				mob = new Zombie(lvl);
+				mob = new Zombie(lvl, random);
 
-			if (mob.findStartPos(this)) {
+			if (mob.findStartPos(this, random)) {
 				this.add(mob);
 			}
 		}
@@ -272,14 +273,14 @@ public class Level {
 		for (int i = 0; i < w * h / 50; i++) {
 			int xt = random.nextInt(w);
 			int yt = random.nextInt(w);
-			getTile(xt, yt).tick(this, xt, yt);
+			getTile(xt, yt).tick(this, xt, yt, random);
 		}
 		for (int i = 0; i < entities.size(); i++) {
 			Entity e = entities.get(i);
 			int xto = e.x >> 4;
 			int yto = e.y >> 4;
 
-			e.tick();
+			e.tick(random);
 
 			if (e.removed) {
 				entities.remove(i--);

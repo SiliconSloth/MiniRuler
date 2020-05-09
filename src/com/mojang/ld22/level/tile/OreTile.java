@@ -15,6 +15,8 @@ import com.mojang.ld22.item.ToolType;
 import com.mojang.ld22.item.resource.Resource;
 import com.mojang.ld22.level.Level;
 
+import java.util.Random;
+
 public class OreTile extends Tile {
 	private Resource toDrop;
 	private int color;
@@ -25,6 +27,7 @@ public class OreTile extends Tile {
 		this.color = toDrop.color & 0xffff00;
 	}
 
+	@Override
 	public void render(Screen screen, Level level, int x, int y) {
 		color = (toDrop.color & 0xffffff00) + Color.get(level.dirtColor);
 		screen.render(x * 16 + 0, y * 16 + 0, 17 + 1 * 32, color, 0);
@@ -33,20 +36,23 @@ public class OreTile extends Tile {
 		screen.render(x * 16 + 8, y * 16 + 8, 18 + 2 * 32, color, 0);
 	}
 
+	@Override
 	public boolean mayPass(Level level, int x, int y, Entity e) {
 		return false;
 	}
 
-	public void hurt(Level level, int x, int y, Mob source, int dmg, int attackDir) {
-		hurt(level, x, y, 0);
+	@Override
+	public void hurt(Level level, int x, int y, Mob source, int dmg, int attackDir, Random random) {
+		hurt(level, x, y, 0, random);
 	}
 
-	public boolean interact(Level level, int xt, int yt, Player player, Item item, int attackDir) {
+	@Override
+	public boolean interact(Level level, int xt, int yt, Player player, Item item, int attackDir, Random random) {
 		if (item instanceof ToolItem) {
 			ToolItem tool = (ToolItem) item;
 			if (tool.type == ToolType.pickaxe) {
 				if (player.payStamina(6 - tool.level)) {
-					hurt(level, xt, yt, 1);
+					hurt(level, xt, yt, 1, random);
 					return true;
 				}
 			}
@@ -54,10 +60,10 @@ public class OreTile extends Tile {
 		return false;
 	}
 
-	public void hurt(Level level, int x, int y, int dmg) {
+	public void hurt(Level level, int x, int y, int dmg, Random random) {
 		int damage = level.getData(x, y) + 1;
 		level.add(new SmashParticle(x * 16 + 8, y * 16 + 8));
-		level.add(new TextParticle("" + dmg, x * 16 + 8, y * 16 + 8, Color.get(-1, 500, 500, 500)));
+		level.add(new TextParticle("" + dmg, x * 16 + 8, y * 16 + 8, Color.get(-1, 500, 500, 500), random));
 		if (dmg > 0) {
 			int count = random.nextInt(2);
 			if (damage >= random.nextInt(10) + 3) {
@@ -67,12 +73,13 @@ public class OreTile extends Tile {
 				level.setData(x, y, damage);
 			}
 			for (int i = 0; i < count; i++) {
-				level.add(new ItemEntity(new ResourceItem(toDrop), x * 16 + random.nextInt(10) + 3, y * 16 + random.nextInt(10) + 3));
+				level.add(new ItemEntity(new ResourceItem(toDrop), x * 16 + random.nextInt(10) + 3, y * 16 + random.nextInt(10) + 3, random));
 			}
 		}
 	}
 
-	public void bumpedInto(Level level, int x, int y, Entity entity) {
-		entity.hurt(this, x, y, 3);
+	@Override
+	public void bumpedInto(Level level, int x, int y, Entity entity, Random random) {
+		entity.hurt(this, x, y, 3, random);
 	}
 }

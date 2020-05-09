@@ -12,12 +12,15 @@ import com.mojang.ld22.item.resource.Resource;
 import com.mojang.ld22.level.Level;
 import com.mojang.ld22.sound.Sound;
 
+import java.util.Random;
+
 public class GrassTile extends Tile {
 	public GrassTile(int id) {
 		super(id);
 		connectsToGrass = true;
 	}
 
+	@Override
 	public void render(Screen screen, Level level, int x, int y) {
 		int col = Color.get(level.grassColor, level.grassColor, level.grassColor + 111, level.grassColor + 111);
 		int transitionColor = Color.get(level.grassColor - 111, level.grassColor, level.grassColor + 111, level.dirtColor);
@@ -47,7 +50,8 @@ public class GrassTile extends Tile {
 			screen.render(x * 16 + 8, y * 16 + 8, (r ? 13 : 12) + (d ? 2 : 1) * 32, transitionColor, 0);
 	}
 
-	public void tick(Level level, int xt, int yt) {
+	@Override
+	public void tick(Level level, int xt, int yt, Random random) {
 		if (random.nextInt(40) != 0) return;
 
 		int xn = xt;
@@ -63,7 +67,8 @@ public class GrassTile extends Tile {
 		}
 	}
 
-	public boolean interact(Level level, int xt, int yt, Player player, Item item, int attackDir) {
+	@Override
+	public boolean interact(Level level, int xt, int yt, Player player, Item item, int attackDir, Random random) {
 		if (item instanceof ToolItem) {
 			ToolItem tool = (ToolItem) item;
 			if (tool.type == ToolType.shovel) {
@@ -71,7 +76,7 @@ public class GrassTile extends Tile {
 					level.setTile(xt, yt, Tile.dirt, 0);
 					Sound.monsterHurt.play();
 					if (random.nextInt(5) == 0) {
-						level.add(new ItemEntity(new ResourceItem(Resource.seeds), xt * 16 + random.nextInt(10) + 3, yt * 16 + random.nextInt(10) + 3));
+						level.add(new ItemEntity(new ResourceItem(Resource.seeds), xt * 16 + random.nextInt(10) + 3, yt * 16 + random.nextInt(10) + 3, random));
 						return true;
 					}
 				}
@@ -80,7 +85,7 @@ public class GrassTile extends Tile {
 				if (player.payStamina(4 - tool.level)) {
 					Sound.monsterHurt.play();
 					if (random.nextInt(5) == 0) {
-						level.add(new ItemEntity(new ResourceItem(Resource.seeds), xt * 16 + random.nextInt(10) + 3, yt * 16 + random.nextInt(10) + 3));
+						level.add(new ItemEntity(new ResourceItem(Resource.seeds), xt * 16 + random.nextInt(10) + 3, yt * 16 + random.nextInt(10) + 3, random));
 						return true;
 					}
 					level.setTile(xt, yt, Tile.farmland, 0);

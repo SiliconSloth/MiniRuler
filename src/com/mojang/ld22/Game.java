@@ -105,15 +105,15 @@ public class Game extends Canvas implements Runnable {
 		levels = new Level[5];
 		currentLevel = 3;
 
-		levels[4] = new Level(128, 128, 1, null);
-		levels[3] = new Level(128, 128, 0, levels[4]);
-		levels[2] = new Level(128, 128, -1, levels[3]);
-		levels[1] = new Level(128, 128, -2, levels[2]);
-		levels[0] = new Level(128, 128, -3, levels[1]);
+		levels[4] = new Level(128, 128, 1, null, random);
+		levels[3] = new Level(128, 128, 0, levels[4], random);
+		levels[2] = new Level(128, 128, -1, levels[3], random);
+		levels[1] = new Level(128, 128, -2, levels[2], random);
+		levels[0] = new Level(128, 128, -3, levels[1], random);
 
 		level = levels[currentLevel];
 		player = new Player(this);
-		player.findStartPos(level);
+		player.findStartPos(level, random);
 
 //		for (int y = 0; y < 128; y++) {
 //			for (int x = 0; x < 128; x++) {

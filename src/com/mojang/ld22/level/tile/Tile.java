@@ -12,7 +12,6 @@ import com.mojang.ld22.level.Level;
 
 public class Tile {
 	public static int tickCount = 0;
-	protected Random random = new Random();
 
 	public static Tile[] tiles = new Tile[256];
 	public static Tile grass = new GrassTile(0);
@@ -63,19 +62,19 @@ public class Tile {
 		return 0;
 	}
 
-	public void hurt(Level level, int x, int y, Mob source, int dmg, int attackDir) {
+	public void hurt(Level level, int x, int y, Mob source, int dmg, int attackDir, Random random) {
 	}
 
-	public void bumpedInto(Level level, int xt, int yt, Entity entity) {
+	public void bumpedInto(Level level, int xt, int yt, Entity entity, Random random) {
 	}
 
-	public void tick(Level level, int xt, int yt) {
+	public void tick(Level level, int xt, int yt, Random random) {
 	}
 
-	public void steppedOn(Level level, int xt, int yt, Entity entity) {
+	public void steppedOn(Level level, int xt, int yt, Entity entity, Random random) {
 	}
 
-	public boolean interact(Level level, int xt, int yt, Player player, Item item, int attackDir) {
+	public boolean interact(Level level, int xt, int yt, Player player, Item item, int attackDir, Random random) {
 		return false;
 	}
 

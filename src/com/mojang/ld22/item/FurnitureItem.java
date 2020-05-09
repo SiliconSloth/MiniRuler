@@ -9,6 +9,8 @@ import com.mojang.ld22.gfx.Screen;
 import com.mojang.ld22.level.Level;
 import com.mojang.ld22.level.tile.Tile;
 
+import java.util.Random;
+
 public class FurnitureItem extends Item {
 	public Furniture furniture;
 	public boolean placed = false;
@@ -41,7 +43,8 @@ public class FurnitureItem extends Item {
 		return false;
 	}
 
-	public boolean interactOn(Tile tile, Level level, int xt, int yt, Player player, int attackDir) {
+	@Override
+	public boolean interactOn(Tile tile, Level level, int xt, int yt, Player player, int attackDir, Random random) {
 		if (tile.mayPass(level, xt, yt, furniture)) {
 			furniture.x = xt * 16 + 8;
 			furniture.y = yt * 16 + 8;

@@ -5,23 +5,26 @@ import com.mojang.ld22.gfx.Screen;
 import com.mojang.ld22.item.ResourceItem;
 import com.mojang.ld22.item.resource.Resource;
 
+import java.util.Random;
+
 public class Slime extends Mob {
 	private int xa, ya;
 	private int jumpTime = 0;
 	private int lvl;
 
-	public Slime(int lvl) {
+	public Slime(int lvl, Random random) {
 		this.lvl = lvl;
 		x = random.nextInt(64 * 16);
 		y = random.nextInt(64 * 16);
 		health = maxHealth = lvl * lvl * 5;
 	}
 
-	public void tick() {
-		super.tick();
+	@Override
+	public void tick(Random random) {
+		super.tick(random);
 
 		int speed = 1;
-		if (!move(xa * speed, ya * speed) || random.nextInt(40) == 0) {
+		if (!move(xa * speed, ya * speed, random) || random.nextInt(40) == 0) {
 			if (jumpTime <= -10) {
 				xa = (random.nextInt(3) - 1);
 				ya = (random.nextInt(3) - 1);
@@ -48,12 +51,13 @@ public class Slime extends Mob {
 		}
 	}
 
-	protected void die() {
-		super.die();
+	@Override
+	protected void die(Random random) {
+		super.die(random);
 
 		int count = random.nextInt(2) + 1;
 		for (int i = 0; i < count; i++) {
-			level.add(new ItemEntity(new ResourceItem(Resource.slime), x + random.nextInt(11) - 5, y + random.nextInt(11) - 5));
+			level.add(new ItemEntity(new ResourceItem(Resource.slime), x + random.nextInt(11) - 5, y + random.nextInt(11) - 5, random));
 		}
 
 		if (level.player != null) {
@@ -62,7 +66,8 @@ public class Slime extends Mob {
 		
 	}
 
-	public void render(Screen screen) {
+	@Override
+	public void render(Screen screen, Random random) {
 		int xt = 0;
 		int yt = 18;
 
@@ -89,9 +94,10 @@ public class Slime extends Mob {
 		screen.render(xo + 8, yo + 8, xt + 1 + (yt + 1) * 32, col, 0);
 	}
 
-	protected void touchedBy(Entity entity) {
+	@Override
+	protected void touchedBy(Entity entity, Random random) {
 		if (entity instanceof Player) {
-			entity.hurt(this, lvl, dir);
+			entity.hurt(this, lvl, dir, random);
 		}
 	}
 }

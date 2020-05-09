@@ -5,6 +5,8 @@ import com.mojang.ld22.gfx.Screen;
 import com.mojang.ld22.item.Item;
 import com.mojang.ld22.sound.Sound;
 
+import java.util.Random;
+
 public class ItemEntity extends Entity {
 	private int lifeTime;
 	protected int walkDist = 0;
@@ -16,7 +18,7 @@ public class ItemEntity extends Entity {
 	public Item item;
 	private int time = 0;
 
-	public ItemEntity(Item item, int x, int y) {
+	public ItemEntity(Item item, int x, int y, Random random) {
 		this.item = item;
 		xx = this.x = x;
 		yy = this.y = y;
@@ -31,7 +33,8 @@ public class ItemEntity extends Entity {
 		lifeTime = 60 * 10 + random.nextInt(60);
 	}
 
-	public void tick() {
+	@Override
+	public void tick(Random random) {
 		time++;
 		if (time >= lifeTime) {
 			remove();
@@ -53,7 +56,7 @@ public class ItemEntity extends Entity {
 		int ny = (int) yy;
 		int expectedx = nx - x;
 		int expectedy = ny - y;
-		move(nx - x, ny - y);
+		move(nx - x, ny - y, random);
 		int gotx = x - ox;
 		int goty = y - oy;
 		xx += gotx - expectedx;
@@ -62,11 +65,13 @@ public class ItemEntity extends Entity {
 		if (hurtTime > 0) hurtTime--;
 	}
 
+	@Override
 	public boolean isBlockableBy(Mob mob) {
 		return false;
 	}
 
-	public void render(Screen screen) {
+	@Override
+	public void render(Screen screen, Random random) {
 		if (time >= lifeTime - 6 * 20) {
 			if (time / 6 % 2 == 0) return;
 		}
@@ -74,7 +79,8 @@ public class ItemEntity extends Entity {
 		screen.render(x - 4, y - 4 - (int) (zz), item.getSprite(), item.getColor(), 0);
 	}
 
-	protected void touchedBy(Entity entity) {
+	@Override
+	protected void touchedBy(Entity entity, Random random) {
 		if (time > 30) entity.touchItem(this);
 	}
 

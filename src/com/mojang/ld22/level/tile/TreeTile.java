@@ -15,12 +15,15 @@ import com.mojang.ld22.item.ToolType;
 import com.mojang.ld22.item.resource.Resource;
 import com.mojang.ld22.level.Level;
 
+import java.util.Random;
+
 public class TreeTile extends Tile {
 	public TreeTile(int id) {
 		super(id);
 		connectsToGrass = true;
 	}
 
+	@Override
 	public void render(Screen screen, Level level, int x, int y) {
 		int col = Color.get(10, 30, 151, level.grassColor);
 		int barkCol1 = Color.get(10, 30, 430, level.grassColor);
@@ -57,25 +60,29 @@ public class TreeTile extends Tile {
 		}
 	}
 
-	public void tick(Level level, int xt, int yt) {
+	@Override
+	public void tick(Level level, int xt, int yt, Random random) {
 		int damage = level.getData(xt, yt);
 		if (damage > 0) level.setData(xt, yt, damage - 1);
 	}
 
+	@Override
 	public boolean mayPass(Level level, int x, int y, Entity e) {
 		return false;
 	}
 
-	public void hurt(Level level, int x, int y, Mob source, int dmg, int attackDir) {
-		hurt(level, x, y, dmg);
+	@Override
+	public void hurt(Level level, int x, int y, Mob source, int dmg, int attackDir, Random random) {
+		hurt(level, x, y, dmg, random);
 	}
 
-	public boolean interact(Level level, int xt, int yt, Player player, Item item, int attackDir) {
+	@Override
+	public boolean interact(Level level, int xt, int yt, Player player, Item item, int attackDir, Random random) {
 		if (item instanceof ToolItem) {
 			ToolItem tool = (ToolItem) item;
 			if (tool.type == ToolType.axe) {
 				if (player.payStamina(4 - tool.level)) {
-					hurt(level, xt, yt, random.nextInt(10) + (tool.level) * 5 + 10);
+					hurt(level, xt, yt, random.nextInt(10) + (tool.level) * 5 + 10, random);
 					return true;
 				}
 			}
@@ -83,24 +90,24 @@ public class TreeTile extends Tile {
 		return false;
 	}
 
-	private void hurt(Level level, int x, int y, int dmg) {
+	private void hurt(Level level, int x, int y, int dmg, Random random) {
 		{
 			int count = random.nextInt(10) == 0 ? 1 : 0;
 			for (int i = 0; i < count; i++) {
-				level.add(new ItemEntity(new ResourceItem(Resource.apple), x * 16 + random.nextInt(10) + 3, y * 16 + random.nextInt(10) + 3));
+				level.add(new ItemEntity(new ResourceItem(Resource.apple), x * 16 + random.nextInt(10) + 3, y * 16 + random.nextInt(10) + 3, random));
 			}
 		}
 		int damage = level.getData(x, y) + dmg;
 		level.add(new SmashParticle(x * 16 + 8, y * 16 + 8));
-		level.add(new TextParticle("" + dmg, x * 16 + 8, y * 16 + 8, Color.get(-1, 500, 500, 500)));
+		level.add(new TextParticle("" + dmg, x * 16 + 8, y * 16 + 8, Color.get(-1, 500, 500, 500), random));
 		if (damage >= 20) {
 			int count = random.nextInt(2) + 1;
 			for (int i = 0; i < count; i++) {
-				level.add(new ItemEntity(new ResourceItem(Resource.wood), x * 16 + random.nextInt(10) + 3, y * 16 + random.nextInt(10) + 3));
+				level.add(new ItemEntity(new ResourceItem(Resource.wood), x * 16 + random.nextInt(10) + 3, y * 16 + random.nextInt(10) + 3, random));
 			}
 			count = random.nextInt(random.nextInt(4) + 1);
 			for (int i = 0; i < count; i++) {
-				level.add(new ItemEntity(new ResourceItem(Resource.acorn), x * 16 + random.nextInt(10) + 3, y * 16 + random.nextInt(10) + 3));
+				level.add(new ItemEntity(new ResourceItem(Resource.acorn), x * 16 + random.nextInt(10) + 3, y * 16 + random.nextInt(10) + 3, random));
 			}
 			level.setTile(x, y, Tile.grass, 0);
 		} else {

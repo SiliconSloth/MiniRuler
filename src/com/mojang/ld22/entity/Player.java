@@ -1,19 +1,15 @@
 package com.mojang.ld22.entity;
 
 import java.util.List;
+import java.util.Random;
 
 import com.mojang.ld22.Game;
-import com.mojang.ld22.InputHandler;
 import com.mojang.ld22.entity.particle.TextParticle;
 import com.mojang.ld22.gfx.Color;
 import com.mojang.ld22.gfx.Screen;
 import com.mojang.ld22.item.FurnitureItem;
 import com.mojang.ld22.item.Item;
 import com.mojang.ld22.item.PowerGloveItem;
-import com.mojang.ld22.item.ResourceItem;
-import com.mojang.ld22.item.ToolItem;
-import com.mojang.ld22.item.ToolType;
-import com.mojang.ld22.item.resource.Resource;
 import com.mojang.ld22.level.Level;
 import com.mojang.ld22.level.tile.Tile;
 import com.mojang.ld22.screen.InventoryMenu;
@@ -55,8 +51,9 @@ public class Player extends Mob {
 		}
 	}
 
-	public void tick() {
-		super.tick();
+	@Override
+	public void tick(Random random) {
+		super.tick(random);
 
 		if (invulnerableTime > 0) invulnerableTime--;
 		Tile onTile = level.getTile(x >> 4, y >> 4);
@@ -100,12 +97,12 @@ public class Player extends Mob {
 			if (stamina > 0) {
 				stamina--;
 			} else {
-				hurt(this, 1, dir ^ 1);
+				hurt(this, 1, dir ^ 1, random);
 			}
 		}
 
 		if (staminaRechargeDelay % 2 == 0) {
-			move(xa, ya);
+			move(xa, ya, random);
 		}
 
 		if (game.getInput().attack.clicked) {
@@ -114,7 +111,7 @@ public class Player extends Mob {
 			} else {
 				stamina--;
 				staminaRecharge = 0;
-				attack();
+				attack(random);
 			}
 		}
 		if (game.getInput().menu.clicked) {
@@ -148,7 +145,7 @@ public class Player extends Mob {
 		return false;
 	}
 
-	private void attack() {
+	private void attack(Random random) {
 		walkDist += 8;
 		attackDir = dir;
 		attackItem = activeItem;
@@ -173,10 +170,10 @@ public class Player extends Mob {
 			if (attackDir == 3) xt = (x + r) >> 4;
 
 			if (xt >= 0 && yt >= 0 && xt < level.w && yt < level.h) {
-				if (activeItem.interactOn(level.getTile(xt, yt), level, xt, yt, this, attackDir)) {
+				if (activeItem.interactOn(level.getTile(xt, yt), level, xt, yt, this, attackDir, random)) {
 					done = true;
 				} else {
-					if (level.getTile(xt, yt).interact(level, xt, yt, this, activeItem, attackDir)) {
+					if (level.getTile(xt, yt).interact(level, xt, yt, this, activeItem, attackDir, random)) {
 						done = true;
 					}
 				}
@@ -192,10 +189,10 @@ public class Player extends Mob {
 			attackTime = 5;
 			int yo = -2;
 			int range = 20;
-			if (dir == 0) hurt(x - 8, y + 4 + yo, x + 8, y + range + yo);
-			if (dir == 1) hurt(x - 8, y - range + yo, x + 8, y - 4 + yo);
-			if (dir == 3) hurt(x + 4, y - 8 + yo, x + range, y + 8 + yo);
-			if (dir == 2) hurt(x - range, y - 8 + yo, x - 4, y + 8 + yo);
+			if (dir == 0) hurt(x - 8, y + 4 + yo, x + 8, y + range + yo, random);
+			if (dir == 1) hurt(x - 8, y - range + yo, x + 8, y - 4 + yo, random);
+			if (dir == 3) hurt(x + 4, y - 8 + yo, x + range, y + 8 + yo, random);
+			if (dir == 2) hurt(x - range, y - 8 + yo, x - 4, y + 8 + yo, random);
 
 			int xt = x >> 4;
 			int yt = (y + yo) >> 4;
@@ -206,7 +203,7 @@ public class Player extends Mob {
 			if (attackDir == 3) xt = (x + r) >> 4;
 
 			if (xt >= 0 && yt >= 0 && xt < level.w && yt < level.h) {
-				level.getTile(xt, yt).hurt(level, xt, yt, this, random.nextInt(3) + 1, attackDir);
+				level.getTile(xt, yt).hurt(level, xt, yt, this, random.nextInt(3) + 1, attackDir, random);
 			}
 		}
 
@@ -230,15 +227,15 @@ public class Player extends Mob {
 		return false;
 	}
 
-	private void hurt(int x0, int y0, int x1, int y1) {
+	private void hurt(int x0, int y0, int x1, int y1, Random random) {
 		List<Entity> entities = level.getEntities(x0, y0, x1, y1);
 		for (int i = 0; i < entities.size(); i++) {
 			Entity e = entities.get(i);
-			if (e != this) e.hurt(this, getAttackDamage(e), attackDir);
+			if (e != this) e.hurt(this, getAttackDamage(e, random), attackDir, random);
 		}
 	}
 
-	private int getAttackDamage(Entity e) {
+	private int getAttackDamage(Entity e, Random random) {
 		int dmg = random.nextInt(3) + 1;
 		if (attackItem != null) {
 			dmg += attackItem.getAttackDamageBonus(e);
@@ -246,7 +243,8 @@ public class Player extends Mob {
 		return dmg;
 	}
 
-	public void render(Screen screen) {
+	@Override
+	public void render(Screen screen, Random random) {
 		int xt = 0;
 		int yt = 14;
 
@@ -325,21 +323,24 @@ public class Player extends Mob {
 			Furniture furniture = ((FurnitureItem) activeItem).furniture;
 			furniture.x = x;
 			furniture.y = yo;
-			furniture.render(screen);
+			furniture.render(screen, random);
 
 		}
 	}
 
+	@Override
 	public void touchItem(ItemEntity itemEntity) {
 		itemEntity.take(this);
 		inventory.add(itemEntity.item);
 	}
 
+	@Override
 	public boolean canSwim() {
 		return true;
 	}
 
-	public boolean findStartPos(Level level) {
+	@Override
+	public boolean findStartPos(Level level, Random random) {
 		while (true) {
 			int x = random.nextInt(level.w);
 			int y = random.nextInt(level.h);
@@ -361,6 +362,7 @@ public class Player extends Mob {
 		game.scheduleLevelChange(dir);
 	}
 
+	@Override
 	public int getLightRadius() {
 		int r = 2;
 		if (activeItem != null) {
@@ -372,22 +374,25 @@ public class Player extends Mob {
 		return r;
 	}
 
-	protected void die() {
-		super.die();
+	@Override
+	protected void die(Random random) {
+		super.die(random);
 		Sound.playerDeath.play();
 	}
 
-	protected void touchedBy(Entity entity) {
+	@Override
+	protected void touchedBy(Entity entity, Random random) {
 		if (!(entity instanceof Player)) {
-			entity.touchedBy(this);
+			entity.touchedBy(this, random);
 		}
 	}
 
-	protected void doHurt(int damage, int attackDir) {
+	@Override
+	protected void doHurt(int damage, int attackDir, Random random) {
 		if (hurtTime > 0 || invulnerableTime > 0) return;
 
 		Sound.playerHurt.play();
-		level.add(new TextParticle("" + damage, x, y, Color.get(-1, 504, 504, 504)));
+		level.add(new TextParticle("" + damage, x, y, Color.get(-1, 504, 504, 504), random));
 		health -= damage;
 		if (attackDir == 0) yKnockback = +6;
 		if (attackDir == 1) yKnockback = -6;

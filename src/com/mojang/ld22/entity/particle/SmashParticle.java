@@ -5,6 +5,8 @@ import com.mojang.ld22.gfx.Color;
 import com.mojang.ld22.gfx.Screen;
 import com.mojang.ld22.sound.Sound;
 
+import java.util.Random;
+
 public class SmashParticle extends Entity {
 	private int time = 0;
 
@@ -14,14 +16,16 @@ public class SmashParticle extends Entity {
 		Sound.monsterHurt.play();
 	}
 
-	public void tick() {
+	@Override
+	public void tick(Random random) {
 		time++;
 		if (time > 10) {
 			remove();
 		}
 	}
 
-	public void render(Screen screen) {
+	@Override
+	public void render(Screen screen, Random random) {
 		int col = Color.get(-1, 555, 555, 555);
 		screen.render(x - 8, y - 8, 5 + 12 * 32, col, 2);
 		screen.render(x - 0, y - 8, 5 + 12 * 32, col, 3);

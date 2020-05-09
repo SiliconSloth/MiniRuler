@@ -9,6 +9,8 @@ import com.mojang.ld22.item.resource.Resource;
 import com.mojang.ld22.level.Level;
 import com.mojang.ld22.level.tile.Tile;
 
+import java.util.Random;
+
 public class ResourceItem extends Item {
 	public Resource resource;
 	public int count = 1;
@@ -49,8 +51,9 @@ public class ResourceItem extends Item {
 	public void onTake(ItemEntity itemEntity) {
 	}
 
-	public boolean interactOn(Tile tile, Level level, int xt, int yt, Player player, int attackDir) {
-		if (resource.interactOn(tile, level, xt, yt, player, attackDir)) {
+	@Override
+	public boolean interactOn(Tile tile, Level level, int xt, int yt, Player player, int attackDir, Random random) {
+		if (resource.interactOn(tile, level, xt, yt, player, attackDir, random)) {
 			count--;
 			return true;
 		}

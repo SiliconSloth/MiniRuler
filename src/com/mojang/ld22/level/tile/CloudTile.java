@@ -12,11 +12,14 @@ import com.mojang.ld22.item.ToolType;
 import com.mojang.ld22.item.resource.Resource;
 import com.mojang.ld22.level.Level;
 
+import java.util.Random;
+
 public class CloudTile extends Tile {
 	public CloudTile(int id) {
 		super(id);
 	}
 
+	@Override
 	public void render(Screen screen, Level level, int x, int y) {
 		int col = Color.get(444, 444, 555, 555);
 		int transitionColor = Color.get(333, 444, 555, -1);
@@ -63,11 +66,13 @@ public class CloudTile extends Tile {
 			screen.render(x * 16 + 8, y * 16 + 8, (r ? 4 : 5) + (d ? 0 : 1) * 32, transitionColor, 3);
 	}
 
+	@Override
 	public boolean mayPass(Level level, int x, int y, Entity e) {
 		return true;
 	}
 
-	public boolean interact(Level level, int xt, int yt, Player player, Item item, int attackDir) {
+	@Override
+	public boolean interact(Level level, int xt, int yt, Player player, Item item, int attackDir, Random random) {
 		if (item instanceof ToolItem) {
 			ToolItem tool = (ToolItem) item;
 			if (tool.type == ToolType.shovel) {
@@ -75,7 +80,7 @@ public class CloudTile extends Tile {
 					// level.setTile(xt, yt, Tile.infiniteFall, 0);
 					int count = random.nextInt(2) + 1;
 					for (int i = 0; i < count; i++) {
-						level.add(new ItemEntity(new ResourceItem(Resource.cloud), xt * 16 + random.nextInt(10) + 3, yt * 16 + random.nextInt(10) + 3));
+						level.add(new ItemEntity(new ResourceItem(Resource.cloud), xt * 16 + random.nextInt(10) + 3, yt * 16 + random.nextInt(10) + 3, random));
 					}
 					return true;
 				}

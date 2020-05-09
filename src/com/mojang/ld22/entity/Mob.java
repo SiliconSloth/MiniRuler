@@ -6,6 +6,8 @@ import com.mojang.ld22.level.Level;
 import com.mojang.ld22.level.tile.Tile;
 import com.mojang.ld22.sound.Sound;
 
+import java.util.Random;
+
 public class Mob extends Entity {
 	protected int walkDist = 0;
 	protected int dir = 0;
@@ -26,40 +28,42 @@ public class Mob extends Entity {
 		return dir;
 	}
 
-	public void tick() {
+	@Override
+	public void tick(Random random) {
 		tickTime++;
 		if (level.getTile(x >> 4, y >> 4) == Tile.lava) {
-			hurt(this, 4, dir ^ 1);
+			hurt(this, 4, dir ^ 1, random);
 		}
 
 		if (health <= 0) {
-			die();
+			die(random);
 		}
 		if (hurtTime > 0) hurtTime--;
 	}
 
-	protected void die() {
+	protected void die(Random random) {
 		remove();
 	}
 
-	public boolean move(int xa, int ya) {
+	@Override
+	public boolean move(int xa, int ya, Random random) {
 		if (isSwimming()) {
 			if (swimTimer++ % 2 == 0) return true;
 		}
 		if (xKnockback < 0) {
-			move2(-1, 0);
+			move2(-1, 0, random);
 			xKnockback++;
 		}
 		if (xKnockback > 0) {
-			move2(1, 0);
+			move2(1, 0, random);
 			xKnockback--;
 		}
 		if (yKnockback < 0) {
-			move2(0, -1);
+			move2(0, -1, random);
 			yKnockback++;
 		}
 		if (yKnockback > 0) {
-			move2(0, 1);
+			move2(0, 1, random);
 			yKnockback--;
 		}
 		if (hurtTime > 0) return true;
@@ -70,7 +74,7 @@ public class Mob extends Entity {
 			if (ya < 0) dir = 1;
 			if (ya > 0) dir = 0;
 		}
-		return super.move(xa, ya);
+		return super.move(xa, ya, random);
 	}
 
 	protected boolean isSwimming() {
@@ -78,28 +82,31 @@ public class Mob extends Entity {
 		return tile == Tile.water || tile == Tile.lava;
 	}
 
+	@Override
 	public boolean blocks(Entity e) {
 		return e.isBlockableBy(this);
 	}
 
-	public void hurt(Tile tile, int x, int y, int damage) {
+	@Override
+	public void hurt(Tile tile, int x, int y, int damage, Random random) {
 		int attackDir = dir ^ 1;
-		doHurt(damage, attackDir);
+		doHurt(damage, attackDir, random);
 	}
 
-	public void hurt(Mob mob, int damage, int attackDir) {
-		doHurt(damage, attackDir);
+	@Override
+	public void hurt(Mob mob, int damage, int attackDir, Random random) {
+		doHurt(damage, attackDir, random);
 	}
 
-	public void heal(int heal) {
+	public void heal(int heal, Random random) {
 		if (hurtTime > 0) return;
 
-		level.add(new TextParticle("" + heal, x, y, Color.get(-1, 50, 50, 50)));
+		level.add(new TextParticle("" + heal, x, y, Color.get(-1, 50, 50, 50), random));
 		health += heal;
 		if (health > maxHealth) health = maxHealth;
 	}
 
-	protected void doHurt(int damage, int attackDir) {
+	protected void doHurt(int damage, int attackDir, Random random) {
 		if (hurtTime > 0) return;
 
 		if (level.player != null) {
@@ -109,7 +116,7 @@ public class Mob extends Entity {
 				Sound.monsterHurt.play();
 			}
 		}
-		level.add(new TextParticle("" + damage, x, y, Color.get(-1, 500, 500, 500)));
+		level.add(new TextParticle("" + damage, x, y, Color.get(-1, 500, 500, 500), random));
 		health -= damage;
 		if (attackDir == 0) yKnockback = +6;
 		if (attackDir == 1) yKnockback = -6;
@@ -118,7 +125,7 @@ public class Mob extends Entity {
 		hurtTime = 10;
 	}
 
-	public boolean findStartPos(Level level) {
+	public boolean findStartPos(Level level, Random random) {
 		int x = random.nextInt(level.w);
 		int y = random.nextInt(level.h);
 		int xx = x * 16 + 8;

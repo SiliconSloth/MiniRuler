@@ -9,17 +9,16 @@ import com.mojang.ld22.level.Level;
 import com.mojang.ld22.level.tile.Tile;
 
 public class Entity {
-	protected final Random random = new Random();
 	public int x, y;
 	public int xr = 6;
 	public int yr = 6;
 	public boolean removed;
 	public Level level;
 
-	public void render(Screen screen) {
+	public void render(Screen screen, Random random) {
 	}
 
-	public void tick() {
+	public void tick(Random random) {
 	}
 
 	public void remove() {
@@ -38,28 +37,28 @@ public class Entity {
 		return false;
 	}
 
-	public void hurt(Mob mob, int dmg, int attackDir) {
+	public void hurt(Mob mob, int dmg, int attackDir, Random random) {
 	}
 
-	public void hurt(Tile tile, int x, int y, int dmg) {
+	public void hurt(Tile tile, int x, int y, int dmg, Random random) {
 	}
 
-	public boolean move(int xa, int ya) {
+	public boolean move(int xa, int ya, Random random) {
 		if (xa != 0 || ya != 0) {
 			boolean stopped = true;
-			if (xa != 0 && move2(xa, 0)) stopped = false;
-			if (ya != 0 && move2(0, ya)) stopped = false;
+			if (xa != 0 && move2(xa, 0, random)) stopped = false;
+			if (ya != 0 && move2(0, ya, random)) stopped = false;
 			if (!stopped) {
 				int xt = x >> 4;
 				int yt = y >> 4;
-				level.getTile(xt, yt).steppedOn(level, xt, yt, this);
+				level.getTile(xt, yt).steppedOn(level, xt, yt, this, random);
 			}
 			return !stopped;
 		}
 		return true;
 	}
 
-	protected boolean move2(int xa, int ya) {
+	protected boolean move2(int xa, int ya, Random random) {
 		if (xa != 0 && ya != 0) throw new IllegalArgumentException("Move2 can only move along one axis at a time!");
 
 		int xto0 = ((x) - xr) >> 4;
@@ -75,7 +74,7 @@ public class Entity {
 		for (int yt = yt0; yt <= yt1; yt++)
 			for (int xt = xt0; xt <= xt1; xt++) {
 				if (xt >= xto0 && xt <= xto1 && yt >= yto0 && yt <= yto1) continue;
-				level.getTile(xt, yt).bumpedInto(level, xt, yt, this);
+				level.getTile(xt, yt).bumpedInto(level, xt, yt, this, random);
 				if (!level.getTile(xt, yt).mayPass(level, xt, yt, this)) {
 					blocked = true;
 					return false;
@@ -89,7 +88,7 @@ public class Entity {
 			Entity e = isInside.get(i);
 			if (e == this) continue;
 
-			e.touchedBy(this);
+			e.touchedBy(this, random);
 		}
 		isInside.removeAll(wasInside);
 		for (int i = 0; i < isInside.size(); i++) {
@@ -106,7 +105,7 @@ public class Entity {
 		return true;
 	}
 
-	protected void touchedBy(Entity entity) {
+	protected void touchedBy(Entity entity, Random random) {
 	}
 
 	public boolean isBlockableBy(Mob mob) {

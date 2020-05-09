@@ -2,10 +2,13 @@ package com.mojang.ld22.entity.particle;
 
 import com.mojang.ld22.entity.Entity;
 
+import java.util.Random;
+
 public class Particle extends Entity {
 	public Particle() {
 	}
 
-	public void tick() {
+	@Override
+	public void tick(Random random) {
 	}
 }

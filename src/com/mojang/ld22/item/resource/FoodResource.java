@@ -4,6 +4,8 @@ import com.mojang.ld22.entity.Player;
 import com.mojang.ld22.level.Level;
 import com.mojang.ld22.level.tile.Tile;
 
+import java.util.Random;
+
 public class FoodResource extends Resource {
 	private int heal;
 	private int staminaCost;
@@ -14,9 +16,10 @@ public class FoodResource extends Resource {
 		this.staminaCost = staminaCost;
 	}
 
-	public boolean interactOn(Tile tile, Level level, int xt, int yt, Player player, int attackDir) {
+	@Override
+	public boolean interactOn(Tile tile, Level level, int xt, int yt, Player player, int attackDir, Random random) {
 		if (player.health < player.maxHealth && player.payStamina(staminaCost)) {
-			player.heal(heal);
+			player.heal(heal, random);
 			return true;
 		}
 		return false;

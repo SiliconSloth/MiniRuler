@@ -15,11 +15,14 @@ import com.mojang.ld22.item.ToolType;
 import com.mojang.ld22.item.resource.Resource;
 import com.mojang.ld22.level.Level;
 
+import java.util.Random;
+
 public class RockTile extends Tile {
 	public RockTile(int id) {
 		super(id);
 	}
 
+	@Override
 	public void render(Screen screen, Level level, int x, int y) {
 		int col = Color.get(444, 444, 333, 333);
 		int transitionColor = Color.get(111, 444, 555, level.dirtColor);
@@ -66,20 +69,23 @@ public class RockTile extends Tile {
 			screen.render(x * 16 + 8, y * 16 + 8, (r ? 4 : 5) + (d ? 0 : 1) * 32, transitionColor, 3);
 	}
 
+	@Override
 	public boolean mayPass(Level level, int x, int y, Entity e) {
 		return false;
 	}
 
-	public void hurt(Level level, int x, int y, Mob source, int dmg, int attackDir) {
-		hurt(level, x, y, dmg);
+	@Override
+	public void hurt(Level level, int x, int y, Mob source, int dmg, int attackDir, Random random) {
+		hurt(level, x, y, dmg, random);
 	}
 
-	public boolean interact(Level level, int xt, int yt, Player player, Item item, int attackDir) {
+	@Override
+	public boolean interact(Level level, int xt, int yt, Player player, Item item, int attackDir, Random random) {
 		if (item instanceof ToolItem) {
 			ToolItem tool = (ToolItem) item;
 			if (tool.type == ToolType.pickaxe) {
 				if (player.payStamina(4 - tool.level)) {
-					hurt(level, xt, yt, random.nextInt(10) + (tool.level) * 5 + 10);
+					hurt(level, xt, yt, random.nextInt(10) + (tool.level) * 5 + 10, random);
 					return true;
 				}
 			}
@@ -87,18 +93,18 @@ public class RockTile extends Tile {
 		return false;
 	}
 
-	public void hurt(Level level, int x, int y, int dmg) {
+	public void hurt(Level level, int x, int y, int dmg, Random random) {
 		int damage = level.getData(x, y) + dmg;
 		level.add(new SmashParticle(x * 16 + 8, y * 16 + 8));
-		level.add(new TextParticle("" + dmg, x * 16 + 8, y * 16 + 8, Color.get(-1, 500, 500, 500)));
+		level.add(new TextParticle("" + dmg, x * 16 + 8, y * 16 + 8, Color.get(-1, 500, 500, 500), random));
 		if (damage >= 50) {
 			int count = random.nextInt(4) + 1;
 			for (int i = 0; i < count; i++) {
-				level.add(new ItemEntity(new ResourceItem(Resource.stone), x * 16 + random.nextInt(10) + 3, y * 16 + random.nextInt(10) + 3));
+				level.add(new ItemEntity(new ResourceItem(Resource.stone), x * 16 + random.nextInt(10) + 3, y * 16 + random.nextInt(10) + 3, random));
 			}
 			count = random.nextInt(2);
 			for (int i = 0; i < count; i++) {
-				level.add(new ItemEntity(new ResourceItem(Resource.coal), x * 16 + random.nextInt(10) + 3, y * 16 + random.nextInt(10) + 3));
+				level.add(new ItemEntity(new ResourceItem(Resource.coal), x * 16 + random.nextInt(10) + 3, y * 16 + random.nextInt(10) + 3, random));
 			}
 			level.setTile(x, y, Tile.dirt, 0);
 		} else {
@@ -106,7 +112,8 @@ public class RockTile extends Tile {
 		}
 	}
 
-	public void tick(Level level, int xt, int yt) {
+	@Override
+	public void tick(Level level, int xt, int yt, Random random) {
 		int damage = level.getData(xt, yt);
 		if (damage > 0) level.setData(xt, yt, damage - 1);
 	}

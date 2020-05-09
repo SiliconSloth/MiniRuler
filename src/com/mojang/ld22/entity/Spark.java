@@ -1,6 +1,7 @@
 package com.mojang.ld22.entity;
 
 import java.util.List;
+import java.util.Random;
 
 import com.mojang.ld22.gfx.Color;
 import com.mojang.ld22.gfx.Screen;
@@ -12,7 +13,7 @@ public class Spark extends Entity {
 	private int time;
 	private AirWizard owner;
 
-	public Spark(AirWizard owner, double xa, double ya) {
+	public Spark(AirWizard owner, double xa, double ya, Random random) {
 		this.owner = owner;
 		xx = this.x = owner.x;
 		yy = this.y = owner.y;
@@ -25,7 +26,8 @@ public class Spark extends Entity {
 		lifeTime = 60 * 10 + random.nextInt(30);
 	}
 
-	public void tick() {
+	@Override
+	public void tick(Random random) {
 		time++;
 		if (time >= lifeTime) {
 			remove();
@@ -39,16 +41,18 @@ public class Spark extends Entity {
 		for (int i = 0; i < toHit.size(); i++) {
 			Entity e = toHit.get(i);
 			if (e instanceof Mob && !(e instanceof AirWizard)) {
-				e.hurt(owner, 1, ((Mob) e).dir ^ 1);
+				e.hurt(owner, 1, ((Mob) e).dir ^ 1, random);
 			}
 		}
 	}
 
+	@Override
 	public boolean isBlockableBy(Mob mob) {
 		return false;
 	}
 
-	public void render(Screen screen) {
+	@Override
+	public void render(Screen screen, Random random) {
 		if (time >= lifeTime - 6 * 20) {
 			if (time / 6 % 2 == 0) return;
 		}

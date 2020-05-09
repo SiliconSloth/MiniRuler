@@ -4,6 +4,8 @@ import com.mojang.ld22.gfx.Screen;
 import com.mojang.ld22.item.FurnitureItem;
 import com.mojang.ld22.item.PowerGloveItem;
 
+import java.util.Random;
+
 public class Furniture extends Entity {
 	private int pushTime = 0;
 	private int pushDir = -1;
@@ -17,7 +19,8 @@ public class Furniture extends Entity {
 		yr = 3;
 	}
 
-	public void tick() {
+	@Override
+	public void tick(Random random) {
 		if (shouldTake != null) {
 			if (shouldTake.getActiveItem() instanceof PowerGloveItem) {
 				remove();
@@ -26,26 +29,29 @@ public class Furniture extends Entity {
 			}
 			shouldTake = null;
 		}
-		if (pushDir == 0) move(0, +1);
-		if (pushDir == 1) move(0, -1);
-		if (pushDir == 2) move(-1, 0);
-		if (pushDir == 3) move(+1, 0);
+		if (pushDir == 0) move(0, +1, random);
+		if (pushDir == 1) move(0, -1, random);
+		if (pushDir == 2) move(-1, 0, random);
+		if (pushDir == 3) move(+1, 0, random);
 		pushDir = -1;
 		if (pushTime > 0) pushTime--;
 	}
 
-	public void render(Screen screen) {
+	@Override
+	public void render(Screen screen, Random random) {
 		screen.render(x - 8, y - 8 - 4, sprite * 2 + 8 * 32, col, 0);
 		screen.render(x - 0, y - 8 - 4, sprite * 2 + 8 * 32 + 1, col, 0);
 		screen.render(x - 8, y - 0 - 4, sprite * 2 + 8 * 32 + 32, col, 0);
 		screen.render(x - 0, y - 0 - 4, sprite * 2 + 8 * 32 + 33, col, 0);
 	}
 
+	@Override
 	public boolean blocks(Entity e) {
 		return true;
 	}
 
-	protected void touchedBy(Entity entity) {
+	@Override
+	protected void touchedBy(Entity entity, Random random) {
 		if (entity instanceof Player && pushTime == 0) {
 			pushDir = ((Player) entity).dir;
 			pushTime = 10;

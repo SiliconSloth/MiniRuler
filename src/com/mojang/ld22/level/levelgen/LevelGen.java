@@ -10,13 +10,14 @@ import javax.swing.JOptionPane;
 import com.mojang.ld22.level.tile.Tile;
 
 public class LevelGen {
-	private static final Random random = new Random();
+	private final Random random;
 	public double[] values;
 	private int w, h;
 
-	public LevelGen(int w, int h, int featureSize) {
+	public LevelGen(int w, int h, int featureSize, Random random) {
 		this.w = w;
 		this.h = h;
+		this.random = random;
 
 		values = new double[w * h];
 
@@ -71,10 +72,10 @@ public class LevelGen {
 		values[(x & (w - 1)) + (y & (h - 1)) * w] = value;
 	}
 
-	public static byte[][] createAndValidateTopMap(int w, int h) {
+	public static byte[][] createAndValidateTopMap(int w, int h, Random random) {
 		int attempt = 0;
 		do {
-			byte[][] result = createTopMap(w, h);
+			byte[][] result = createTopMap(w, h, random);
 
 			int[] count = new int[256];
 
@@ -92,10 +93,10 @@ public class LevelGen {
 		} while (true);
 	}
 
-	public static byte[][] createAndValidateUndergroundMap(int w, int h, int depth) {
+	public static byte[][] createAndValidateUndergroundMap(int w, int h, int depth, Random random) {
 		int attempt = 0;
 		do {
-			byte[][] result = createUndergroundMap(w, h, depth);
+			byte[][] result = createUndergroundMap(w, h, depth, random);
 
 			int[] count = new int[256];
 
@@ -112,10 +113,10 @@ public class LevelGen {
 		} while (true);
 	}
 
-	public static byte[][] createAndValidateSkyMap(int w, int h) {
+	public static byte[][] createAndValidateSkyMap(int w, int h, Random random) {
 		int attempt = 0;
 		do {
-			byte[][] result = createSkyMap(w, h);
+			byte[][] result = createSkyMap(w, h, random);
 
 			int[] count = new int[256];
 
@@ -130,13 +131,13 @@ public class LevelGen {
 		} while (true);
 	}
 
-	private static byte[][] createTopMap(int w, int h) {
-		LevelGen mnoise1 = new LevelGen(w, h, 16);
-		LevelGen mnoise2 = new LevelGen(w, h, 16);
-		LevelGen mnoise3 = new LevelGen(w, h, 16);
+	private static byte[][] createTopMap(int w, int h, Random random) {
+		LevelGen mnoise1 = new LevelGen(w, h, 16, random);
+		LevelGen mnoise2 = new LevelGen(w, h, 16, random);
+		LevelGen mnoise3 = new LevelGen(w, h, 16, random);
 
-		LevelGen noise1 = new LevelGen(w, h, 32);
-		LevelGen noise2 = new LevelGen(w, h, 32);
+		LevelGen noise1 = new LevelGen(w, h, 32, random);
+		LevelGen noise2 = new LevelGen(w, h, 32, random);
 
 		byte[] map = new byte[w * h];
 		byte[] data = new byte[w * h];
@@ -249,21 +250,21 @@ public class LevelGen {
 		return new byte[][] { map, data };
 	}
 
-	private static byte[][] createUndergroundMap(int w, int h, int depth) {
-		LevelGen mnoise1 = new LevelGen(w, h, 16);
-		LevelGen mnoise2 = new LevelGen(w, h, 16);
-		LevelGen mnoise3 = new LevelGen(w, h, 16);
+	private static byte[][] createUndergroundMap(int w, int h, int depth, Random random) {
+		LevelGen mnoise1 = new LevelGen(w, h, 16, random);
+		LevelGen mnoise2 = new LevelGen(w, h, 16, random);
+		LevelGen mnoise3 = new LevelGen(w, h, 16, random);
 
-		LevelGen nnoise1 = new LevelGen(w, h, 16);
-		LevelGen nnoise2 = new LevelGen(w, h, 16);
-		LevelGen nnoise3 = new LevelGen(w, h, 16);
+		LevelGen nnoise1 = new LevelGen(w, h, 16, random);
+		LevelGen nnoise2 = new LevelGen(w, h, 16, random);
+		LevelGen nnoise3 = new LevelGen(w, h, 16, random);
 
-		LevelGen wnoise1 = new LevelGen(w, h, 16);
-		LevelGen wnoise2 = new LevelGen(w, h, 16);
-		LevelGen wnoise3 = new LevelGen(w, h, 16);
+		LevelGen wnoise1 = new LevelGen(w, h, 16, random);
+		LevelGen wnoise2 = new LevelGen(w, h, 16, random);
+		LevelGen wnoise3 = new LevelGen(w, h, 16, random);
 
-		LevelGen noise1 = new LevelGen(w, h, 32);
-		LevelGen noise2 = new LevelGen(w, h, 32);
+		LevelGen noise1 = new LevelGen(w, h, 32, random);
+		LevelGen noise2 = new LevelGen(w, h, 32, random);
 
 		byte[] map = new byte[w * h];
 		byte[] data = new byte[w * h];
@@ -341,9 +342,9 @@ public class LevelGen {
 		return new byte[][] { map, data };
 	}
 
-	private static byte[][] createSkyMap(int w, int h) {
-		LevelGen noise1 = new LevelGen(w, h, 8);
-		LevelGen noise2 = new LevelGen(w, h, 8);
+	private static byte[][] createSkyMap(int w, int h, Random random) {
+		LevelGen noise1 = new LevelGen(w, h, 8, random);
+		LevelGen noise2 = new LevelGen(w, h, 8, random);
 
 		byte[] map = new byte[w * h];
 		byte[] data = new byte[w * h];
@@ -407,7 +408,7 @@ public class LevelGen {
 			int w = 128;
 			int h = 128;
 
-			byte[] map = LevelGen.createAndValidateTopMap(w, h)[0];
+			byte[] map = LevelGen.createAndValidateTopMap(w, h, new Random())[0];
 			// byte[] map = LevelGen.createAndValidateUndergroundMap(w, h, (d++ % 3) + 1)[0];
 			// byte[] map = LevelGen.createAndValidateSkyMap(w, h)[0];
 

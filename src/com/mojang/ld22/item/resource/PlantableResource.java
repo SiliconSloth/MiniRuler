@@ -2,6 +2,7 @@ package com.mojang.ld22.item.resource;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import com.mojang.ld22.entity.Player;
 import com.mojang.ld22.level.Level;
@@ -21,7 +22,8 @@ public class PlantableResource extends Resource {
 		this.targetTile = targetTile;
 	}
 
-	public boolean interactOn(Tile tile, Level level, int xt, int yt, Player player, int attackDir) {
+	@Override
+	public boolean interactOn(Tile tile, Level level, int xt, int yt, Player player, int attackDir, Random random) {
 		if (sourceTiles.contains(tile)) {
 			level.setTile(xt, yt, targetTile, 0);
 			return true;
