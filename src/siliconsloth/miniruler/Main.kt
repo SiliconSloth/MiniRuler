@@ -25,6 +25,7 @@ fun main() {
     val game = Game.startWindowedGame(PerceptionHandler(engine))
     KeyListener(engine, game.botInput)
     Visualizer(engine, pathFinder).display()
+    KeyTracer(engine).display()
 
     engine.menuRules()
     engine.memoryRules()
