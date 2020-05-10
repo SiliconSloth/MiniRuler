@@ -11,20 +11,21 @@ import siliconsloth.miniruler.math.Box
  * Rule that rotates the player until they are not facing any obstacles (as defined by obstacleCondition)
  * and then executes whenClear. Only acts if all the provided bindings are met first.
  */
-fun RuleEngine.faceClear(bindings: RuleBuilder.() -> Unit, obstacleCondition: (Memory) -> Boolean,
+fun RuleEngine.faceClear(bindings: RuleBuilder.() -> Unit,
+                         obstacleCondition: (Memory, Memory) -> Boolean,
                          whenClear: CompleteMatch.() -> Unit) = rule {
     bindings()
     val player by find<Memory> { entity == Entity.PLAYER }
-    val obstacles by all<Memory>(AreaFilter { Box(player.pos, player.pos, padding=30) })
+    val obstacles by all<Memory>(AreaFilter { Box(player.pos, player.pos, padding=40) })
 
     fire {
-        val obstructed = obstacles.any { obstacleCondition(it) && aimingAt(player, it) }
+        val obstructed = obstacles.any { obstacleCondition(it, player) }
         if (obstructed) {
             // If there is an obstacle in front of the player, find a direction in which there are no obstacles.
             Direction.values().forEach { dir ->
                 // Rotate the player and check for obstacles again.
                 val rotated = Memory(player.entity, player.pos, dir, player.item)
-                val obs = obstacles.any { obstacleCondition(it) && aimingAt(rotated, it) }
+                val obs = obstacles.any { obstacleCondition(it, rotated) }
 
                 if (!obs) {
                     maintain(KeyPress(Key.fromDirection(dir)))

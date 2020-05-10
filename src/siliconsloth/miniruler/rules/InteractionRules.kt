@@ -54,8 +54,9 @@ fun RuleEngine.attackRules() {
     // then place the workbench.
     faceClear({
         find<CurrentAction> { action == PLACE_WORKBENCH }
-    }, {
-        it.entity.solid
+    }, { obstacle, player ->
+        // Ensure the adjacent tile to the player is free.
+        obstacle.entity.solid && obstacle.pos == ((player.pos) / 16) * 16 + Vector(8,8) + player.facing.vector * 16
     }, {
         maintain(KeyPress(Key.ATTACK))
     })

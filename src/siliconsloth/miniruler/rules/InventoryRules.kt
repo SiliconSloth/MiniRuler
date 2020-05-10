@@ -8,8 +8,8 @@ fun RuleEngine.inventoryRules() {
     faceClear({
         find<CurrentAction> { action == OPEN_INVENTORY }
         not<MenuOpen>()
-    }, {
-        it.entity == Entity.WORKBENCH
+    }, { obstacle, player ->
+        obstacle.entity == Entity.WORKBENCH && aimingAt(player, obstacle)
     }, {
         maintain(KeyPress(Key.MENU))
     })
