@@ -7,6 +7,7 @@ fun RuleEngine.inventoryRules() {
     // If trying to open the inventory, first turn away from any nearby workbenches.
     faceClear({
         find<CurrentAction> { action == OPEN_INVENTORY }
+        not<MenuOpen>()
     }, {
         it.entity == Entity.WORKBENCH
     }, {
