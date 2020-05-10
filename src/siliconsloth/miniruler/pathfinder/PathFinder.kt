@@ -93,12 +93,16 @@ class PathFinder(val store: SpatialMap<Memory>) {
             path = findPath(tile)
         }
 
+        if (path.isEmpty()) {
+            return null
+        }
+
         val nextInd = path.lastIndexOf(tile)+1
         if (nextInd < path.size) {
             return path[nextInd]
         } else if (goals.isEmpty()) {
             path = findPath(tile)
-            return path[1]
+            return  if (path.isEmpty()) null else path[1]
         } else {
             return tile
         }
@@ -175,7 +179,7 @@ class PathFinder(val store: SpatialMap<Memory>) {
             }
         }
 
-        throw RuntimeException("No path could be found")
+        return listOf()
     }
 
     fun buildPath(goal: Action, cameFrom: Map<Action, Vector>): List<Vector> {
