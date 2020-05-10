@@ -56,7 +56,6 @@ fun RuleEngine.navigationRules(pathFinder: PathFinder) {
     }
 
     rule {
-        find<CurrentAction> { action == CHOP_TREES || action == MINE_ROCK || action == OPEN_CRAFTING }
         all<PossibleTarget>()   // Recompute path whenever targets change
         val player by find<Memory> { entity == Entity.PLAYER }
 
