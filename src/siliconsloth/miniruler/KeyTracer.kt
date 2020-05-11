@@ -1,22 +1,17 @@
 package siliconsloth.miniruler
 
-import com.mojang.ld22.Game
 import siliconsloth.miniruler.engine.RuleEngine
-import siliconsloth.miniruler.math.Box
-import siliconsloth.miniruler.math.Vector
-import siliconsloth.miniruler.pathfinder.PathFinder
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics
 import java.awt.Graphics2D
 import javax.swing.JFrame
 import javax.swing.JPanel
-import kotlin.math.min
 
 class KeyTracer(val engine: RuleEngine): JPanel() {
-    data class KeyEvent(val down: Boolean, val time: Int)
+    data class Event(val down: Boolean, val time: Int)
 
-    val eventTimes = Key.values().map { it to mutableListOf<KeyEvent>() }.toMap()
+    val eventTimes = (0..6).map { mutableListOf<Event>() }
     var time = 0
 
     init {
@@ -27,7 +22,7 @@ class KeyTracer(val engine: RuleEngine): JPanel() {
 
             fire {
                 synchronized(this@KeyTracer) {
-                    eventTimes[press.key]!!.add(KeyEvent(true, time))
+                    eventTimes[press.key.ordinal].add(Event(true, time))
                 }
                 time++
                 repaint()
@@ -35,7 +30,27 @@ class KeyTracer(val engine: RuleEngine): JPanel() {
 
             end {
                 synchronized(this@KeyTracer) {
-                    eventTimes[press.key]!!.add(KeyEvent(false, time))
+                    eventTimes[press.key.ordinal].add(Event(false, time))
+                }
+                time++
+                repaint()
+            }
+        }
+
+        engine.rule {
+            find<MenuOpen>()
+
+            fire {
+                synchronized(this@KeyTracer) {
+                    eventTimes[6].add(Event(true, time))
+                }
+                time++
+                repaint()
+            }
+
+            end {
+                synchronized(this@KeyTracer) {
+                    eventTimes[6].add(Event(false, time))
                 }
                 time++
                 repaint()
@@ -55,17 +70,17 @@ class KeyTracer(val engine: RuleEngine): JPanel() {
         val g2d = g as Graphics2D
 
         synchronized(this) {
-            if (eventTimes.any { it.value.isNotEmpty() }) {
-                eventTimes.values.forEach { it.retainAll { it.time > time - 50 } }
+            if (eventTimes.any { it.isNotEmpty() }) {
+                eventTimes.forEach { it.retainAll { it.time > time - 50 } }
 
-                val minTime = eventTimes.values.filter { it.isNotEmpty() }.map { it[0].time }.min()!!
+                val minTime = eventTimes.filter { it.isNotEmpty() }.map { it[0].time }.min()!!
                 val maxTime = time
 
                 val barHeight = height / eventTimes.size
                 val scale = width / (maxTime - minTime).toFloat()
 
                 g2d.color = Color.RED
-                eventTimes.forEach { (key, events) ->
+                eventTimes.forEachIndexed { i, events ->
                     var start = minTime
                     var count = 0
                     events.forEach {
@@ -81,13 +96,13 @@ class KeyTracer(val engine: RuleEngine): JPanel() {
                                 start = minTime
                             }
                             if (count == 0) {
-                                g2d.fillRect(((start - minTime) * scale).toInt(), key.ordinal * barHeight,
+                                g2d.fillRect(((start - minTime) * scale).toInt(), i * barHeight,
                                         ((it.time - start) * scale).toInt(), barHeight)
                             }
                         }
                     }
                     if (count > 0) {
-                        g2d.fillRect(((start - minTime) * scale).toInt(), key.ordinal * barHeight,
+                        g2d.fillRect(((start - minTime) * scale).toInt(), i * barHeight,
                                 ((maxTime - start) * scale).toInt(), barHeight)
                     }
                 }
