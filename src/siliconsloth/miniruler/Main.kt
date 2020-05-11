@@ -34,6 +34,7 @@ fun main() {
     engine.inventoryMemoryRules()
     engine.inventoryRules()
     engine.planningRules(planner)
+    engine.keyRules()
 }
 
 fun <T: Spatial> screenFilter(camera: () -> Vector) = AreaFilter<T> { Box(

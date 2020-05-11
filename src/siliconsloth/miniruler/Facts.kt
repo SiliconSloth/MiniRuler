@@ -32,6 +32,9 @@ data class Memory(val entity: Entity, override val pos: Vector, val facing: Dire
             Box(pos, pos, entity.r).intersects(Box(other.pos, other.pos, other.entity.r))
 }
 
+data class KeyRequest(val key: Key)
+data class GuardedKeyRequest(val key: Key)
+data class GuardedKeyPress(val key: Key)
 data class KeyPress(val key: Key)
 
 interface Target: Fact {

@@ -28,7 +28,7 @@ fun RuleEngine.faceClear(bindings: RuleBuilder.() -> Unit,
                 val obs = obstacles.any { obstacleCondition(it, rotated) }
 
                 if (!obs) {
-                    maintain(KeyPress(Key.fromDirection(dir)))
+                    maintain(KeyRequest(Key.fromDirection(dir)))
                     return@forEach
                 }
             }

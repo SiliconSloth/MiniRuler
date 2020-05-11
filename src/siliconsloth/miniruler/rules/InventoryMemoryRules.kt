@@ -113,11 +113,9 @@ fun RuleEngine.inventoryMemoryRules() {
         not<MenuOpen>()
         val target by find<ResourceTarget>()
         find<InventoryMemory> { item == target.item && lower < target.count && upper >= target.count }
-        val presses by all<KeyPress>()
 
         fire {
-            presses.forEach { delete(it) }
-            maintain((KeyPress(Key.MENU)))
+            maintain((GuardedKeyRequest(Key.MENU)))
         }
     }
 }

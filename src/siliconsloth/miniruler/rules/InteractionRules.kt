@@ -17,15 +17,15 @@ fun RuleEngine.attackRules() {
         find<StaminaLevel> { stamina > 6 }
 
         fire {
-            maintain(KeyPress(Key.ATTACK))
+            maintain(KeyRequest(Key.ATTACK))
         }
     }
 
     // If the player is standing on top of a item it is trying to collect, keep moving in place
     // until the item is collected. Minicraft only allows items to be picked up while moving.
     rule {
-        val upPress = KeyPress(Key.UP)
-        val downPress = KeyPress(Key.DOWN)
+        val upRequest = KeyRequest(Key.UP)
+        val downRequest = KeyRequest(Key.DOWN)
 
         find<CurrentAction> { action == CHOP_TREES || action == MINE_ROCK }
 
@@ -33,20 +33,11 @@ fun RuleEngine.attackRules() {
         find<MoveTarget> { target.entity == Entity.ITEM && player.intersects(target) }
 
         fire {
-            if (exists(EqualityFilter { downPress })) {
-                replace(downPress, upPress)
+            if (exists(EqualityFilter { downRequest })) {
+                replace(downRequest, upRequest)
             } else {
-                replace(upPress, downPress)
+                replace(upRequest, downRequest)
             }
-        }
-    }
-
-    // Before trying to place the workbench release all previously held keys to prevent unwanted movement.
-    rule {
-        find<CurrentAction> { action == PLACE_WORKBENCH }
-
-        fire {
-            Key.values().forEach { delete(KeyPress(it)) }
         }
     }
 
@@ -58,7 +49,7 @@ fun RuleEngine.attackRules() {
         // Ensure the adjacent tile to the player is free.
         obstacle.entity.solid && obstacle.pos == ((player.pos) / 16) * 16 + Vector(8,8) + player.facing.vector * 16
     }, {
-        maintain(KeyPress(Key.ATTACK))
+        maintain(KeyRequest(Key.ATTACK))
     })
 
     // If trying to open the crafting menu while facing a workbench, press the Menu key.
@@ -70,7 +61,7 @@ fun RuleEngine.attackRules() {
 
         fire {
             if (aims.any { it.entity == Entity.WORKBENCH }) {
-                maintain(KeyPress(Key.MENU))
+                maintain(GuardedKeyRequest(Key.MENU))
             }
         }
     }
@@ -85,7 +76,7 @@ fun RuleEngine.attackRules() {
 
         fire {
             if (aims.any { it.entity == Entity.WORKBENCH }) {
-                maintain(KeyPress(Key.ATTACK))
+                maintain(KeyRequest(Key.ATTACK))
             }
         }
     }

@@ -7,28 +7,28 @@ fun RuleEngine.menuRules() {
     rule {
         find<MenuOpen> { menu == Menu.INSTRUCTIONS || menu == Menu.ABOUT }
         fire {
-            maintain(KeyPress(Key.ATTACK))
+            maintain(KeyRequest(Key.ATTACK))
         }
     }
 
     rule {
         find<TitleSelection> { option == TitleOption.HOW_TO_PLAY }
         fire {
-            maintain(KeyPress(Key.UP))
+            maintain(KeyRequest(Key.UP))
         }
     }
 
     rule {
         find<TitleSelection> { option == TitleOption.ABOUT }
         fire {
-            maintain(KeyPress(Key.DOWN))
+            maintain(KeyRequest(Key.DOWN))
         }
     }
 
     rule {
         find<TitleSelection> { option == TitleOption.START_GAME }
         fire {
-            maintain(KeyPress(Key.ATTACK))
+            maintain(KeyRequest(Key.ATTACK))
         }
     }
 }

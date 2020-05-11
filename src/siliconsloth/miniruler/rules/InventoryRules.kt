@@ -11,17 +11,8 @@ fun RuleEngine.inventoryRules() {
     }, { obstacle, player ->
         obstacle.entity == Entity.WORKBENCH && aimingAt(player, obstacle)
     }, {
-        maintain(KeyPress(Key.MENU))
+        maintain(GuardedKeyRequest(Key.MENU))
     })
-
-    // Release all keys upon opening menu.
-    rule {
-        find<MenuOpen>()
-
-        fire {
-            Key.values().forEach { delete(KeyPress(it)) }
-        }
-    }
 
     // Select the desired item in the list.
     rule {
@@ -32,11 +23,11 @@ fun RuleEngine.inventoryRules() {
 
         fire {
             if (item.position < selection.position) {
-                maintain(KeyPress(Key.UP))
+                maintain(KeyRequest(Key.UP))
             } else if (item.position > selection.position) {
-                maintain(KeyPress(Key.DOWN))
+                maintain(KeyRequest(Key.DOWN))
             } else {
-                maintain(KeyPress(Key.ATTACK))
+                maintain(GuardedKeyRequest(Key.ATTACK))
             }
         }
     }
@@ -46,7 +37,7 @@ fun RuleEngine.inventoryRules() {
         find<MenuOpen> { menu == Menu.INVENTORY }
 
         fire {
-            maintain(KeyPress(Key.MENU))
+            maintain(GuardedKeyRequest(Key.MENU))
         }
     }
 
@@ -55,7 +46,7 @@ fun RuleEngine.inventoryRules() {
         find<MenuOpen> { menu == Menu.CRAFTING }
 
         fire {
-            maintain(KeyPress(Key.MENU))
+            maintain(GuardedKeyRequest(Key.MENU))
         }
     }
 }
