@@ -19,14 +19,15 @@ class Planner(goal: State, val actions: List<Action>) {
 
     // Returns null if already at goal or the goal is unreachable from given state.
     fun chooseAction(state: State): Action? =
-            (chosenActions.filter { it.key.supersetOf(state) }.values.minBy { it.cost } ?: searchTo(state)).action
+            (chosenActions.filter { it.key.supersetOf(state) }.values.minBy { it.cost } ?: searchTo(state)).also { println(it.cost) }.action
 
     // Continue the breadth-first search until (a superset of) the given state is visited.
     // Returns the chosen action for that state, or a null action if the search terminates without reaching the state.
     private fun searchTo(target: State): ActionProposal {
         var result: ActionProposal? = null
         while (result == null && frontier.any()) {
-            val current = frontier.removeAt(0)
+            val current = frontier.minBy { it.cost }!!
+            frontier.remove(current)
             // Try unapplying every action to see if it ends up in a valid, novel state.
             // If the resulting state is a subset of an already visited state, we can discard this action edge;
             // in a BFS if a superstate has already been visited then a shorter (or equal) path has already been found.
@@ -34,8 +35,8 @@ class Planner(goal: State, val actions: List<Action>) {
                 val before = act.unapply(current.state)
                 if (before.isValid() && !chosenActions.keys.any { it.supersetOf(before) }) {
                     // This is the first path to reach this state, so it is the shortest.
-                    chosenActions[before] = ActionProposal(act, current.cost + 1)
-                    frontier.add(StateAndCost(before, current.cost + 1))
+                    chosenActions[before] = ActionProposal(act, current.cost + act.cost)
+                    frontier.add(StateAndCost(before, current.cost + act.cost))
 
                     if (result == null && before.supersetOf(target)) {
                         result = chosenActions[before]

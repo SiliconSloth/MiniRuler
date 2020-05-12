@@ -23,7 +23,7 @@ val CHOP_TREES = Action("CHOP_TREES", State(mapOf(
 )), mapOf(
         itemCount(Item.WOOD) to AddArbitrary(),
         NEXT_TO to Set(null)
-))
+), cost = 100)
 
 val OPEN_INVENTORY = Action("OPEN_INVENTORY", State(mapOf(
         MENU to SingleValue(null)
@@ -83,7 +83,7 @@ val MINE_ROCK = Action("MINE_ROCK", State(mapOf(
 )), mapOf(
         itemCount(Item.STONE) to AddArbitrary(),
         NEXT_TO to Set(null)
-))
+), cost = 100)
 
 val ALL_ACTIONS = listOf(CHOP_TREES, OPEN_INVENTORY, CLOSE_INVENTORY, PLACE_WORKBENCH, OPEN_CRAFTING, CRAFT_PCIKAXE,
         CLOSE_CRAFTING, PICK_UP_WORKBENCH, MINE_ROCK) + Item.values().map { Select(it) }
