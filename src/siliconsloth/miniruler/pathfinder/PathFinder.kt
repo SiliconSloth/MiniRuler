@@ -10,6 +10,7 @@ import siliconsloth.miniruler.math.Box
 import siliconsloth.miniruler.math.Vector
 import java.security.InvalidParameterException
 import java.util.*
+import kotlin.math.pow
 
 fun goalCost(goal: Memory): Int =
         when (goal.entity) {
@@ -23,35 +24,42 @@ fun goalCost(goal: Memory): Int =
 class PathFinder(val store: SpatialMap<Memory>) {
     interface Action {
         val pos: Vector
-        fun costFrom(before: Vector, hasGoals: Boolean): Int
+        fun costFrom(before: Vector, hasGoals: Boolean, monsterCost: Float): Int
     }
 
     data class Move(override val pos: Vector): Action {
-        override fun costFrom(before: Vector, hasGoals: Boolean): Int =
-                before.distance(pos).toInt()
+        override fun costFrom(before: Vector, hasGoals: Boolean, monsterCost: Float): Int =
+                before.distance(pos).toInt() + monsterCost.toInt()
     }
 
     data class AcceptGoal(val goal: Memory): Action {
         override val pos: Vector
         get() = goal.pos
 
-        override fun costFrom(before: Vector, hasGoals: Boolean): Int =
-                before.distance(pos).toInt() + goalCost(goal)
+        override fun costFrom(before: Vector, hasGoals: Boolean, monsterCost: Float): Int =
+                before.distance(pos).toInt() + goalCost(goal) + (monsterCost * 10).toInt()
     }
 
-    data class Explore(override val pos: Vector): Action {
-        override fun costFrom(before: Vector, hasGoals: Boolean): Int =
-            before.distance(pos).toInt() + if (hasGoals) 800 else 0
+    data class Terminate(override val pos: Vector, val explorable: Boolean): Action {
+        override fun costFrom(before: Vector, hasGoals: Boolean, monsterCost: Float): Int =
+            before.distance(pos).toInt() + (if (hasGoals) 800 else 0) +
+                    (if (explorable) 0 else 800) + (monsterCost * 10).toInt()
     }
 
     var path = listOf<Vector>()
 
-    var goals: Map<Vector, Memory> = mapOf()
+    var goals = mapOf<Vector, Memory>()
     set(value) {
         field = value
         path = listOf()
     }
     var chosenGoal: Memory? = null
+
+    var monsters = listOf<Memory>()
+    set(value) {
+        field = value
+        path = listOf()
+    }
 
     fun setGoals(gs: Iterable<Memory>) {
         val newGoals = mutableMapOf<Vector, Memory>()
@@ -123,6 +131,15 @@ class PathFinder(val store: SpatialMap<Memory>) {
     fun computeHeuristic(pos: Vector): Float =
         goals.map { (k, v) -> k.distance(pos) + goalCost(v) }.min() ?: 0f
 
+    fun monsterCost(pos: Vector): Float {
+        val dist = monsters.map { it.pos.distance(pos) }.min()
+        if (dist?.let { it > 400 } != false) {
+            return 0f
+        } else {
+            return 1600 * 0.9f.pow(dist)
+        }
+    }
+
     fun findPath(start: Vector): List<Vector> {
         val frontier = PriorityQueue<Pair<Action, Float>>(compareBy { it.second })
         frontier.add(Pair(Move(start), computeHeuristic(start)))
@@ -142,15 +159,13 @@ class PathFinder(val store: SpatialMap<Memory>) {
                         nextAtions.add(AcceptGoal(goals[current]!!))
                     }
 
-                    if (tileExplorable(current)) {
-                        nextAtions.add(Explore(current))
-                    }
+                    nextAtions.add(Terminate(current, tileExplorable(current)))
 
                     nextAtions.addAll(Direction.values().map { it.vector*16 + current }
                             .filter { tileClear(it) }.map { Move(it) })
 
                     nextAtions.forEach { next ->
-                        val newDist = dists[currentAction]!! + next.costFrom(current, goals.isNotEmpty())
+                        val newDist = dists[currentAction]!! + next.costFrom(current, goals.isNotEmpty(), monsterCost(next.pos))
                         if (dists[next]?.let { newDist < it } != false) {
                             cameFrom[next] = current
                             dists[next] = newDist
@@ -172,7 +187,7 @@ class PathFinder(val store: SpatialMap<Memory>) {
                     return buildPath(currentAction, cameFrom)
                 }
 
-                is Explore -> {
+                is Terminate -> {
                     chosenGoal = null
                     return buildPath(currentAction, cameFrom)
                 }

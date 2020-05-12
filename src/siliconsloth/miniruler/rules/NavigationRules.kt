@@ -56,7 +56,16 @@ fun RuleEngine.navigationRules(pathFinder: PathFinder) {
     }
 
     rule {
+        val monsters by all<Memory> { entity == Entity.SLIME || entity == Entity.ZOMBIE }
+
+        fire {
+            pathFinder.monsters = monsters.toList()
+        }
+    }
+
+    rule {
         all<PossibleTarget>()   // Recompute path whenever targets change
+        all<Memory> { entity == Entity.SLIME || entity == Entity.ZOMBIE }
         val player by find<Memory> { entity == Entity.PLAYER }
 
         fire {
