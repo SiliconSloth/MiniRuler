@@ -70,6 +70,7 @@ fun RuleEngine.planningRules(planner: Planner) {
             val action = planner.chooseAction(state)
             println(action)
             action?.let { maintain(CurrentAction(it)) }
+            println(varValues.filter { it.value != 0 })
             if (action == CHOP_TREES) {
                 maintain(ResourceTarget(Item.WOOD, 5))
             } else if (action == MINE_ROCK) {
