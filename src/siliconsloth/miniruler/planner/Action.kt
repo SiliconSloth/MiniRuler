@@ -1,7 +1,7 @@
 package siliconsloth.miniruler.planner
 
 open class Action(val name: String, val prerequisite: State, val operations: Map<Variable<*>, Operation<*>>,
-                  val cost: Int = 1):
+                  val cost: (State, State) -> Int = { _,_ -> 1 }):
         VariableContainer<Operation<*>?> {
 
     // For VariableContainer

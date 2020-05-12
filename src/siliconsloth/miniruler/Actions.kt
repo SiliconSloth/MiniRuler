@@ -17,13 +17,20 @@ class Select(val item: Item): Action("Select($item)", State(mapOf(
         HOLDING to Set(item)
 ))
 
+fun resourceGainCost(item: Item, before: State, after: State): Int {
+    val countBefore = (before[itemCount(item)] as LowerBounded).min
+    val countAfter = (after[itemCount(item)] as LowerBounded).min
+
+    return (countAfter - countBefore) * 10
+}
+
 val CHOP_TREES = Action("CHOP_TREES", State(mapOf(
         MENU to SingleValue(null),
         HOLDING to SingleValue(null)
 )), mapOf(
         itemCount(Item.WOOD) to AddArbitrary(),
         NEXT_TO to Set(null)
-), cost = 100)
+)) { b, a -> resourceGainCost(Item.WOOD, b, a) }
 
 val OPEN_INVENTORY = Action("OPEN_INVENTORY", State(mapOf(
         MENU to SingleValue(null)
@@ -83,7 +90,7 @@ val MINE_ROCK = Action("MINE_ROCK", State(mapOf(
 )), mapOf(
         itemCount(Item.STONE) to AddArbitrary(),
         NEXT_TO to Set(null)
-), cost = 100)
+)) { b, a -> resourceGainCost(Item.STONE, b, a) }
 
 val ALL_ACTIONS = listOf(CHOP_TREES, OPEN_INVENTORY, CLOSE_INVENTORY, PLACE_WORKBENCH, OPEN_CRAFTING, CRAFT_PCIKAXE,
         CLOSE_CRAFTING, PICK_UP_WORKBENCH, MINE_ROCK) + Item.values().map { Select(it) }

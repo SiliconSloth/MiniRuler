@@ -15,6 +15,10 @@ data class State(val variables: Map<Variable<*>, Domain<*>>): VariableContainer<
     override fun defaultValue(variable: Variable<*>): Domain<*> =
             variable.initializeDomain()
 
+    operator fun <T> get(variable: Variable<T>): Domain<T> =
+            @Suppress("UNCHECKED_CAST")
+            (variables.getOrDefault(variable, defaultValue(variable)) as Domain<T>)
+
     fun intersect(other: State): State =
             @Suppress("UNCHECKED_CAST")
             State(this.zip(other).map { it.variable to

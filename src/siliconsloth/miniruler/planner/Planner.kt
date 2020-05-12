@@ -35,8 +35,9 @@ class Planner(goal: State, val actions: List<Action>) {
                 val before = act.unapply(current.state)
                 if (before.isValid() && !chosenActions.keys.any { it.supersetOf(before) }) {
                     // This is the first path to reach this state, so it is the shortest.
-                    chosenActions[before] = ActionProposal(act, current.cost + act.cost)
-                    frontier.add(StateAndCost(before, current.cost + act.cost))
+                    val actCost = act.cost(before, current.state)
+                    chosenActions[before] = ActionProposal(act, current.cost + actCost)
+                    frontier.add(StateAndCost(before, current.cost + actCost))
 
                     if (result == null && before.supersetOf(target)) {
                         result = chosenActions[before]
