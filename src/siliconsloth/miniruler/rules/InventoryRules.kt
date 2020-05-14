@@ -2,6 +2,7 @@ package siliconsloth.miniruler.rules
 
 import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
+import java.lang.RuntimeException
 
 fun RuleEngine.inventoryRules() {
     // If trying to open the inventory, first turn away from any nearby workbenches.
@@ -16,10 +17,13 @@ fun RuleEngine.inventoryRules() {
 
     // Select the desired item in the list.
     rule {
-        val action by find<CurrentAction> { action is Select || action == CRAFT_PCIKAXE }
+        val action by find<CurrentAction> { action is Select || action is Craft }
         val selection by find<ListSelection>()
-        val item by find<ListItem> { item == (if (action.action is Select)
-                                                    (action.action as Select).item else Item.WOOD_PICKAXE) }
+        val item by find<ListItem> { item == when (action.action) {
+            is Select -> (action.action as Select).item
+            is Craft -> (action.action as Craft).result
+            else -> throw RuntimeException("Invalid action type")
+        } }
 
         fire {
             if (item.position < selection.position) {

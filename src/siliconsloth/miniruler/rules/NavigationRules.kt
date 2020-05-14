@@ -17,7 +17,7 @@ fun RuleEngine.navigationRules(pathFinder: PathFinder) {
 
     // Target rocks.
     rule {
-        find<CurrentAction> { action == MINE_ROCK }
+        find<CurrentAction> { action is MineRock }
         val rock by find<Memory> { entity == Entity.ROCK }
 
         fire {
@@ -28,7 +28,7 @@ fun RuleEngine.navigationRules(pathFinder: PathFinder) {
     // Target items that have remained in the same location for more than 40 frames, so have probably stopped moving.
     // If the item is not yet stationary, the game will not let the player pick it up.
     rule {
-        find<CurrentAction> { action == CHOP_TREES || action == MINE_ROCK }
+        find<CurrentAction> { action == CHOP_TREES || action is MineRock }
         val camera by find<CameraLocation>()    // The camera can tell us the current frame number
         val item by find<StationaryItem> { camera.frame - since > 40 }
 

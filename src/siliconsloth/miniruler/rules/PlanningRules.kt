@@ -68,14 +68,12 @@ fun RuleEngine.planningRules(planner: Planner) {
         fire {
             val state = State(varValues.map { it.variable to SingleValue(it.value) }.toMap())
             val action = planner.chooseAction(state)
-            println(action)
-            action?.let { maintain(CurrentAction(it)) }
+
+            action.action?.let { maintain(CurrentAction(it)) }
+            action.resourceTarget?.let { maintain(it) }
+
+            println(action.action)
             println(varValues.filter { it.value != 0 })
-            if (action == CHOP_TREES) {
-                maintain(ResourceTarget(Item.WOOD, 5))
-            } else if (action == MINE_ROCK) {
-                maintain(ResourceTarget(Item.STONE, 100))
-            }
         }
     }
 }
