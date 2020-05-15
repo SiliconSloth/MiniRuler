@@ -24,26 +24,26 @@ fun goalCost(goal: Memory): Int =
 class PathFinder(val store: SpatialMap<Memory>) {
     interface Action {
         val pos: Vector
-        fun costFrom(before: Vector, hasGoals: Boolean, monsterCost: Float): Int
+        fun costFrom(before: Vector, hasGoals: Boolean, dangerCost: Float): Int
     }
 
     data class Move(override val pos: Vector): Action {
-        override fun costFrom(before: Vector, hasGoals: Boolean, monsterCost: Float): Int =
-                before.distance(pos).toInt() + monsterCost.toInt()
+        override fun costFrom(before: Vector, hasGoals: Boolean, dangerCost: Float): Int =
+                before.distance(pos).toInt() + dangerCost.toInt()
     }
 
     data class AcceptGoal(val goal: Memory): Action {
         override val pos: Vector
         get() = goal.pos
 
-        override fun costFrom(before: Vector, hasGoals: Boolean, monsterCost: Float): Int =
-                before.distance(pos).toInt() + goalCost(goal) + (monsterCost * 10).toInt()
+        override fun costFrom(before: Vector, hasGoals: Boolean, dangerCost: Float): Int =
+                before.distance(pos).toInt() + goalCost(goal) + (dangerCost * 10).toInt()
     }
 
     data class Terminate(override val pos: Vector, val explorable: Boolean): Action {
-        override fun costFrom(before: Vector, hasGoals: Boolean, monsterCost: Float): Int =
+        override fun costFrom(before: Vector, hasGoals: Boolean, dangerCost: Float): Int =
             before.distance(pos).toInt() + (if (hasGoals) 800 else 0) +
-                    (if (explorable) 0 else 800) + (monsterCost * 10).toInt()
+                    (if (explorable) 0 else 800) + (dangerCost * 10).toInt()
     }
 
     var path = listOf<Vector>()
@@ -94,11 +94,11 @@ class PathFinder(val store: SpatialMap<Memory>) {
         goals = newGoals
     }
 
-    fun nextWaypoint(current: Vector): Vector? {
+    fun nextWaypoint(current: Vector, stamina: Int): Vector? {
         val tile = (current / 16) * 16 + Vector(8,8)
 
         if (!(tile in path && pathClear())) {
-            path = findPath(tile)
+            path = findPath(tile, stamina)
         }
 
         if (path.isEmpty()) {
@@ -109,7 +109,7 @@ class PathFinder(val store: SpatialMap<Memory>) {
         if (nextInd < path.size) {
             return path[nextInd]
         } else if (goals.isEmpty()) {
-            path = findPath(tile)
+            path = findPath(tile, stamina)
             return  if (path.isEmpty()) null else path[1]
         } else {
             return tile
@@ -124,6 +124,9 @@ class PathFinder(val store: SpatialMap<Memory>) {
         return (!tiles.any { it.pos == pos && it.entity.r == Vector(8,8) })
                 && tiles.count { it.entity != Entity.WATER } > 4
     }
+
+    fun tileWater(pos: Vector): Boolean =
+            store.retrieveMatching(Filter { it.pos == pos && it.entity == Entity.WATER }).any()
 
     fun pathClear(): Boolean =
             path.all { tileClear(it) }
@@ -140,7 +143,7 @@ class PathFinder(val store: SpatialMap<Memory>) {
         }
     }
 
-    fun findPath(start: Vector): List<Vector> {
+    fun findPath(start: Vector, stamina: Int): List<Vector> {
         val frontier = PriorityQueue<Pair<Action, Float>>(compareBy { it.second })
         frontier.add(Pair(Move(start), computeHeuristic(start)))
 
@@ -165,7 +168,12 @@ class PathFinder(val store: SpatialMap<Memory>) {
                             .filter { tileClear(it) }.map { Move(it) })
 
                     nextAtions.forEach { next ->
-                        val newDist = dists[currentAction]!! + next.costFrom(current, goals.isNotEmpty(), monsterCost(next.pos))
+                        var dangerCost = monsterCost(next.pos)
+                        if (tileWater(next.pos)) {
+                            dangerCost += (11 - stamina) * (if (next is Move) 16 else 1600)
+                        }
+
+                        val newDist = dists[currentAction]!! + next.costFrom(current, goals.isNotEmpty(), dangerCost)
                         if (dists[next]?.let { newDist < it } != false) {
                             cameFrom[next] = current
                             dists[next] = newDist

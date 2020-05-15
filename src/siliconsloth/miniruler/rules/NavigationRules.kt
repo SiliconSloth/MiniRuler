@@ -64,12 +64,21 @@ fun RuleEngine.navigationRules(pathFinder: PathFinder) {
     }
 
     rule {
+        find<StaminaLevel>()
+
+        fire {
+            pathFinder.path = listOf()
+        }
+    }
+
+    rule {
         all<PossibleTarget>()   // Recompute path whenever targets change
         all<Memory> { entity == Entity.SLIME || entity == Entity.ZOMBIE }
+        val stamina by find<StaminaLevel>()
         val player by find<Memory> { entity == Entity.PLAYER }
 
         fire {
-            val waypoint = pathFinder.nextWaypoint(player.pos)
+            val waypoint = pathFinder.nextWaypoint(player.pos, stamina.stamina)
             if (waypoint != null) {
                 maintain(Waypoint(waypoint))
             }
