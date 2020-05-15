@@ -50,6 +50,16 @@ val CHOP_TREES = Action("CHOP_TREES", State(mapOf(
 ), { b, a -> resourceGainCost(Item.WOOD, b, a) * 30 })
 { b, a -> ResourceTarget(Item.WOOD, (a[itemCount(Item.WOOD)] as LowerBounded).min) }
 
+val DIG_SAND = Action("DIG_SAND", State(mapOf(
+        MENU to SingleValue(null),
+        HOLDING to SingleValue(Item.ROCK_SHOVEL)
+)), mapOf(
+        itemCount(Item.SAND) to AddArbitrary(),
+        NEXT_TO to Set(null),
+        MENU to Set(Menu.INVENTORY)
+), { b, a -> resourceGainCost(Item.SAND, b, a) * 20 })
+{ b, a -> ResourceTarget(Item.SAND, (a[itemCount(Item.SAND)] as LowerBounded).min) }
+
 val OPEN_INVENTORY = Action("OPEN_INVENTORY", State(mapOf(
         MENU to SingleValue(null)
 )), mapOf(
@@ -113,7 +123,7 @@ val MINE_ROCK_WITH_HAND = MineRock(null, 50)
 val MINE_ROCK_WITH_WOOD = MineRock(Item.WOOD_PICKAXE, 20)
 val MINE_ROCK_WITH_ROCK = MineRock(Item.ROCK_PICKAXE, 15)
 
-val ALL_ACTIONS = listOf(CHOP_TREES, OPEN_INVENTORY, CLOSE_INVENTORY, PLACE_WORKBENCH, OPEN_CRAFTING,
+val ALL_ACTIONS = listOf(CHOP_TREES, DIG_SAND, OPEN_INVENTORY, CLOSE_INVENTORY, PLACE_WORKBENCH, OPEN_CRAFTING,
         CRAFT_WOOD_PCIKAXE, CRAFT_ROCK_PCIKAXE, CRAFT_ROCK_SHOVEL,
         CLOSE_CRAFTING, PICK_UP_WORKBENCH, MINE_ROCK_WITH_HAND, MINE_ROCK_WITH_WOOD, MINE_ROCK_WITH_ROCK) +
         Item.values().map { Select(it) }

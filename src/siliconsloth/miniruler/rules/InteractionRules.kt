@@ -10,10 +10,11 @@ import siliconsloth.miniruler.math.Vector
 fun RuleEngine.attackRules() {
     // If the player is aiming at a tree and has sufficient stamina, attack it.
     rule {
-        find<CurrentAction> { action == CHOP_TREES || action is MineRock }
+        find<CurrentAction> { action == CHOP_TREES || action is MineRock || action == DIG_SAND }
 
         val player by find<Memory> { entity == Entity.PLAYER }
-        find<MoveTarget> { (target.entity == Entity.TREE || target.entity == Entity.ROCK) && aimingAt(player, target) }
+        find<MoveTarget> { (target.entity == Entity.TREE || target.entity == Entity.ROCK || target.entity == Entity.SAND)
+                && aimingAt(player, target) }
         find<StaminaLevel> { stamina > 6 }
 
         fire {

@@ -16,6 +16,7 @@ fun goalCost(goal: Memory): Int =
         when (goal.entity) {
             Entity.TREE -> 512
             Entity.ROCK -> 512
+            Entity.SAND -> 512
             Entity.ITEM -> 0
             Entity.WORKBENCH -> 0
             else -> throw InvalidParameterException("Unexpected goal type")

@@ -25,6 +25,15 @@ fun RuleEngine.navigationRules(pathFinder: PathFinder) {
         }
     }
 
+    rule {
+        find<CurrentAction> { action == DIG_SAND }
+        val sand by find<Memory> { entity == Entity.SAND }
+
+        fire {
+            maintain(PossibleTarget(sand))
+        }
+    }
+
     // Target items that have remained in the same location for more than 40 frames, so have probably stopped moving.
     // If the item is not yet stationary, the game will not let the player pick it up.
     rule {
