@@ -1,20 +1,13 @@
 package siliconsloth.miniruler.planner
 
 import siliconsloth.miniruler.ResourceTarget
-import java.util.*
 
-open class Action(val name: String, val prerequisite: State, val operations: SortedMap<Variable<*>, Operation<*>>,
+open class Action(val name: String, val prerequisite: State, val varOps: Map<Variable<*>, Operation<*>>,
                   val cost: (State, State) -> Int = { _,_ -> 1 },
-                  val resourceTarget: (State, State) -> ResourceTarget? = { _,_ -> null }):
-        VariableContainer<Operation<*>?> {
+                  val resourceTarget: (State, State) -> ResourceTarget? = { _,_ -> null }) {
 
-    // For VariableContainer
-    override val varValues: SortedMap<Variable<*>, Operation<*>>
-        get() = operations
-
-    // For VariableContainer; defaults to no operation
-    override fun defaultValue(variable: Variable<*>): Operation<*>? =
-            null
+    val variables = prerequisite.variables
+    val operations = variables.map { varOps[it] }.toTypedArray()
 
     fun apply(before: State): State =
             apply(before.intersect(prerequisite)) { op, dom -> op.apply(dom) }
@@ -23,10 +16,11 @@ open class Action(val name: String, val prerequisite: State, val operations: Sor
             apply(after) { op, dom -> op.unapply(dom) }.intersect(prerequisite)
 
     private fun apply(state: State, applyFunc: (Operation<Any>, Domain<Any>) -> Domain<*>): State =
-            State(this.zip(state).map { vs -> vs.variable to (
-                    @Suppress("UNCHECKED_CAST") // value1: operation value2: domain
-                    vs.value1?.let { applyFunc(vs.value1 as Operation<Any>, vs.value2 as Domain<Any>) } ?: vs.value2
-                ) }.toMap().toSortedMap())
+            @Suppress("UNCHECKED_CAST")
+            State(variables, operations.mapIndexed { index, operation ->
+                operation?.let { op -> applyFunc(op as Operation<Any>, state.domains[index] as Domain<Any>) }
+                        ?: state.domains[index]
+            }.toTypedArray())
 
     override fun toString(): String {
         return name
