@@ -38,6 +38,7 @@ class PerceptionHandler(private val engine: RuleEngine): GameListener {
         deleteAll<ListSelection>()
         deleteAll<ListItem>()
         itemList.clear()
+        deleteAll<HaveIndicator>()
 
         if (newMenu is InventoryMenu) {
             insert(ListSelection(newMenu.selected))
