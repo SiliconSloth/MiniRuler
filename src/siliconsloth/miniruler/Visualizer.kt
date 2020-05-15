@@ -2,8 +2,6 @@ package siliconsloth.miniruler
 
 import com.mojang.ld22.Game
 import siliconsloth.miniruler.engine.RuleEngine
-import siliconsloth.miniruler.math.Box
-import siliconsloth.miniruler.math.Vector
 import siliconsloth.miniruler.pathfinder.PathFinder
 import java.awt.Color
 import java.awt.Dimension
@@ -106,6 +104,14 @@ class Visualizer(val engine: RuleEngine, val pathFinder: PathFinder): JPanel() {
                     g2d.color = Color((ord * 163 + 87) % 256, (ord * 3 + 90) % 256, (ord * 321 + 54) % 256, 255)
                     g2d.fillRect(it.pos.x - 6, it.pos.y - 6, 12, 12)
                 }
+
+//                if (it.entity == Entity.PLAYER) {
+//                    Direction.values().forEach { d ->
+//                        val rotated = Memory(it.entity, it.pos, d, null)
+//                        val box = aimBox(rotated, 10)
+//                        g2d.drawRect(box.min.x, box.min.y, box.max.x - box.min.x, box.max.y - box.min.y)
+//                    }
+//                }
             }
 
             g2d.color = Color(0, 255, 0, 255)
