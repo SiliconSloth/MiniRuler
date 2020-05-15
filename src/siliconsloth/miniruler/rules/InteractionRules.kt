@@ -82,8 +82,8 @@ fun RuleEngine.attackRules() {
     }
 }
 
-fun aimingAt(actor: Memory, target: Spatial): Boolean =
-        target.pos in aimBox(actor, 24)
+fun aimingAt(actor: Memory, target: Memory): Boolean =
+        aimBox(actor, 10).intersects(Box(target.pos, target.pos, target.entity.r))
 
 fun aimBox(actor: Memory, reach: Int): Box {
     // Bounding box that target must lie in if the actor is facing down.
