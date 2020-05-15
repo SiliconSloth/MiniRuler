@@ -79,7 +79,7 @@ class PathFinder(val store: SpatialMap<Memory>) {
                         if (Box(app, app, padding = g.entity.r)
                                         .intersects(Box(tile, tile, padding = 8))
                                 && !obstacles.any {
-                                    it != g && it.pos == tile && it.entity.solid
+                                    it != g && it.pos == tile && (it.entity.solid || it.entity == Entity.WATER)
                                             && it.entity.r == Vector(8, 8)
                                 }) {
 
