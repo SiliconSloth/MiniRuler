@@ -1,14 +1,15 @@
 package siliconsloth.miniruler.planner
 
 import siliconsloth.miniruler.ResourceTarget
+import java.util.*
 
-open class Action(val name: String, val prerequisite: State, val operations: Map<Variable<*>, Operation<*>>,
+open class Action(val name: String, val prerequisite: State, val operations: SortedMap<Variable<*>, Operation<*>>,
                   val cost: (State, State) -> Int = { _,_ -> 1 },
                   val resourceTarget: (State, State) -> ResourceTarget? = { _,_ -> null }):
         VariableContainer<Operation<*>?> {
 
     // For VariableContainer
-    override val varValues: Map<Variable<*>, Operation<*>>
+    override val varValues: SortedMap<Variable<*>, Operation<*>>
         get() = operations
 
     // For VariableContainer; defaults to no operation
@@ -25,7 +26,7 @@ open class Action(val name: String, val prerequisite: State, val operations: Map
             State(this.zip(state).map { vs -> vs.variable to (
                     @Suppress("UNCHECKED_CAST") // value1: operation value2: domain
                     vs.value1?.let { applyFunc(vs.value1 as Operation<Any>, vs.value2 as Domain<Any>) } ?: vs.value2
-                ) }.toMap())
+                ) }.toMap().toSortedMap())
 
     override fun toString(): String {
         return name

@@ -66,7 +66,7 @@ fun RuleEngine.planningRules(planner: Planner) {
         delay = 6   // Allow time for all values to be updated
 
         fire {
-            val state = State(varValues.map { it.variable to SingleValue(it.value) }.toMap())
+            val state = State(varValues.map { it.variable to SingleValue(it.value) }.toMap().toSortedMap())
             val action = planner.chooseAction(state)
 
             action.action?.let { maintain(CurrentAction(it)) }

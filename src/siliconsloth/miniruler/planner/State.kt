@@ -1,14 +1,16 @@
 package siliconsloth.miniruler.planner
 
+import java.util.*
+
 /**
  * Represents a set of states. Each conceptual state in the set is a tuple of values assigned to each variable
  * in the planning problem. A State instance represents the cross product of the variable domains it specifies.
  * Variables in the problem that are not included in the State default to
  * their full domains given by Variable.initializeDomain().
  */
-data class State(val variables: Map<Variable<*>, Domain<*>>): VariableContainer<Domain<*>> {
+data class State(val variables: SortedMap<Variable<*>, Domain<*>>): VariableContainer<Domain<*>> {
     // For VariableContainer
-    override val varValues: Map<Variable<*>, Domain<*>>
+    override val varValues: SortedMap<Variable<*>, Domain<*>>
         get() = variables
 
     // For VariableContainer; defaults to Variable's full domain
@@ -22,7 +24,7 @@ data class State(val variables: Map<Variable<*>, Domain<*>>): VariableContainer<
     fun intersect(other: State): State =
             @Suppress("UNCHECKED_CAST")
             State(this.zip(other).map { it.variable to
-                    (it.value1 as Domain<Any>).intersect(it.value2 as Domain<out Any>) }.toMap())
+                    (it.value1 as Domain<Any>).intersect(it.value2 as Domain<out Any>) }.toMap().toSortedMap())
 
     // States that contain NoValue are impossible, as there is a variable that cannot be assigned a value.
     fun isValid(): Boolean =
