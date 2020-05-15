@@ -17,7 +17,8 @@ fun main() {
     val spatialStore = SpatialMap<Memory>()
     engine.addFactStore(spatialStore)
 
-    val goal = State(mapOf(itemCount(Item.STONE) to LowerBounded(100), itemCount(Item.WORKBENCH) to LowerBounded(1)))
+    val goal = State(mapOf(itemCount(Item.WORKBENCH) to LowerBounded(1), itemCount(Item.ROCK_PICKAXE) to LowerBounded(1),
+                            itemCount(Item.ROCK_SHOVEL) to LowerBounded(1)))
     val planner = Planner(goal, ALL_ACTIONS)
 
     val pathFinder = PathFinder(spatialStore)
