@@ -14,7 +14,7 @@ fun RuleEngine.attackRules() {
 
         val player by find<Memory> { entity == Entity.PLAYER }
         find<MoveTarget> { (target.entity == Entity.TREE || target.entity == Entity.ROCK || target.entity == Entity.SAND)
-                && aimingAt(player, target) }
+                && aimingAtTile(player, target) }
         find<StaminaLevel> { stamina > 6 }
 
         fire {
@@ -85,6 +85,11 @@ fun RuleEngine.attackRules() {
 
 fun aimingAt(actor: Memory, target: Memory): Boolean =
         aimBox(actor).intersects(Box(target.pos, target.pos, target.entity.r))
+
+fun aimingAtTile(actor: Memory, target: Memory): Boolean {
+    val tile = ((actor.pos - Vector(0,2)) + actor.facing.vector * 12) / 16
+    return target.pos / 16 == tile
+}
 
 fun aimBox(actor: Memory): Box {
     // Bounding box that target must lie in if the actor is facing down.
