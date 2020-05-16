@@ -27,6 +27,8 @@ fun RuleEngine.attackRules() {
     rule {
         val upRequest = KeyRequest(Key.UP)
         val downRequest = KeyRequest(Key.DOWN)
+        val leftRequest = KeyRequest(Key.LEFT)
+        val rightRequest = KeyRequest(Key.RIGHT)
 
         find<CurrentAction> { action == CHOP_TREES || action is MineRock }
 
@@ -38,6 +40,12 @@ fun RuleEngine.attackRules() {
                 replace(downRequest, upRequest)
             } else {
                 replace(upRequest, downRequest)
+            }
+
+            if (exists(EqualityFilter { leftRequest })) {
+                replace(leftRequest, rightRequest)
+            } else {
+                replace(rightRequest, leftRequest)
             }
         }
     }
