@@ -1,8 +1,10 @@
 package siliconsloth.miniruler.rules
 
+import com.mojang.ld22.Game
 import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.filters.EqualityFilter
 import siliconsloth.miniruler.engine.RuleEngine
+import siliconsloth.miniruler.math.Vector
 
 fun RuleEngine.memoryRules() {
     // Memorize all visible tiles and entities.
@@ -72,6 +74,19 @@ fun RuleEngine.memoryRules() {
 
         fire {
             delete(item)
+        }
+    }
+
+    rule {
+        val camera by find<CameraLocation>()
+        val mem1 by find<Memory> { entity == Entity.PLAYER }
+        val mem2 by find<Memory> { entity == Entity.PLAYER && pos != mem1.pos }
+
+        fire {
+            val center = camera.pos + Vector(Game.WIDTH/2, Game.HEIGHT/2)
+            if (mem1.pos.distance(center) < mem2.pos.distance(center)) {
+                delete(mem2)
+            }
         }
     }
 }
