@@ -38,7 +38,7 @@ class MineRock(tool: Item?, costMultiplier: Int): Action("MineRock($tool)", stat
         itemCount(Item.STONE) to AddArbitrary(),
         NEXT_TO to Set(null),
         MENU to Set(Menu.INVENTORY)
-), { b, a -> resourceGainCost(Item.STONE, b, a) * costMultiplier },
+), { b, a -> resourceGainCost(Item.STONE, b, a) * costMultiplier + 50 },
 { b, a -> ResourceTarget(Item.STONE, (a[itemCount(Item.STONE)] as LowerBounded).min) })
 
 fun resourceGainCost(item: Item, before: State, after: State): Int {
@@ -55,7 +55,7 @@ val CHOP_TREES = Action("CHOP_TREES", state(
         itemCount(Item.WOOD) to AddArbitrary(),
         NEXT_TO to Set(null),
         MENU to Set(Menu.INVENTORY)
-), { b, a -> resourceGainCost(Item.WOOD, b, a) * 30 })
+), { b, a -> resourceGainCost(Item.WOOD, b, a) * 30 + 50 })
 { b, a -> ResourceTarget(Item.WOOD, (a[itemCount(Item.WOOD)] as LowerBounded).min) }
 
 val DIG_SAND = Action("DIG_SAND", state(
@@ -65,7 +65,7 @@ val DIG_SAND = Action("DIG_SAND", state(
         itemCount(Item.SAND) to AddArbitrary(),
         NEXT_TO to Set(null),
         MENU to Set(Menu.INVENTORY)
-), { b, a -> resourceGainCost(Item.SAND, b, a) * 20 })
+), { b, a -> resourceGainCost(Item.SAND, b, a) * 20 + 50 })
 { b, a -> ResourceTarget(Item.SAND, (a[itemCount(Item.SAND)] as LowerBounded).min) }
 
 val OPEN_INVENTORY = Action("OPEN_INVENTORY", state(
