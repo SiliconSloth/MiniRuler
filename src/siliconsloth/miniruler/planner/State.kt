@@ -35,4 +35,7 @@ class State(val variables: Array<Variable<*>>, val domains: Array<Domain<*>>) {
 
     // Comparing States is complicated so use a simple, inefficient hash code until something faster is needed.
     override fun hashCode(): Int = 0
+
+    override fun toString(): String =
+            "State" + variables.zip(domains).filter { it.second != LowerBounded(0) }.toMap()
 }
