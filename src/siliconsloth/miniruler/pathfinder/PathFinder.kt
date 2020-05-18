@@ -65,7 +65,7 @@ class PathFinder(val store: SpatialMap<Memory>) {
     fun setGoals(gs: Iterable<Memory>) {
         val newGoals = mutableMapOf<Vector, Memory>()
         gs.forEach { g ->
-            val approaches = if (g.entity.solid) {
+            val approaches = if (g.entity.solid || g.entity == Entity.SAND) {
                 Direction.values().map { g.pos + it.vector * 16 }
             } else {
                 listOf(g.pos)
@@ -213,6 +213,11 @@ class PathFinder(val store: SpatialMap<Memory>) {
         while (cameFrom.containsKey(current)) {
             current = Move(cameFrom[current]!!)
             bPath.add(0, current.pos)
+        }
+
+        // If the goal is sand, move the final waypoint to be at the edge of the target sand tile.
+        if (goal is AcceptGoal && goal.goal.entity == Entity.SAND) {
+            bPath[bPath.size-1] = (bPath[bPath.size-1] + bPath[bPath.size-2]) / 2
         }
 
         return bPath
