@@ -43,10 +43,12 @@ class Planner(goal: State, val actions: List<Action>) {
             actions.forEach { act ->
                 val before = act.unapply(current.state)
                 if (before.isValid() && !finalized.any { it.supersetOf(before) }) {
-                    // This is the first path to reach this state, so it is the shortest.
                     val actCost = current.cost + act.cost(before, current.state)
-                    chosenActions[before] = ActionProposal(act, actCost, act.resourceTarget(before, current.state))
-                    frontier.add(StateAndCost(before, actCost))
+                    val cheapest = chosenActions.filter { it.key.supersetOf(before) }.values.map { it.cost }.min()
+                    if (cheapest?.let { it > actCost } != false) {
+                        chosenActions[before] = ActionProposal(act, actCost, act.resourceTarget(before, current.state))
+                        frontier.add(StateAndCost(before, actCost))
+                    }
                 }
             }
         }
