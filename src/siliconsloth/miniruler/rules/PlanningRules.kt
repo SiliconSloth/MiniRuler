@@ -73,6 +73,7 @@ fun RuleEngine.planningRules(planner: Planner) {
             action.resourceTarget?.let { maintain(it) }
 
             println(action.action)
+            println(action.cost)
             println(varValues.filter { it.value != 0 })
         }
     }
