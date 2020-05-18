@@ -37,6 +37,10 @@ data class GuardedKeyRequest(val key: Key)
 data class GuardedKeyPress(val key: Key)
 data class KeyPress(val key: Key)
 
+data class MoveRequest(val direction: Direction)
+class JiggleRequest()
+class KeySpam(val key: Key)
+
 interface Target: Fact {
     val target: Memory
 }

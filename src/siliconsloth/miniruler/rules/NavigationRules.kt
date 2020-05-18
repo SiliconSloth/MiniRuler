@@ -99,11 +99,6 @@ fun RuleEngine.navigationRules(pathFinder: PathFinder) {
 
     // Press keys to walk towards the current target.
     rule {
-        val upRequest = KeyRequest(Key.UP)
-        val downRequest = KeyRequest(Key.DOWN)
-        val leftRequest = KeyRequest(Key.LEFT)
-        val rightRequest = KeyRequest(Key.RIGHT)
-
         not<MenuOpen>()
         val target by find<Waypoint>()
         val player by find<Memory> { entity == Entity.PLAYER }
@@ -115,21 +110,15 @@ fun RuleEngine.navigationRules(pathFinder: PathFinder) {
 
                 // Try to get within 1 unit of the target position along both axes.
                 if (t.x > p.x + 1) {
-                    replace(leftRequest, rightRequest)
+                    maintain(MoveRequest(Direction.RIGHT))
                 } else if (t.x < p.x - 1) {
-                    replace(rightRequest, leftRequest)
-                } else {
-                    delete(leftRequest)
-                    delete(rightRequest)
+                    maintain(MoveRequest(Direction.LEFT))
                 }
 
                 if (t.y > p.y + 1) {
-                    replace(upRequest, downRequest)
+                    maintain(MoveRequest(Direction.DOWN))
                 } else if (t.y < p.y - 1) {
-                    replace(downRequest, upRequest)
-                } else {
-                    delete(upRequest)
-                    delete(downRequest)
+                    maintain(MoveRequest(Direction.UP))
                 }
             }
         }

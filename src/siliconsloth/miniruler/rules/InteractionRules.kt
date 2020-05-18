@@ -18,35 +18,20 @@ fun RuleEngine.attackRules() {
         find<StaminaLevel> { stamina > 6 }
 
         fire {
-            maintain(KeyRequest(Key.ATTACK))
+            maintain(KeySpam(Key.ATTACK))
         }
     }
 
     // If the player is standing on top of a item it is trying to collect, keep moving in place
     // until the item is collected. Minicraft only allows items to be picked up while moving.
     rule {
-        val upRequest = KeyRequest(Key.UP)
-        val downRequest = KeyRequest(Key.DOWN)
-        val leftRequest = KeyRequest(Key.LEFT)
-        val rightRequest = KeyRequest(Key.RIGHT)
-
         find<CurrentAction> { action == CHOP_TREES || action is MineRock }
 
         val player by find<Memory> { entity == Entity.PLAYER }
         find<MoveTarget> { target.entity == Entity.ITEM && player.intersects(target) }
 
         fire {
-            if (exists(EqualityFilter { downRequest })) {
-                replace(downRequest, upRequest)
-            } else {
-                replace(upRequest, downRequest)
-            }
-
-            if (exists(EqualityFilter { leftRequest })) {
-                replace(leftRequest, rightRequest)
-            } else {
-                replace(rightRequest, leftRequest)
-            }
+            maintain(JiggleRequest())
         }
     }
 

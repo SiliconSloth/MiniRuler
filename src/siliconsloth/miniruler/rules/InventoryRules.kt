@@ -27,9 +27,9 @@ fun RuleEngine.inventoryRules() {
 
         fire {
             if (item.position < selection.position) {
-                maintain(KeyRequest(Key.UP))
+                maintain(KeySpam(Key.UP))
             } else if (item.position > selection.position) {
-                maintain(KeyRequest(Key.DOWN))
+                maintain(KeySpam(Key.DOWN))
             } else {
                 maintain(GuardedKeyRequest(Key.ATTACK))
             }
