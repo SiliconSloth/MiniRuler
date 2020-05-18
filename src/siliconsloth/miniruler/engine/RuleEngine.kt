@@ -70,6 +70,10 @@ class RuleEngine(val reportInterval: Int = 0): FactUpdater<Any> {
                 // Remove any insertions of facts maintained by matches that have already ended.
                 val batch = updateQueue.mapValues { it.value.filter {
                     !(it.isInsert && it.maintainer?.state == CompleteMatch.State.ENDED) } }
+                    // Remove any insertions that are immediately undone by a deletion or vice versa.
+                    .mapValues { (_,ups) ->
+                        ups.filter { a -> !ups.any { b -> a.fact == b.fact && a.isInsert != b.isInsert } }
+                    }
                 updateQueue.clear()
 
                 // Update the fact stores.
