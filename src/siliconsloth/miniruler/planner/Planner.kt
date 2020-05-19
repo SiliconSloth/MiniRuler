@@ -9,13 +9,14 @@ import siliconsloth.miniruler.*
  * @param goal the goal state
  * @param actions all actions that can be taken by the agent
  */
-class Planner(goal: State, val actions: List<Action>) {
+class Planner(val goal: State, val actions: List<Action>) {
     // cost is length of path from current state to goal via this action.
-    data class ActionProposal(val action: Action?, val cost: Int, val resourceTargets: List<ResourceTarget>)
+    data class ActionProposal(val action: Action?, val cost: Int, val resourceTargets: List<ResourceTarget>,
+            val source: State?)
     // cost is length of shortest path to goal from this state.
     data class StateAndCost(val state: State, val cost: Int)
 
-    val chosenActions = mutableMapOf(goal to ActionProposal(null, 0, listOf()))
+    val chosenActions = mutableMapOf(goal to ActionProposal(null, 0, listOf(), goal))
     // Used as a FIFO queue so that the lowest-cost states are always visited next.
     val frontier = mutableListOf(StateAndCost(goal, 0))
     val finalized = mutableSetOf<State>()
@@ -46,12 +47,23 @@ class Planner(goal: State, val actions: List<Action>) {
                     val actCost = current.cost + act.cost(before, current.state)
                     val cheapest = chosenActions.filter { it.key.supersetOf(before) }.values.map { it.cost }.min()
                     if (cheapest?.let { it > actCost } != false) {
-                        chosenActions[before] = ActionProposal(act, actCost, act.resourceTarget(before, current.state))
+                        chosenActions[before] = ActionProposal(act, actCost, act.resourceTarget(before, current.state),
+                                current.state)
                         frontier.add(StateAndCost(before, actCost))
                     }
                 }
             }
         }
-        return result ?: ActionProposal(null, -1, listOf())
+        return result ?: ActionProposal(null, -1, listOf(), null)
+    }
+
+    fun printPlan(start: State) {
+        var current: State? = start
+        while (current != null && !goal.supersetOf(current)) {
+            val prop = chosenActions.filter { it.key.supersetOf(current!!) && it.key in finalized }.values
+                    .minBy { it.cost } ?: searchTo(current)
+            println(prop.action)
+            current = prop.source
+        }
     }
 }

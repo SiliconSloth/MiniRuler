@@ -4,7 +4,6 @@ import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.planner.Planner
 import siliconsloth.miniruler.planner.SingleValue
-import siliconsloth.miniruler.planner.State
 
 fun RuleEngine.planningRules(planner: Planner) {
     rule {
@@ -76,6 +75,7 @@ fun RuleEngine.planningRules(planner: Planner) {
             println(action.cost)
             println(action.resourceTargets)
             println(varValues.filter { it.value != 0 })
+            planner.printPlan(state)
         }
     }
 }
