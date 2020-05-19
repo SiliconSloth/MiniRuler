@@ -30,8 +30,10 @@ fun RuleEngine.inventoryRules() {
                 maintain(KeySpam(Key.UP))
             } else if (item.position > selection.position) {
                 maintain(KeySpam(Key.DOWN))
+            } else if (action.action is Craft) {
+                maintain(CraftPress())
             } else {
-                maintain(GuardedKeyRequest(Key.ATTACK))
+                maintain(GuardedKeyPress(Key.ATTACK))
             }
         }
     }

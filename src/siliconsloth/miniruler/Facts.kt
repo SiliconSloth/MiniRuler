@@ -39,7 +39,8 @@ data class KeyPress(val key: Key)
 
 data class MoveRequest(val direction: Direction)
 class JiggleRequest()
-class KeySpam(val key: Key)
+data class KeySpam(val key: Key)
+class CraftPress()
 
 interface Target: Fact {
     val target: Memory

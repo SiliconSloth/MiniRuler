@@ -144,4 +144,18 @@ fun RuleEngine.keyRules() {
             maintain(KeyRequest(Key.fromDirection(request.direction)))
         }
     }
+
+    // If trying to craft an item, repeatedly press and release the Attack key until the target is met.
+    rule {
+        find<CraftPress>()
+        val target by find<ResourceTarget>()
+        find<InventoryMemory> { item == target.item && lower < target.count }
+        not<GuardedKeyPress> { key == Key.ATTACK }
+
+        delay = 6
+
+        fire {
+            maintain(GuardedKeyPress(Key.ATTACK))
+        }
+    }
 }

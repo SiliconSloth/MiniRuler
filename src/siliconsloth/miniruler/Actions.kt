@@ -50,7 +50,9 @@ class Craft(val result: Item, ingredients: Map<Item, Int>): Action("Craft($resul
         ingredients.map { itemCount(it.key) to LowerBounded(it.value) }.toMap()
                 .plus(MENU to SingleValue(Menu.WORKBENCH))
 ), ingredients.map { itemCount(it.key) to Add(-it.value) }.toMap()
-        .plus(itemCount(result) to Add(1)))
+        .plus(itemCount(result) to Add(1)), resourceTarget = { _,a ->
+            listOf(ResourceTarget(result, (a[itemCount(result)] as LowerBounded).min))
+        })
 
 class MineRock(tool: Item?, costMultiplier: Int): Action("MineRock($tool)", state(
         MENU to SingleValue(null),
@@ -64,7 +66,7 @@ class MineRock(tool: Item?, costMultiplier: Int): Action("MineRock($tool)", stat
     val coalCost = resourceGainCost(Item.COAL, b, a) * 3
     max(stoneCost, coalCost) * costMultiplier + 20
 },
-{ b, a -> listOf(ResourceTarget(Item.STONE, (a[itemCount(Item.STONE)] as LowerBounded).min),
+{ _, a -> listOf(ResourceTarget(Item.STONE, (a[itemCount(Item.STONE)] as LowerBounded).min),
                  ResourceTarget(Item.COAL, (a[itemCount(Item.COAL)] as LowerBounded).min)) })
 
 fun resourceGainCost(item: Item, before: State, after: State): Int {
@@ -82,7 +84,7 @@ val CHOP_TREES = Action("CHOP_TREES", state(
         MENU to Set(Menu.INVENTORY)
 ) + ERASE_NEXT_TOS,
         { b, a -> resourceGainCost(Item.WOOD, b, a) * 30 + 20 })
-{ b, a -> listOf(ResourceTarget(Item.WOOD, (a[itemCount(Item.WOOD)] as LowerBounded).min)) }
+{ _, a -> listOf(ResourceTarget(Item.WOOD, (a[itemCount(Item.WOOD)] as LowerBounded).min)) }
 
 val DIG_SAND = Action("DIG_SAND", state(
         MENU to SingleValue(null),
@@ -92,7 +94,7 @@ val DIG_SAND = Action("DIG_SAND", state(
         MENU to Set(Menu.INVENTORY)
 ) + ERASE_NEXT_TOS,
         { b, a -> resourceGainCost(Item.SAND, b, a) * 20 + 20 })
-{ b, a -> listOf(ResourceTarget(Item.SAND, (a[itemCount(Item.SAND)] as LowerBounded).min)) }
+{ _, a -> listOf(ResourceTarget(Item.SAND, (a[itemCount(Item.SAND)] as LowerBounded).min)) }
 
 val OPEN_INVENTORY = Action("OPEN_INVENTORY", state(
         MENU to SingleValue(null)
