@@ -22,7 +22,7 @@ fun RuleEngine.inventoryMemoryRules() {
         val mem by find<InventoryMemory> { lower > 0 }
         not<ListItem> { item == mem.item }
 
-        delay = 3   // Wait for the item list to load
+        delay = 10   // Wait for the item list to load
 
         fire {
             replace(mem, InventoryMemory(mem.item, 0, 0))
