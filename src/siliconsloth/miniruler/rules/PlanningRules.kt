@@ -53,7 +53,7 @@ fun RuleEngine.planningRules(planner: Planner) {
             find<Memory> { entity == e }
 
             fire {
-                maintain(VariableValue(nextTo(e), 1))
+                maintain(VariableValue(nextTo(e), true))
             }
         }
 
@@ -61,7 +61,7 @@ fun RuleEngine.planningRules(planner: Planner) {
             not<Memory> { entity == e }
 
             fire {
-                maintain(VariableValue(nextTo(e), 0))
+                maintain(VariableValue(nextTo(e), false))
             }
         }
     }
@@ -80,7 +80,7 @@ fun RuleEngine.planningRules(planner: Planner) {
             println(action.action)
             println(action.cost)
             println(action.resourceTargets)
-            println(varValues.filter { it.value != 0 })
+            println(varValues.filter { it.value != 0 && it.value != false })
             planner.printPlan(state)
         }
     }

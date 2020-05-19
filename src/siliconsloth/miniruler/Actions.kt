@@ -6,10 +6,10 @@ import kotlin.math.max
 val ITEM_COUNTS = Item.values().map { it to Variable("itemCount($it)") { LowerBounded(0) } }.toMap()
 fun itemCount(item: Item) = ITEM_COUNTS[item] ?: error("Unknown item")
 
-val NEXT_TOS = Entity.values().map { it to Variable("nextTo($it)") { LowerBounded(0) } }.toMap()
+val NEXT_TOS = Entity.values().map { it to Variable("nextTo($it)") { AnyValue<Boolean>() } }.toMap()
 fun nextTo(entity: Entity) = NEXT_TOS[entity] ?: error("Unknown entity")
 
-val ERASE_NEXT_TOS = Entity.values().map { nextTo(it) to Set(0) }.toMap()
+val ERASE_NEXT_TOS = Entity.values().map { nextTo(it) to Set(false) }.toMap()
 
 val MENU = Variable("MENU") { AnyValue<Menu?>() }
 val HOLDING = Variable("HOLDING") { AnyValue<Item?>() }
@@ -35,13 +35,13 @@ class Place(val item: Item, val entity: Entity): Action("Place($item)", state(
         HOLDING to SingleValue(item)
 ), mapOf(
         HOLDING to Set(null),
-        nextTo(entity) to Set(1),
+        nextTo(entity) to Set(true),
         itemCount(item) to Add(-1)
 ))
 
 class Open(val menu: Menu, val entity: Entity): Action("Open($menu)", state(
         MENU to SingleValue(null),
-        nextTo(entity) to SingleValue(1)
+        nextTo(entity) to SingleValue(true)
 ), mapOf(
         MENU to Set(menu)
 ))
@@ -115,10 +115,10 @@ val CLOSE_CRAFTING = Action("CLOSE_CRAFTING", state(
 
 val PICK_UP_WORKBENCH = Action("PICK_UP_WORKBENCH", state(
         MENU to SingleValue(null),
-        nextTo(Entity.WORKBENCH) to SingleValue(1),
+        nextTo(Entity.WORKBENCH) to SingleValue(true),
         HOLDING to SingleValue(Item.POWER_GLOVE)
 ), mapOf(
-        nextTo(Entity.WORKBENCH) to Set(0),
+        nextTo(Entity.WORKBENCH) to Set(false),
         HOLDING to Set(Item.WORKBENCH),
         itemCount(Item.WORKBENCH) to Add(1)
 ))
