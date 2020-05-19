@@ -3,7 +3,6 @@ package siliconsloth.miniruler.rules
 import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.engine.filters.AreaFilter
-import siliconsloth.miniruler.engine.filters.EqualityFilter
 import siliconsloth.miniruler.math.Box
 import siliconsloth.miniruler.math.Vector
 
