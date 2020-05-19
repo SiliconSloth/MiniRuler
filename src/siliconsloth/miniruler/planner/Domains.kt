@@ -28,20 +28,26 @@ class AnyValue<T>: Domain<T> {
 }
 
 /**
- * The empty set.
+ * A finite set of values that does not contain all values of type T.
  */
-class NoValue: Domain<Nothing> {
-    override fun intersect(other: Domain<out Nothing>): Domain<Nothing> =
-            this
+data class Enumeration<T>(val values: Set<T>): Domain<T> {
+    constructor(vararg values: T): this(values.toSet())
 
-    override fun supersetOf(other: Domain<out Nothing>): Boolean =
-            other is NoValue
+    override fun intersect(other: Domain<out T>): Domain<out T> =
+            when (other) {
+                is AnyValue -> this
+                is LowerBounded -> Enumeration(values.filter { (it as Int) >= other.min }.toSet())
+                is Enumeration -> Enumeration(values.intersect(other.values).toSet())
+                else -> throw UnsupportedOperationException("Unknown domain type")
+            }
 
-    override fun equals(other: Any?): Boolean =
-            other is NoValue
-
-    // All instances of NoValue should share same hash code.
-    override fun hashCode(): Int = 129
+    override fun supersetOf(other: Domain<out T>): Boolean =
+            when (other) {
+                is AnyValue -> false
+                is LowerBounded -> false
+                is Enumeration -> values.containsAll(other.values)
+                else -> throw UnsupportedOperationException("Unknown domain type")
+            }
 }
 
 /**
@@ -51,41 +57,16 @@ data class LowerBounded(val min: Int): Domain<Int> {
     override fun intersect(other: Domain<out Int>): Domain<out Int> =
             when (other) {
                 is AnyValue -> this
-                is NoValue -> other
                 is LowerBounded -> if (min > other.min) this else other
-                is SingleValue -> if (other.value >= min) other else NoValue()
+                is Enumeration -> Enumeration(other.values.filter { it >= min }.toSet())
                 else -> throw UnsupportedOperationException("Unknown domain type")
             }
 
     override fun supersetOf(other: Domain<out Int>): Boolean =
             when (other) {
                 is AnyValue -> false
-                is NoValue -> true
                 is LowerBounded -> min <= other.min
-                is SingleValue -> other.value >= min
-                else -> throw UnsupportedOperationException("Unknown domain type")
-            }
-}
-
-/**
- * A singleton containing one value of type T.
- */
-data class SingleValue<T>(val value: T): Domain<T> {
-    override fun intersect(other: Domain<out T>): Domain<out T> =
-            when (other) {
-                is AnyValue -> this
-                is NoValue -> other
-                is LowerBounded -> if (value as Int >= other.min) this else NoValue()
-                is SingleValue -> if (value == other.value) this else NoValue()
-                else -> throw UnsupportedOperationException("Unknown domain type")
-            }
-
-    override fun supersetOf(other: Domain<out T>): Boolean =
-            when (other) {
-                is AnyValue -> false
-                is NoValue -> true
-                is LowerBounded -> false
-                is SingleValue -> value == other.value
+                is Enumeration -> other.values.all { it >= min }
                 else -> throw UnsupportedOperationException("Unknown domain type")
             }
 }

@@ -9,7 +9,6 @@ import siliconsloth.miniruler.math.Vector
 import siliconsloth.miniruler.pathfinder.PathFinder
 import siliconsloth.miniruler.planner.LowerBounded
 import siliconsloth.miniruler.planner.Planner
-import siliconsloth.miniruler.planner.SingleValue
 import siliconsloth.miniruler.rules.*
 
 fun main() {

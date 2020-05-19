@@ -22,9 +22,9 @@ class State(val variables: Array<Variable<*>>, val domains: Array<Domain<*>>) {
             State(variables, domains.mapIndexed { index, domain -> (domain as Domain<Any>)
                     .intersect(other.domains[index] as Domain<Any>) }.toTypedArray() as Array<Domain<*>>)
 
-    // States that contain NoValue are impossible, as there is a variable that cannot be assigned a value.
+    // States that contain empty domains are impossible, as there is a variable that cannot be assigned a value.
     fun isValid(): Boolean =
-            !domains.contains(NoValue())
+            !domains.any { it is Enumeration && it.values.isEmpty() }
 
     fun supersetOf(other: State): Boolean =
             @Suppress("UNCHECKED_CAST")

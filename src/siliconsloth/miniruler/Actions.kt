@@ -23,7 +23,7 @@ fun state(vararg domains: Pair<Variable<*>, Domain<*>>): State =
         state(mapOf(*domains))
 
 class Select(val item: Item): Action("Select($item)", state(
-        MENU to SingleValue(Menu.INVENTORY),
+        MENU to Enumeration(Menu.INVENTORY),
         itemCount(item) to LowerBounded(1)
 ), mapOf(
         MENU to SetTo(null),
@@ -31,8 +31,8 @@ class Select(val item: Item): Action("Select($item)", state(
 ))
 
 class Place(val item: Item, val entity: Entity): Action("Place($item)", state(
-        MENU to SingleValue(null),
-        HOLDING to SingleValue(item)
+        MENU to Enumeration<Menu?>(null),
+        HOLDING to Enumeration(item)
 ), mapOf(
         HOLDING to SetTo(null),
         nextTo(entity) to SetTo(true),
@@ -40,8 +40,8 @@ class Place(val item: Item, val entity: Entity): Action("Place($item)", state(
 ))
 
 class Open(val menu: Menu, val entity: Entity): Action("Open($menu)", state(
-        MENU to SingleValue(null),
-        nextTo(entity) to SingleValue(true)
+        MENU to Enumeration<Menu?>(null),
+        nextTo(entity) to Enumeration(true)
 ), mapOf(
         MENU to SetTo(menu)
 ))
@@ -49,15 +49,15 @@ class Open(val menu: Menu, val entity: Entity): Action("Open($menu)", state(
 class Craft(val result: Item, ingredients: Map<Item, Int>, val menu: Menu = Menu.WORKBENCH):
         Action("Craft($result)", state(
             ingredients.map { itemCount(it.key) to LowerBounded(it.value) }.toMap()
-                    .plus(MENU to SingleValue(menu))
+                    .plus(MENU to Enumeration(menu))
 ), ingredients.map { itemCount(it.key) to Add(-it.value) }.toMap()
         .plus(itemCount(result) to Add(1)), resourceTarget = { _,a ->
             listOf(ResourceTarget(result, (a[itemCount(result)] as LowerBounded).min))
         })
 
 class MineRock(tool: Item?, costMultiplier: Int): Action("MineRock($tool)", state(
-        MENU to SingleValue(null),
-        HOLDING to SingleValue(tool)
+        MENU to Enumeration<Menu?>(null),
+        HOLDING to Enumeration(tool)
 ), mapOf(
         itemCount(Item.STONE) to AddArbitrary(),
         itemCount(Item.COAL) to AddArbitrary(),
@@ -78,8 +78,8 @@ fun resourceGainCost(item: Item, before: State, after: State): Int {
 }
 
 val CHOP_TREES = Action("CHOP_TREES", state(
-        MENU to SingleValue(null),
-        HOLDING to SingleValue(null)
+        MENU to Enumeration<Menu?>(null),
+        HOLDING to Enumeration<Item?>(null)
 ), mapOf(
         itemCount(Item.WOOD) to AddArbitrary(),
         MENU to SetTo(Menu.INVENTORY)
@@ -88,8 +88,8 @@ val CHOP_TREES = Action("CHOP_TREES", state(
 { _, a -> listOf(ResourceTarget(Item.WOOD, (a[itemCount(Item.WOOD)] as LowerBounded).min)) }
 
 val DIG_SAND = Action("DIG_SAND", state(
-        MENU to SingleValue(null),
-        HOLDING to SingleValue(Item.ROCK_SHOVEL)
+        MENU to Enumeration<Menu?>(null),
+        HOLDING to Enumeration(Item.ROCK_SHOVEL)
 ), mapOf(
         itemCount(Item.SAND) to AddArbitrary(),
         MENU to SetTo(Menu.INVENTORY)
@@ -98,28 +98,28 @@ val DIG_SAND = Action("DIG_SAND", state(
 { _, a -> listOf(ResourceTarget(Item.SAND, (a[itemCount(Item.SAND)] as LowerBounded).min)) }
 
 val OPEN_INVENTORY = Action("OPEN_INVENTORY", state(
-        MENU to SingleValue(null)
+        MENU to Enumeration<Menu?>(null)
 ), mapOf(
         MENU to SetTo(Menu.INVENTORY)
 ))
 
 val CLOSE_INVENTORY = Action("CLOSE_INVENTORY", state(
-        MENU to SingleValue(Menu.INVENTORY)
+        MENU to Enumeration(Menu.INVENTORY)
 ), mapOf(
         MENU to SetTo(null),
         HOLDING to SetTo(null)
 ))
 
 val CLOSE_CRAFTING = Action("CLOSE_CRAFTING", state(
-        MENU to SingleValue(Menu.WORKBENCH)
+        MENU to Enumeration(Menu.WORKBENCH)
 ), mapOf(
         MENU to SetTo(null)
 ))
 
 val PICK_UP_WORKBENCH = Action("PICK_UP_WORKBENCH", state(
-        MENU to SingleValue(null),
-        nextTo(Entity.WORKBENCH) to SingleValue(true),
-        HOLDING to SingleValue(Item.POWER_GLOVE)
+        MENU to Enumeration<Menu?>(null),
+        nextTo(Entity.WORKBENCH) to Enumeration(true),
+        HOLDING to Enumeration(Item.POWER_GLOVE)
 ), mapOf(
         nextTo(Entity.WORKBENCH) to SetTo(false),
         HOLDING to SetTo(Item.WORKBENCH),

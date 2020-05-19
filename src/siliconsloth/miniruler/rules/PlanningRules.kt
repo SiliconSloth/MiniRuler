@@ -2,8 +2,8 @@ package siliconsloth.miniruler.rules
 
 import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
+import siliconsloth.miniruler.planner.Enumeration
 import siliconsloth.miniruler.planner.Planner
-import siliconsloth.miniruler.planner.SingleValue
 
 fun RuleEngine.planningRules(planner: Planner) {
     rule {
@@ -71,7 +71,7 @@ fun RuleEngine.planningRules(planner: Planner) {
         delay = 6   // Allow time for all values to be updated
 
         fire {
-            val state = state(varValues.map { it.variable to SingleValue(it.value) }.toMap())
+            val state = state(varValues.map { it.variable to Enumeration(it.value) }.toMap())
             val action = planner.chooseAction(state)
 
             action.action?.let { maintain(CurrentAction(it)) }
