@@ -38,7 +38,7 @@ fun RuleEngine.attackRules() {
     // If the player is standing on top of a item it is trying to collect, keep moving in place
     // until the item is collected. Minicraft only allows items to be picked up while moving.
     rule {
-        find<CurrentAction> { action == CHOP_TREES || action is MineRock }
+        find<CurrentAction> { action == CHOP_TREES || action is MineRock || action == DIG_SAND }
 
         val player by find<Memory> { entity == Entity.PLAYER }
         find<MoveTarget> { target.entity == Entity.ITEM && player.intersects(target) }
