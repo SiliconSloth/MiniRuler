@@ -46,16 +46,22 @@ fun RuleEngine.planningRules(planner: Planner) {
         }
     }
 
-    // If the agent is aware of any workbenches existing anywhere in the world,
+    // If the agent is aware of any instance of an entity existing anywhere in the world,
     // that counts as "next to".
-    rule {
-        val benches by all<Memory> { entity == Entity.WORKBENCH }
+    Entity.values().forEach { e ->
+        rule {
+            find<Memory> { entity == e }
 
-        fire {
-            if (benches.any()) {
-                maintain(VariableValue(NEXT_TO, Entity.WORKBENCH))
-            } else {
-                maintain(VariableValue(NEXT_TO, null))
+            fire {
+                maintain(VariableValue(nextTo(e), 1))
+            }
+        }
+
+        rule {
+            not<Memory> { entity == e }
+
+            fire {
+                maintain(VariableValue(nextTo(e), 0))
             }
         }
     }

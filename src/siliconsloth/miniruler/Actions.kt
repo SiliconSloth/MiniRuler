@@ -6,11 +6,15 @@ import kotlin.math.max
 val ITEM_COUNTS = Item.values().map { it to Variable("itemCount($it)") { LowerBounded(0) } }.toMap()
 fun itemCount(item: Item) = ITEM_COUNTS[item] ?: error("Unknown item")
 
+val NEXT_TOS = Entity.values().map { it to Variable("nextTo($it)") { LowerBounded(0) } }.toMap()
+fun nextTo(entity: Entity) = NEXT_TOS[entity] ?: error("Unknown entity")
+
+val ERASE_NEXT_TOS = Entity.values().map { nextTo(it) to Set(0) }.toMap()
+
 val MENU = Variable("MENU") { AnyValue<Menu?>() }
 val HOLDING = Variable("HOLDING") { AnyValue<Item?>() }
-val NEXT_TO = Variable("NEXT_TO") { AnyValue<Entity?>() }
 
-val VARIABLES: Array<Variable<*>> = (ITEM_COUNTS.values + listOf(MENU, HOLDING, NEXT_TO)).toTypedArray()
+val VARIABLES: Array<Variable<*>> = (ITEM_COUNTS.values + NEXT_TOS.values + listOf(MENU, HOLDING)).toTypedArray()
 
 fun state(domains: Map<Variable<*>, Domain<*>>): State =
         State(VARIABLES, domains)
@@ -31,13 +35,13 @@ class Place(val item: Item, val entity: Entity): Action("Place($item)", state(
         HOLDING to SingleValue(item)
 ), mapOf(
         HOLDING to Set(null),
-        NEXT_TO to Set(entity),
+        nextTo(entity) to Set(1),
         itemCount(item) to Add(-1)
 ))
 
 class Open(val menu: Menu, val entity: Entity): Action("Open($menu)", state(
         MENU to SingleValue(null),
-        NEXT_TO to SingleValue(entity)
+        nextTo(entity) to SingleValue(1)
 ), mapOf(
         MENU to Set(menu)
 ))
@@ -54,9 +58,8 @@ class MineRock(tool: Item?, costMultiplier: Int): Action("MineRock($tool)", stat
 ), mapOf(
         itemCount(Item.STONE) to AddArbitrary(),
         itemCount(Item.COAL) to AddArbitrary(),
-        NEXT_TO to Set(null),
         MENU to Set(Menu.INVENTORY)
-), { b, a ->
+) + ERASE_NEXT_TOS, { b, a ->
     val stoneCost = resourceGainCost(Item.STONE, b, a)
     val coalCost = resourceGainCost(Item.COAL, b, a) * 3
     max(stoneCost, coalCost) * costMultiplier + 20
@@ -76,9 +79,9 @@ val CHOP_TREES = Action("CHOP_TREES", state(
         HOLDING to SingleValue(null)
 ), mapOf(
         itemCount(Item.WOOD) to AddArbitrary(),
-        NEXT_TO to Set(null),
         MENU to Set(Menu.INVENTORY)
-), { b, a -> resourceGainCost(Item.WOOD, b, a) * 30 + 20 })
+) + ERASE_NEXT_TOS,
+        { b, a -> resourceGainCost(Item.WOOD, b, a) * 30 + 20 })
 { b, a -> listOf(ResourceTarget(Item.WOOD, (a[itemCount(Item.WOOD)] as LowerBounded).min)) }
 
 val DIG_SAND = Action("DIG_SAND", state(
@@ -86,9 +89,9 @@ val DIG_SAND = Action("DIG_SAND", state(
         HOLDING to SingleValue(Item.ROCK_SHOVEL)
 ), mapOf(
         itemCount(Item.SAND) to AddArbitrary(),
-        NEXT_TO to Set(null),
         MENU to Set(Menu.INVENTORY)
-), { b, a -> resourceGainCost(Item.SAND, b, a) * 20 + 20 })
+) + ERASE_NEXT_TOS,
+        { b, a -> resourceGainCost(Item.SAND, b, a) * 20 + 20 })
 { b, a -> listOf(ResourceTarget(Item.SAND, (a[itemCount(Item.SAND)] as LowerBounded).min)) }
 
 val OPEN_INVENTORY = Action("OPEN_INVENTORY", state(
@@ -112,10 +115,10 @@ val CLOSE_CRAFTING = Action("CLOSE_CRAFTING", state(
 
 val PICK_UP_WORKBENCH = Action("PICK_UP_WORKBENCH", state(
         MENU to SingleValue(null),
-        NEXT_TO to SingleValue(Entity.WORKBENCH),
+        nextTo(Entity.WORKBENCH) to SingleValue(1),
         HOLDING to SingleValue(Item.POWER_GLOVE)
 ), mapOf(
-        NEXT_TO to Set(null),
+        nextTo(Entity.WORKBENCH) to Set(0),
         HOLDING to Set(Item.WORKBENCH),
         itemCount(Item.WORKBENCH) to Add(1)
 ))
