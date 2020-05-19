@@ -3,6 +3,7 @@ package siliconsloth.miniruler
 import com.mojang.ld22.Game
 import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.pathfinder.PathFinder
+import siliconsloth.miniruler.rules.aimBox
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics
@@ -102,16 +103,16 @@ class Visualizer(val engine: RuleEngine, val pathFinder: PathFinder): JPanel() {
                 } else {
                     val ord = it.entity.ordinal - 23
                     g2d.color = Color((ord * 163 + 87) % 256, (ord * 3 + 90) % 256, (ord * 321 + 54) % 256, 255)
-                    g2d.fillRect(it.pos.x - 6, it.pos.y - 6, 12, 12)
+                    g2d.fillRect(it.pos.x - it.entity.r.x, it.pos.y - it.entity.r.y, it.entity.r.x * 2, it.entity.r.y * 2)
                 }
 
-//                if (it.entity == Entity.PLAYER) {
-//                    Direction.values().forEach { d ->
-//                        val rotated = Memory(it.entity, it.pos, d, null)
-//                        val box = aimBox(rotated, 10)
-//                        g2d.drawRect(box.min.x, box.min.y, box.max.x - box.min.x, box.max.y - box.min.y)
-//                    }
-//                }
+                if (it.entity == Entity.PLAYER) {
+                    Direction.values().forEach { d ->
+                        val rotated = Memory(it.entity, it.pos, d, null)
+                        val box = aimBox(rotated)
+                        g2d.drawRect(box.min.x, box.min.y, box.max.x - box.min.x, box.max.y - box.min.y)
+                    }
+                }
             }
 
             g2d.color = Color(0, 255, 0, 255)
