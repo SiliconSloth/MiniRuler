@@ -115,4 +115,8 @@ public class CraftingMenu extends Menu {
 		}
 		// renderItemList(screen, 12, 4, 19, 11, recipes.get(selected).costs, -1);
 	}
+
+	public List<Recipe> getRecipes() {
+		return recipes;
+	}
 }

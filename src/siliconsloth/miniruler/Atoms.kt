@@ -1,5 +1,6 @@
 package siliconsloth.miniruler
 
+import com.mojang.ld22.crafting.Crafting
 import com.mojang.ld22.entity.*
 import com.mojang.ld22.entity.particle.SmashParticle
 import com.mojang.ld22.entity.particle.TextParticle
@@ -31,15 +32,22 @@ enum class Key {
     }
 }
 
-enum class Menu {
-    ABOUT, CONTAINER, CRAFTING, DEAD, INSTRUCTIONS, INVENTORY, LEVEL_TRANSITION, TITLE, WON;
+enum class Menu(val isCrafting: Boolean = false) {
+    ABOUT, CONTAINER, ANVIL(true), FURNACE(true), OVEN(true), WORKBENCH(true), DEAD,
+    INSTRUCTIONS, INVENTORY, LEVEL_TRANSITION, TITLE, WON;
 
     companion object {
         fun fromGameMenu(menu: GameMenu): Menu =
                 when (menu) {
                     is AboutMenu -> ABOUT
                     is ContainerMenu -> CONTAINER
-                    is CraftingMenu -> CRAFTING
+                    is CraftingMenu -> when (menu.recipes.size) {
+                        Crafting.anvilRecipes.size -> ANVIL
+                        Crafting.furnaceRecipes.size -> FURNACE
+                        Crafting.ovenRecipes.size -> OVEN
+                        Crafting.workbenchRecipes.size -> WORKBENCH
+                        else -> throw InvalidParameterException("Unknown crafting menu")
+                    }
                     is DeadMenu -> DEAD
                     is InstructionsMenu -> INSTRUCTIONS
                     is InventoryMenu -> INVENTORY

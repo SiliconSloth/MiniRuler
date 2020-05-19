@@ -26,9 +26,25 @@ class Select(val item: Item): Action("Select($item)", state(
         HOLDING to Set(item)
 ))
 
+class Place(val item: Item, val entity: Entity): Action("Place($item)", state(
+        MENU to SingleValue(null),
+        HOLDING to SingleValue(item)
+), mapOf(
+        HOLDING to Set(null),
+        NEXT_TO to Set(entity),
+        itemCount(item) to Add(-1)
+))
+
+class Open(val menu: Menu, val entity: Entity): Action("Open($menu)", state(
+        MENU to SingleValue(null),
+        NEXT_TO to SingleValue(entity)
+), mapOf(
+        MENU to Set(menu)
+))
+
 class Craft(val result: Item, ingredients: Map<Item, Int>): Action("Craft($result)", state(
         ingredients.map { itemCount(it.key) to LowerBounded(it.value) }.toMap()
-                .plus(MENU to SingleValue(Menu.CRAFTING))
+                .plus(MENU to SingleValue(Menu.WORKBENCH))
 ), ingredients.map { itemCount(it.key) to Add(-it.value) }.toMap()
         .plus(itemCount(result) to Add(1)))
 
@@ -88,24 +104,8 @@ val CLOSE_INVENTORY = Action("CLOSE_INVENTORY", state(
         HOLDING to Set(null)
 ))
 
-val PLACE_WORKBENCH = Action("PLACE_WORKBENCH", state(
-        MENU to SingleValue(null),
-        HOLDING to SingleValue(Item.WORKBENCH)
-), mapOf(
-        HOLDING to Set(null),
-        NEXT_TO to Set(Entity.WORKBENCH),
-        itemCount(Item.WORKBENCH) to Add(-1)
-))
-
-val OPEN_CRAFTING = Action("OPEN_CRAFTING", state(
-        MENU to SingleValue(null),
-        NEXT_TO to SingleValue(Entity.WORKBENCH)
-), mapOf(
-        MENU to Set(Menu.CRAFTING)
-))
-
 val CLOSE_CRAFTING = Action("CLOSE_CRAFTING", state(
-        MENU to SingleValue(Menu.CRAFTING)
+        MENU to SingleValue(Menu.WORKBENCH)
 ), mapOf(
         MENU to Set(null)
 ))
@@ -120,25 +120,41 @@ val PICK_UP_WORKBENCH = Action("PICK_UP_WORKBENCH", state(
         itemCount(Item.WORKBENCH) to Add(1)
 ))
 
-val CRAFT_WOOD_PCIKAXE = Craft(Item.WOOD_PICKAXE, mapOf(
-        Item.WOOD to 5
-))
+val PLACE_ACTIONS = listOf(
+        Place(Item.ANVIL, Entity.ANVIL),
+        Place(Item.FURNACE, Entity.FURNACE),
+        Place(Item.OVEN, Entity.OVEN),
+        Place(Item.WORKBENCH, Entity.WORKBENCH)
+)
 
-val CRAFT_ROCK_PCIKAXE = Craft(Item.ROCK_PICKAXE, mapOf(
-        Item.WOOD to 5,
-        Item.STONE to 5
-))
+val OPEN_ACTIONS = listOf(
+        Open(Menu.ANVIL, Entity.ANVIL),
+        Open(Menu.FURNACE, Entity.FURNACE),
+        Open(Menu.OVEN, Entity.OVEN),
+        Open(Menu.WORKBENCH, Entity.WORKBENCH)
+)
 
-val CRAFT_ROCK_SHOVEL = Craft(Item.ROCK_SHOVEL, mapOf(
-        Item.WOOD to 5,
-        Item.STONE to 5
-))
+val CRAFT_ACTIONS = listOf(
+        Craft(Item.WOOD_PICKAXE, mapOf(
+                Item.WOOD to 5
+        )),
+        Craft(Item.ROCK_PICKAXE, mapOf(
+                Item.WOOD to 5,
+                Item.STONE to 5
+        )),
+        Craft(Item.ROCK_SHOVEL, mapOf(
+                Item.WOOD to 5,
+                Item.STONE to 5
+        )),
+        Craft(Item.FURNACE, mapOf(
+                Item.STONE to 20
+        ))
+)
 
 val MINE_ROCK_WITH_HAND = MineRock(null, 50)
 val MINE_ROCK_WITH_WOOD = MineRock(Item.WOOD_PICKAXE, 20)
 val MINE_ROCK_WITH_ROCK = MineRock(Item.ROCK_PICKAXE, 15)
 
-val ALL_ACTIONS = listOf(CHOP_TREES, DIG_SAND, OPEN_INVENTORY, CLOSE_INVENTORY, PLACE_WORKBENCH, OPEN_CRAFTING,
-        CRAFT_WOOD_PCIKAXE, CRAFT_ROCK_PCIKAXE, CRAFT_ROCK_SHOVEL,
-        CLOSE_CRAFTING, PICK_UP_WORKBENCH, MINE_ROCK_WITH_HAND, MINE_ROCK_WITH_WOOD, MINE_ROCK_WITH_ROCK)
-        .plus(Item.values().map { Select(it) })
+val ALL_ACTIONS = listOf(CHOP_TREES, DIG_SAND, OPEN_INVENTORY, CLOSE_INVENTORY, CLOSE_CRAFTING,
+        PICK_UP_WORKBENCH, MINE_ROCK_WITH_HAND, MINE_ROCK_WITH_WOOD, MINE_ROCK_WITH_ROCK)
+        .plus(PLACE_ACTIONS).plus(OPEN_ACTIONS).plus(CRAFT_ACTIONS).plus(Item.values().map { Select(it) })

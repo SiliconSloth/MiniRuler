@@ -9,6 +9,7 @@ import siliconsloth.miniruler.math.Vector
 import siliconsloth.miniruler.pathfinder.PathFinder
 import siliconsloth.miniruler.planner.LowerBounded
 import siliconsloth.miniruler.planner.Planner
+import siliconsloth.miniruler.planner.SingleValue
 import siliconsloth.miniruler.rules.*
 
 fun main() {
@@ -17,7 +18,8 @@ fun main() {
     engine.addFactStore(spatialStore)
 
     val goal = state(itemCount(Item.WORKBENCH) to LowerBounded(1), itemCount(Item.ROCK_PICKAXE) to LowerBounded(1),
-                            itemCount(Item.SAND) to LowerBounded(100), itemCount(Item.COAL) to LowerBounded(4))
+                            itemCount(Item.SAND) to LowerBounded(16), itemCount(Item.COAL) to LowerBounded(4),
+                            MENU to SingleValue(Menu.FURNACE))
     val planner = Planner(goal, ALL_ACTIONS)
 
     val pathFinder = PathFinder(spatialStore)

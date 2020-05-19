@@ -47,10 +47,8 @@ fun RuleEngine.attackRules() {
         }
     }
 
-    // When trying to place a workbench, turn to point in a direction where there is empty space in front of the player
-    // then place the workbench.
     faceClear({
-        find<CurrentAction> { action == PLACE_WORKBENCH }
+        find<CurrentAction> { action is Place }
     }, { obstacle, player ->
         // Ensure the adjacent tile to the player is free.
         obstacle.entity.solid && obstacle.pos == ((player.pos) / 16) * 16 + Vector(8,8) + player.facing.vector * 16
@@ -58,15 +56,14 @@ fun RuleEngine.attackRules() {
         maintain(KeyRequest(Key.ATTACK))
     })
 
-    // If trying to open the crafting menu while facing a workbench, press the Menu key.
     rule {
-        find<CurrentAction> { action == OPEN_CRAFTING }
+        val action by find<CurrentAction> { action is Open }
         not<MenuOpen>()
         val player by find<Memory> { entity == Entity.PLAYER }
         val aims by all<Memory>(AreaFilter { aimBox(player) })
 
         fire {
-            if (aims.any { it.entity == Entity.WORKBENCH }) {
+            if (aims.any { it.entity == (action.action as Open).entity }) {
                 maintain(GuardedKeyRequest(Key.MENU))
             }
         }

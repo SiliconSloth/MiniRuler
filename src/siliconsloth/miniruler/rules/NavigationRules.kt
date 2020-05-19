@@ -46,13 +46,12 @@ fun RuleEngine.navigationRules(pathFinder: PathFinder) {
         }
     }
 
-    // Target workbenches if trying to open one.
     rule {
-        find<CurrentAction> { action == OPEN_CRAFTING || action == PICK_UP_WORKBENCH }
-        val bench by find<Memory> { entity == Entity.WORKBENCH }
+        val action by find<CurrentAction> { action is Open || action == PICK_UP_WORKBENCH }
+        val furniture by find<Memory> { entity == (action.action as? Open)?.entity ?: Entity.WORKBENCH }
 
         fire {
-            maintain(PossibleTarget(bench))
+            maintain(PossibleTarget(furniture))
         }
     }
 

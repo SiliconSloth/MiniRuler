@@ -47,7 +47,7 @@ fun RuleEngine.inventoryRules() {
 
     rule {
         find<CurrentAction> { action == CLOSE_CRAFTING }
-        find<MenuOpen> { menu == Menu.CRAFTING }
+        find<MenuOpen> { menu.isCrafting }
 
         fire {
             maintain(GuardedKeyRequest(Key.MENU))
