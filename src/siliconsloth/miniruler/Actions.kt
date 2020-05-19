@@ -111,7 +111,7 @@ val CLOSE_INVENTORY = Action("CLOSE_INVENTORY", state(
 ))
 
 val CLOSE_CRAFTING = Action("CLOSE_CRAFTING", state(
-        MENU to Enumeration(Menu.WORKBENCH)
+        MENU to Enumeration(Menu.values().filter { it.isCrafting }.toSet())
 ), mapOf(
         MENU to SetTo(null)
 ))
