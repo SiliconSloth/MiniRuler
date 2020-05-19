@@ -9,7 +9,7 @@ fun itemCount(item: Item) = ITEM_COUNTS[item] ?: error("Unknown item")
 val NEXT_TOS = Entity.values().map { it to Variable("nextTo($it)") { AnyValue<Boolean>() } }.toMap()
 fun nextTo(entity: Entity) = NEXT_TOS[entity] ?: error("Unknown entity")
 
-val ERASE_NEXT_TOS = Entity.values().map { nextTo(it) to Set(false) }.toMap()
+val ERASE_NEXT_TOS = Entity.values().map { nextTo(it) to SetTo(false) }.toMap()
 
 val MENU = Variable("MENU") { AnyValue<Menu?>() }
 val HOLDING = Variable("HOLDING") { AnyValue<Item?>() }
@@ -26,16 +26,16 @@ class Select(val item: Item): Action("Select($item)", state(
         MENU to SingleValue(Menu.INVENTORY),
         itemCount(item) to LowerBounded(1)
 ), mapOf(
-        MENU to Set(null),
-        HOLDING to Set(item)
+        MENU to SetTo(null),
+        HOLDING to SetTo(item)
 ))
 
 class Place(val item: Item, val entity: Entity): Action("Place($item)", state(
         MENU to SingleValue(null),
         HOLDING to SingleValue(item)
 ), mapOf(
-        HOLDING to Set(null),
-        nextTo(entity) to Set(true),
+        HOLDING to SetTo(null),
+        nextTo(entity) to SetTo(true),
         itemCount(item) to Add(-1)
 ))
 
@@ -43,7 +43,7 @@ class Open(val menu: Menu, val entity: Entity): Action("Open($menu)", state(
         MENU to SingleValue(null),
         nextTo(entity) to SingleValue(true)
 ), mapOf(
-        MENU to Set(menu)
+        MENU to SetTo(menu)
 ))
 
 class Craft(val result: Item, ingredients: Map<Item, Int>, val menu: Menu = Menu.WORKBENCH):
@@ -61,7 +61,7 @@ class MineRock(tool: Item?, costMultiplier: Int): Action("MineRock($tool)", stat
 ), mapOf(
         itemCount(Item.STONE) to AddArbitrary(),
         itemCount(Item.COAL) to AddArbitrary(),
-        MENU to Set(Menu.INVENTORY)
+        MENU to SetTo(Menu.INVENTORY)
 ) + ERASE_NEXT_TOS, { b, a ->
     val stoneCost = resourceGainCost(Item.STONE, b, a)
     val coalCost = resourceGainCost(Item.COAL, b, a) * 3
@@ -82,7 +82,7 @@ val CHOP_TREES = Action("CHOP_TREES", state(
         HOLDING to SingleValue(null)
 ), mapOf(
         itemCount(Item.WOOD) to AddArbitrary(),
-        MENU to Set(Menu.INVENTORY)
+        MENU to SetTo(Menu.INVENTORY)
 ) + ERASE_NEXT_TOS,
         { b, a -> resourceGainCost(Item.WOOD, b, a) * 30 + 20 })
 { _, a -> listOf(ResourceTarget(Item.WOOD, (a[itemCount(Item.WOOD)] as LowerBounded).min)) }
@@ -92,7 +92,7 @@ val DIG_SAND = Action("DIG_SAND", state(
         HOLDING to SingleValue(Item.ROCK_SHOVEL)
 ), mapOf(
         itemCount(Item.SAND) to AddArbitrary(),
-        MENU to Set(Menu.INVENTORY)
+        MENU to SetTo(Menu.INVENTORY)
 ) + ERASE_NEXT_TOS,
         { b, a -> resourceGainCost(Item.SAND, b, a) * 20 + 20 })
 { _, a -> listOf(ResourceTarget(Item.SAND, (a[itemCount(Item.SAND)] as LowerBounded).min)) }
@@ -100,20 +100,20 @@ val DIG_SAND = Action("DIG_SAND", state(
 val OPEN_INVENTORY = Action("OPEN_INVENTORY", state(
         MENU to SingleValue(null)
 ), mapOf(
-        MENU to Set(Menu.INVENTORY)
+        MENU to SetTo(Menu.INVENTORY)
 ))
 
 val CLOSE_INVENTORY = Action("CLOSE_INVENTORY", state(
         MENU to SingleValue(Menu.INVENTORY)
 ), mapOf(
-        MENU to Set(null),
-        HOLDING to Set(null)
+        MENU to SetTo(null),
+        HOLDING to SetTo(null)
 ))
 
 val CLOSE_CRAFTING = Action("CLOSE_CRAFTING", state(
         MENU to SingleValue(Menu.WORKBENCH)
 ), mapOf(
-        MENU to Set(null)
+        MENU to SetTo(null)
 ))
 
 val PICK_UP_WORKBENCH = Action("PICK_UP_WORKBENCH", state(
@@ -121,8 +121,8 @@ val PICK_UP_WORKBENCH = Action("PICK_UP_WORKBENCH", state(
         nextTo(Entity.WORKBENCH) to SingleValue(true),
         HOLDING to SingleValue(Item.POWER_GLOVE)
 ), mapOf(
-        nextTo(Entity.WORKBENCH) to Set(false),
-        HOLDING to Set(Item.WORKBENCH),
+        nextTo(Entity.WORKBENCH) to SetTo(false),
+        HOLDING to SetTo(Item.WORKBENCH),
         itemCount(Item.WORKBENCH) to Add(1)
 ))
 

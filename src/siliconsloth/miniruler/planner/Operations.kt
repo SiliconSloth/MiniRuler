@@ -77,7 +77,7 @@ class AddArbitrary: Operation<Int> {
 /**
  * Set the variable's value to a fixed value of the same type.
  */
-data class Set<T>(val value: T): Operation<T> {
+data class SetTo<T>(val value: T): Operation<T> {
     override fun apply(before: Domain<out T>): Domain<out T> =
             if (before is NoValue) NoValue() else SingleValue(value)
 
