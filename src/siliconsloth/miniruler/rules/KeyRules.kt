@@ -52,6 +52,8 @@ fun RuleEngine.keyRules() {
 
     rule {
         not<JiggleRequest>()
+        not<FaceRequest>()
+
         find<MoveRequest> { direction == Direction.UP }
 
         fire {
@@ -61,6 +63,8 @@ fun RuleEngine.keyRules() {
 
     rule {
         not<JiggleRequest>()
+        not<FaceRequest>()
+
         find<MoveRequest> { direction == Direction.DOWN }
         not<MoveRequest> { direction == Direction.UP }
 
@@ -71,6 +75,8 @@ fun RuleEngine.keyRules() {
 
     rule {
         not<JiggleRequest>()
+        not<FaceRequest>()
+
         find<MoveRequest> { direction == Direction.LEFT }
 
         fire {
@@ -80,6 +86,8 @@ fun RuleEngine.keyRules() {
 
     rule {
         not<JiggleRequest>()
+        not<FaceRequest>()
+
         find<MoveRequest> { direction == Direction.RIGHT }
         not<MoveRequest> { direction == Direction.LEFT }
 
@@ -94,6 +102,7 @@ fun RuleEngine.keyRules() {
         val leftRequest = KeyRequest(Key.LEFT)
         val rightRequest = KeyRequest(Key.RIGHT)
 
+        not<FaceRequest>()
         find<JiggleRequest>()
         // Reevaluate every time the player moves.
         find<Memory> { entity == Entity.PLAYER }
@@ -124,6 +133,15 @@ fun RuleEngine.keyRules() {
 
         fire {
             maintain(KeyRequest(spam.key))
+        }
+    }
+
+    rule {
+        val request by find<FaceRequest>()
+        find<Memory> { entity == Entity.PLAYER && facing != request.direction }
+
+        fire {
+            maintain(KeyRequest(Key.fromDirection(request.direction)))
         }
     }
 }
