@@ -46,9 +46,10 @@ class Open(val menu: Menu, val entity: Entity): Action("Open($menu)", state(
         MENU to Set(menu)
 ))
 
-class Craft(val result: Item, ingredients: Map<Item, Int>): Action("Craft($result)", state(
-        ingredients.map { itemCount(it.key) to LowerBounded(it.value) }.toMap()
-                .plus(MENU to SingleValue(Menu.WORKBENCH))
+class Craft(val result: Item, ingredients: Map<Item, Int>, val menu: Menu = Menu.WORKBENCH):
+        Action("Craft($result)", state(
+            ingredients.map { itemCount(it.key) to LowerBounded(it.value) }.toMap()
+                    .plus(MENU to SingleValue(menu))
 ), ingredients.map { itemCount(it.key) to Add(-it.value) }.toMap()
         .plus(itemCount(result) to Add(1)), resourceTarget = { _,a ->
             listOf(ResourceTarget(result, (a[itemCount(result)] as LowerBounded).min))
@@ -153,7 +154,12 @@ val CRAFT_ACTIONS = listOf(
         )),
         Craft(Item.FURNACE, mapOf(
                 Item.STONE to 20
-        ))
+        )),
+
+        Craft(Item.GLASS, mapOf(
+                Item.SAND to 4,
+                Item.COAL to 1
+        ), menu = Menu.FURNACE)
 )
 
 val MINE_ROCK_WITH_HAND = MineRock(null, 50)
