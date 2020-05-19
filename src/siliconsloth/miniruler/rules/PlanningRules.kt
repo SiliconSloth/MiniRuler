@@ -70,11 +70,11 @@ fun RuleEngine.planningRules(planner: Planner) {
             val action = planner.chooseAction(state)
 
             action.action?.let { maintain(CurrentAction(it)) }
-            action.resourceTarget?.let { maintain(it) }
+            action.resourceTargets.forEach { maintain(it) }
 
             println(action.action)
             println(action.cost)
-            println(action.resourceTarget)
+            println(action.resourceTargets)
             println(varValues.filter { it.value != 0 })
         }
     }

@@ -11,11 +11,11 @@ import siliconsloth.miniruler.*
  */
 class Planner(goal: State, val actions: List<Action>) {
     // cost is length of path from current state to goal via this action.
-    data class ActionProposal(val action: Action?, val cost: Int, val resourceTarget: ResourceTarget?)
+    data class ActionProposal(val action: Action?, val cost: Int, val resourceTargets: List<ResourceTarget>)
     // cost is length of shortest path to goal from this state.
     data class StateAndCost(val state: State, val cost: Int)
 
-    val chosenActions = mutableMapOf(goal to ActionProposal(null, 0, null))
+    val chosenActions = mutableMapOf(goal to ActionProposal(null, 0, listOf()))
     // Used as a FIFO queue so that the lowest-cost states are always visited next.
     val frontier = mutableListOf(StateAndCost(goal, 0))
     val finalized = mutableSetOf<State>()
@@ -52,6 +52,6 @@ class Planner(goal: State, val actions: List<Action>) {
                 }
             }
         }
-        return result ?: ActionProposal(null, -1, null)
+        return result ?: ActionProposal(null, -1, listOf())
     }
 }

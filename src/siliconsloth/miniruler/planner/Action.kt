@@ -4,7 +4,7 @@ import siliconsloth.miniruler.ResourceTarget
 
 open class Action(val name: String, val prerequisite: State, val varOps: Map<Variable<*>, Operation<*>>,
                   val cost: (State, State) -> Int = { _,_ -> 1 },
-                  val resourceTarget: (State, State) -> ResourceTarget? = { _,_ -> null }) {
+                  val resourceTarget: (State, State) -> List<ResourceTarget> = { _,_ -> listOf() }) {
 
     val variables = prerequisite.variables
     val operations = variables.map { varOps[it] }.toTypedArray()

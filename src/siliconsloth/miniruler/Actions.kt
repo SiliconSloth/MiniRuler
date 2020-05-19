@@ -1,6 +1,7 @@
 package siliconsloth.miniruler
 
 import siliconsloth.miniruler.planner.*
+import kotlin.math.max
 
 val ITEM_COUNTS = Item.values().map { it to Variable("itemCount($it)") { LowerBounded(0) } }.toMap()
 fun itemCount(item: Item) = ITEM_COUNTS[item] ?: error("Unknown item")
@@ -36,10 +37,16 @@ class MineRock(tool: Item?, costMultiplier: Int): Action("MineRock($tool)", stat
         HOLDING to SingleValue(tool)
 ), mapOf(
         itemCount(Item.STONE) to AddArbitrary(),
+        itemCount(Item.COAL) to AddArbitrary(),
         NEXT_TO to Set(null),
         MENU to Set(Menu.INVENTORY)
-), { b, a -> resourceGainCost(Item.STONE, b, a) * costMultiplier + 20 },
-{ b, a -> ResourceTarget(Item.STONE, (a[itemCount(Item.STONE)] as LowerBounded).min) })
+), { b, a ->
+    val stoneCost = resourceGainCost(Item.STONE, b, a)
+    val coalCost = resourceGainCost(Item.COAL, b, a) * 3
+    max(stoneCost, coalCost) * costMultiplier + 20
+},
+{ b, a -> listOf(ResourceTarget(Item.STONE, (a[itemCount(Item.STONE)] as LowerBounded).min),
+                 ResourceTarget(Item.COAL, (a[itemCount(Item.COAL)] as LowerBounded).min)) })
 
 fun resourceGainCost(item: Item, before: State, after: State): Int {
     val countBefore = (before[itemCount(item)] as LowerBounded).min
@@ -56,7 +63,7 @@ val CHOP_TREES = Action("CHOP_TREES", state(
         NEXT_TO to Set(null),
         MENU to Set(Menu.INVENTORY)
 ), { b, a -> resourceGainCost(Item.WOOD, b, a) * 30 + 20 })
-{ b, a -> ResourceTarget(Item.WOOD, (a[itemCount(Item.WOOD)] as LowerBounded).min) }
+{ b, a -> listOf(ResourceTarget(Item.WOOD, (a[itemCount(Item.WOOD)] as LowerBounded).min)) }
 
 val DIG_SAND = Action("DIG_SAND", state(
         MENU to SingleValue(null),
@@ -66,7 +73,7 @@ val DIG_SAND = Action("DIG_SAND", state(
         NEXT_TO to Set(null),
         MENU to Set(Menu.INVENTORY)
 ), { b, a -> resourceGainCost(Item.SAND, b, a) * 20 + 20 })
-{ b, a -> ResourceTarget(Item.SAND, (a[itemCount(Item.SAND)] as LowerBounded).min) }
+{ b, a -> listOf(ResourceTarget(Item.SAND, (a[itemCount(Item.SAND)] as LowerBounded).min)) }
 
 val OPEN_INVENTORY = Action("OPEN_INVENTORY", state(
         MENU to SingleValue(null)
