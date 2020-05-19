@@ -46,6 +46,16 @@ class Open(val menu: Menu, val entity: Entity): Action("Open($menu)", state(
         MENU to SetTo(menu)
 ))
 
+class PickUp(val entity: Entity, val item: Item): Action("PickUp($entity)", state(
+        MENU to Enumeration<Menu?>(null),
+        nextTo(entity) to Enumeration(true),
+        HOLDING to Enumeration(Item.POWER_GLOVE)
+), mapOf(
+        nextTo(entity) to SetTo(false),
+        HOLDING to SetTo(item),
+        itemCount(item) to Add(1)
+))
+
 class Craft(val result: Item, ingredients: Map<Item, Int>, val menu: Menu = Menu.WORKBENCH):
         Action("Craft($result)", state(
             ingredients.map { itemCount(it.key) to LowerBounded(it.value) }.toMap()
@@ -116,16 +126,6 @@ val CLOSE_CRAFTING = Action("CLOSE_CRAFTING", state(
         MENU to SetTo(null)
 ))
 
-val PICK_UP_WORKBENCH = Action("PICK_UP_WORKBENCH", state(
-        MENU to Enumeration<Menu?>(null),
-        nextTo(Entity.WORKBENCH) to Enumeration(true),
-        HOLDING to Enumeration(Item.POWER_GLOVE)
-), mapOf(
-        nextTo(Entity.WORKBENCH) to SetTo(false),
-        HOLDING to SetTo(Item.WORKBENCH),
-        itemCount(Item.WORKBENCH) to Add(1)
-))
-
 val PLACE_ACTIONS = listOf(
         Place(Item.ANVIL, Entity.ANVIL),
         Place(Item.FURNACE, Entity.FURNACE),
@@ -138,6 +138,13 @@ val OPEN_ACTIONS = listOf(
         Open(Menu.FURNACE, Entity.FURNACE),
         Open(Menu.OVEN, Entity.OVEN),
         Open(Menu.WORKBENCH, Entity.WORKBENCH)
+)
+
+val PICK_UP_ACTIONS = listOf(
+        PickUp(Entity.ANVIL, Item.ANVIL),
+        PickUp(Entity.FURNACE, Item.FURNACE),
+        PickUp(Entity.OVEN, Item.OVEN),
+        PickUp(Entity.WORKBENCH, Item.WORKBENCH)
 )
 
 val CRAFT_ACTIONS = listOf(
@@ -167,5 +174,6 @@ val MINE_ROCK_WITH_WOOD = MineRock(Item.WOOD_PICKAXE, 20)
 val MINE_ROCK_WITH_ROCK = MineRock(Item.ROCK_PICKAXE, 15)
 
 val ALL_ACTIONS = listOf(CHOP_TREES, DIG_SAND, OPEN_INVENTORY, CLOSE_INVENTORY, CLOSE_CRAFTING,
-        PICK_UP_WORKBENCH, MINE_ROCK_WITH_HAND, MINE_ROCK_WITH_WOOD, MINE_ROCK_WITH_ROCK)
-        .plus(PLACE_ACTIONS).plus(OPEN_ACTIONS).plus(CRAFT_ACTIONS).plus(Item.values().map { Select(it) })
+        MINE_ROCK_WITH_HAND, MINE_ROCK_WITH_WOOD, MINE_ROCK_WITH_ROCK)
+        .plus(PLACE_ACTIONS).plus(OPEN_ACTIONS).plus(PICK_UP_ACTIONS).plus(CRAFT_ACTIONS)
+        .plus(Item.values().map { Select(it) })

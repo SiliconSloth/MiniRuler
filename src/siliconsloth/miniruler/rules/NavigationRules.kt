@@ -47,8 +47,8 @@ fun RuleEngine.navigationRules(pathFinder: PathFinder) {
     }
 
     rule {
-        val action by find<CurrentAction> { action is Open || action == PICK_UP_WORKBENCH }
-        val furniture by find<Memory> { entity == (action.action as? Open)?.entity ?: Entity.WORKBENCH }
+        val action by find<CurrentAction> { action is Open || action is PickUp }
+        val furniture by find<Memory> { entity == (action.action as? Open)?.entity ?: (action.action as PickUp).entity }
 
         fire {
             maintain(PossibleTarget(furniture))
