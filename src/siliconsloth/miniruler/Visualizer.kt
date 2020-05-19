@@ -106,13 +106,13 @@ class Visualizer(val engine: RuleEngine, val pathFinder: PathFinder): JPanel() {
                     g2d.fillRect(it.pos.x - it.entity.r.x, it.pos.y - it.entity.r.y, it.entity.r.x * 2, it.entity.r.y * 2)
                 }
 
-                if (it.entity == Entity.PLAYER) {
-                    Direction.values().forEach { d ->
-                        val rotated = Memory(it.entity, it.pos, d, null)
-                        val box = aimBox(rotated)
-                        g2d.drawRect(box.min.x, box.min.y, box.max.x - box.min.x, box.max.y - box.min.y)
-                    }
-                }
+//                if (it.entity == Entity.PLAYER) {
+//                    Direction.values().forEach { d ->
+//                        val rotated = Memory(it.entity, it.pos, d, null)
+//                        val box = aimBox(rotated)
+//                        g2d.drawRect(box.min.x, box.min.y, box.max.x - box.min.x, box.max.y - box.min.y)
+//                    }
+//                }
             }
 
             g2d.color = Color(0, 255, 0, 255)
