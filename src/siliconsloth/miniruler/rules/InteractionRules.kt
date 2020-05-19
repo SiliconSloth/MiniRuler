@@ -89,8 +89,8 @@ fun RuleEngine.attackRules() {
     }
 }
 
-fun aimingAt(actor: Memory, target: Memory): Boolean =
-        aimBox(actor).intersects(Box(target.pos, target.pos, target.entity.r))
+fun aimingAt(actor: Memory, target: Memory, padding: Int = 0): Boolean =
+        aimBox(actor).intersects(Box(target.pos, target.pos, target.entity.r + Vector(padding, padding)))
 
 fun aimingAtTile(actor: Memory, target: Memory): Boolean {
     val tile = ((actor.pos - Vector(0,2)) + actor.facing.vector * 12) / 16

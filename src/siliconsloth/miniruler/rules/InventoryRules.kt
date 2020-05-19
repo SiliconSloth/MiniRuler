@@ -10,7 +10,7 @@ fun RuleEngine.inventoryRules() {
         find<CurrentAction> { action == OPEN_INVENTORY }
         not<MenuOpen>()
     }, { obstacle, player ->
-        obstacle.entity == Entity.WORKBENCH && aimingAt(player, obstacle)
+        obstacle.entity == Entity.WORKBENCH && aimingAt(player, obstacle, padding = 2)
     }, {
         maintain(GuardedKeyRequest(Key.MENU))
     })
