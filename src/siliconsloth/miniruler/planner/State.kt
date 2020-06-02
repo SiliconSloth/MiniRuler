@@ -37,5 +37,6 @@ class State(val variables: Array<Variable<*>>, val domains: Array<Domain<*>>) {
     override fun hashCode(): Int = 0
 
     override fun toString(): String =
-            "State" + variables.zip(domains).filter { it.second != LowerBounded(0) }.toMap()
+            "State" + variables.zip(domains).filter { it.second != LowerBounded(0) && it.second != Enumeration(0)
+                    && it.second != Enumeration(false) && it.second !is AnyValue }.toMap()
 }

@@ -29,6 +29,7 @@ class Planner(val goal: State, val actions: List<Action>) {
     // Returns the chosen action for that state, or a null action if the search terminates without reaching the state.
     private fun searchTo(target: State): ActionProposal {
         var result: ActionProposal? = null
+        var step = 0
         while (result == null && frontier.any()) {
             val current = frontier.minBy { it.cost }!!
             finalized.add(current.state)
@@ -37,6 +38,10 @@ class Planner(val goal: State, val actions: List<Action>) {
                 break
             }
             frontier.remove(current)
+            if (step % 1000 == 0) {
+                println(current.cost)
+            }
+            step++
 
             // Try unapplying every action to see if it ends up in a valid, novel state.
             // If the resulting state is a subset of an already visited state, we can discard this action edge;

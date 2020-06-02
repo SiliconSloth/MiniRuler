@@ -17,7 +17,7 @@ fun main() {
     val spatialStore = SpatialMap<Memory>()
     engine.addFactStore(spatialStore)
 
-    val goal = state(itemCount(Item.WORKBENCH) to LowerBounded(1), //itemCount(Item.ROCK_PICKAXE) to LowerBounded(1),
+    val goal = state(itemCount(Item.WORKBENCH) to LowerBounded(1), itemCount(Item.ROCK_PICKAXE) to LowerBounded(1),
                             itemCount(Item.GLASS) to LowerBounded(4), itemCount(Item.FURNACE) to LowerBounded(1))
     val planner = Planner(goal, ALL_ACTIONS)
 

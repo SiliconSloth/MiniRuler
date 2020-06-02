@@ -3,7 +3,9 @@ package siliconsloth.miniruler.rules
 import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.planner.Enumeration
+import siliconsloth.miniruler.planner.PartialOrderPlanner
 import siliconsloth.miniruler.planner.Planner
+import kotlin.system.exitProcess
 
 fun RuleEngine.planningRules(planner: Planner) {
     rule {
@@ -72,6 +74,8 @@ fun RuleEngine.planningRules(planner: Planner) {
 
         fire {
             val state = state(varValues.map { it.variable to Enumeration(it.value) }.toMap())
+            PartialOrderPlanner(planner.goal, planner.actions).run(state)
+            exitProcess(0)
             val action = planner.chooseAction(state)
 
             action.action?.let { maintain(CurrentAction(it)) }
