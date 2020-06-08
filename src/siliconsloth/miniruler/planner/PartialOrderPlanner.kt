@@ -7,7 +7,9 @@ import it.uniroma1.dis.wsngroup.gexf4j.core.Node
 import it.uniroma1.dis.wsngroup.gexf4j.core.impl.GexfImpl
 import it.uniroma1.dis.wsngroup.gexf4j.core.impl.SpellImpl
 import it.uniroma1.dis.wsngroup.gexf4j.core.impl.StaxGraphWriter
+import siliconsloth.miniruler.Item
 import siliconsloth.miniruler.VARIABLES
+import siliconsloth.miniruler.itemCount
 import siliconsloth.miniruler.math.PartialOrder
 import siliconsloth.miniruler.state
 import java.io.File
@@ -22,6 +24,9 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
     var timeStep = 0
     var edgeId = 0
     var lastPlan = Plan(listOf(), setOf(), PartialOrder())
+
+    val choices = mutableListOf(0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 4, 1, 0, 1, 0, 1, 1, 4, 0, 1)
+    val demotions = mutableListOf(true, true, true, true, false, true, true, true, true, true, true, true, true, true)
 
     val gexf = GexfImpl()
     val graph = gexf.graph.apply {
@@ -45,78 +50,98 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
         val initialStep = Step(state(), INITIALIZE, start, nextId++)
         val finalStep = Step(goal, FINALIZE, state(), nextId++)
 
-        val plan = fulfillPreconditions(Plan(
+        val frontier = mutableListOf(Plan(
                 listOf(initialStep, finalStep),
                 setOf(),
-                PartialOrder<Step>().apply { add(initialStep, finalStep) }
-        ))
-        println(plan)
+                PartialOrder<Step>().apply { add(initialStep, finalStep) }) to 0)
+ 
+        while (frontier.isNotEmpty()) {
+//            println(frontier.size)
+//            val current = frontier.minBy { it.second }!!
+//            frontier.remove(current)
+            val current = frontier.removeAt(frontier.size-1)
+
+            val children = fulfillPreconditions(current.first)
+            if (children == null) {
+                println("Done!")
+                println(current)
+                return
+            } else {
+                frontier.addAll(children.map { it.first to it.second + current.second }.reversed())
+            }
+        }
+        println("No plan found.")
     }
 
-    fun fulfillPreconditions(plan: Plan): Plan? {
+    fun fulfillPreconditions(plan: Plan): List<Pair<Plan, Int>>? {
         println("$timeStep ${plan.steps.size} ${plan.links.size}")
 //        println(plan)
 
-        (plan.steps - lastPlan.steps).forEach { step ->
-            nodes.getOrPut(step) { graph.createNode() }.apply {
-                label = step.toString()
-            }.spells.add(SpellImpl().apply {
-                startValue = timeStep
-            })
-        }
+//        (plan.steps - lastPlan.steps).forEach { step ->
+//            nodes.getOrPut(step) { graph.createNode() }.apply {
+//                label = step.toString()
+//            }.spells.add(SpellImpl().apply {
+//                startValue = timeStep
+//            })
+//        }
+//
+//        (lastPlan.steps - plan.steps).forEach { step ->
+//            nodes[step]!!.spells.last().endValue = timeStep
+//        }
+//
+//        (plan.links - lastPlan.links).forEach { link ->
+//            try {
+//                edges.getOrPut(link) {
+//                    nodes[link.setter]!!.connectTo((edgeId++).toString(),
+//                            link.setter.before.variables[link.variable].name, EdgeType.DIRECTED, nodes[link.dependent]!!)
+//                }.spells.add(SpellImpl().apply {
+//                    startValue = timeStep
+//                })
+//            } catch (e: IllegalArgumentException) {
+//
+//            }
+//        }
+//
+//        (lastPlan.links - plan.links).forEach { link ->
+//            edges[link]?.let { it.spells.last().endValue = timeStep }
+//        }
 
-        (lastPlan.steps - plan.steps).forEach { step ->
-            nodes[step]!!.spells.last().endValue = timeStep
-        }
-
-        (plan.links - lastPlan.links).forEach { link ->
-            try {
-                edges.getOrPut(link) {
-                    nodes[link.setter]!!.connectTo((edgeId++).toString(),
-                            link.setter.before.variables[link.variable].name, EdgeType.DIRECTED, nodes[link.dependent]!!)
-                }.spells.add(SpellImpl().apply {
-                    startValue = timeStep
-                })
-            } catch (e: IllegalArgumentException) {
-
-            }
-        }
-
-        (lastPlan.links - plan.links).forEach { link ->
-            edges[link]?.let { it.spells.last().endValue = timeStep }
-        }
-
-//        if (timeStep >= 15000) {
+//        if (timeStep >= 5000) {
 //            val graphWriter = StaxGraphWriter()
 //            val file = File("logs/graph${timeStep}.gexf")
 //            val out = FileWriter(file, false)
 //            graphWriter.writeToStream(gexf, out, "UTF-8")
-////            System.exit(0)
+//            System.exit(0)
 //        }
         timeStep++
         lastPlan = plan
 
-        val precondition = choosePrecondition(plan.steps, plan.links) ?: return null
-        val needStep = precondition.first
-        val varInd = precondition.second
+        val preconditionAndCandidates = openPreconditions(plan.steps, plan.links).map {
+            it to fulfillmentCandidates(it.first, it.second, plan)
+        }.minBy { it.second.size }
+                ?: return null
+
+        val needStep = preconditionAndCandidates.first.first
+        val varInd = preconditionAndCandidates.first.second
         val variable = needStep.before.variables[varInd]
+        val candidates = preconditionAndCandidates.second
 
-        val candidates = plan.steps.filter { it != needStep && (needStep.before.domains[varInd] as Domain<Any>)
-                .supersetOf(it.after.domains[varInd] as Domain<Any>) &&
-                (it.action == INITIALIZE || it.action.operations[varInd] != null)
-                && !plan.orderings.precedes(needStep, it) } +
-                actions.filter { it.operations[varInd] != null && canAchieve(it.operations[varInd] as Operation<Any>,
-                        needStep.before.domains[varInd] as Domain<Any>) }
+        println(candidates)
 
+//        val choice = if (choices.isEmpty()) {
 //        println(plan)
 //        println(needStep)
 //        println(variable)
-//        candidates.forEachIndexed() { i,cand ->
+//        candidates.forEachIndexed() { i, cand ->
 //            println("$i: $cand")
 //        }
 //        print(">: ")
 //        val choice = readLine()!!.toInt()
+//        } else {
+//            choices.removeAt(0)
+//        }
 
+        val newPlans = mutableListOf<Pair<Plan, Int>>()
         candidates.forEachIndexed() { i,candidate ->
 //            if (i == choice) {
                 val newLink: Link
@@ -151,43 +176,41 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
                 }
                 assert(threats.all { it.first.setter != it.second && it.first.dependent != it.second }) { threats.map { (it.first.setter.hashCode() to it.first.dependent.hashCode()) to it.second.hashCode() } }
 
-                val completePlan = if (threats.isEmpty()) {
-                    fulfillPreconditions(newPlan)
+                if (threats.isEmpty()) {
+                    newPlans.add(newPlan to candidates.size)
                 } else {
-                    resolveThreatsAndConditions(newPlan, threats)
-                }
-
-                if (completePlan != null) {
-                    return completePlan
+                    newPlans.addAll(resolveThreatsAndConditions(newPlan, threats).map { it to candidates.size })
                 }
 //            }
         }
-        return null
+        return newPlans
     }
 
-    fun resolveThreatsAndConditions(plan: Plan, threats: List<Pair<Link, Step>>): Plan? {
+    fun resolveThreatsAndConditions(plan: Plan, threats: List<Pair<Link, Step>>): List<Plan> {
 //        println("$timeStep")
 //        timeStep++
         val threat = threats[0]
-
-//        println("Link: ${threat.first}")
-//        println("Threat: ${threat.second}")
-//        println("Variable: ${threat.first.setter.before.variables[threat.first.variable]}")
+        val newPlans = mutableListOf<Plan>()
 
         if (!plan.orderings.precedes(threat.first.setter, threat.second)) {
-//            print("Demote? ")
-//            val choice = readLine()!!.startsWith("y")
+//            val choice = if (!plan.orderings.precedes(threat.second, threat.first.dependent)) {
+//                println("Link: ${threat.first}")
+//                println("Threat: ${threat.second}")
+//                println("Variable: ${threat.first.setter.before.variables[threat.first.variable]}")
+//
+//                print("Demote? ")
+//                readLine()!!.startsWith("y")
+//            } else {
+//                true
+//            }
 //            if (choice) {
                 val demotePlan = Plan(plan.steps, plan.links, plan.orderings.plus(threat.second, threat.first.setter))
-                demotePlan.orderings.precedes(threat.second, threat.second)
-                val completePlan = if (threats.size > 1) {
-                    resolveThreatsAndConditions(demotePlan, threats.drop(1))
+                if (threats.size > 1) {
+                    newPlans.addAll(resolveThreatsAndConditions(demotePlan, threats.drop(1)))
                 } else {
-                    fulfillPreconditions(demotePlan)
+                    newPlans.add(demotePlan)
                 }
-                if (completePlan != null) {
-                    return completePlan
-                }
+//                return newPlans
 //            }
         }
 
@@ -196,32 +219,37 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
 //            val choice = readLine()!!.startsWith("y")
 //            if (choice) {
                 val promotePlan = Plan(plan.steps, plan.links, plan.orderings.plus(threat.first.dependent, threat.second))
-                promotePlan.orderings.precedes(threat.first.dependent, threat.first.dependent)
-                val completePlan = if (threats.size > 1) {
-                    resolveThreatsAndConditions(promotePlan, threats.drop(1))
+                if (threats.size > 1) {
+                    newPlans.addAll(resolveThreatsAndConditions(promotePlan, threats.drop(1)))
                 } else {
-                    fulfillPreconditions(promotePlan)
-                }
-                if (completePlan != null) {
-                    return completePlan
+                    newPlans.add(promotePlan)
                 }
 //            }
         }
 
-        return null
+        return newPlans
     }
 
-    fun choosePrecondition(steps: List<Step>, links: Set<Link>): Pair<Step, Int>? {
-        steps.forEach { step ->
-            step.before.variables.forEachIndexed { index, variable ->
-                if (step.before.domains[index] != variable.initializeDomain() &&
-                        !links.any { it.variable == index && it.dependent == step }) {
-                    return step to index
-                }
-            }
-        }
-        return null
-    }
+    fun openPreconditions(steps: List<Step>, links: Set<Link>): List<Pair<Step, Int>> =
+            steps.map { step ->
+                step.before.variables.mapIndexed { index, variable ->
+                    if (step.before.domains[index] != variable.initializeDomain() &&
+                            !links.any { it.variable == index && it.dependent == step }) {
+                        step to index
+                    } else {
+                        null
+                    }
+                }.filterNotNull()
+            }.flatten()
+
+    fun fulfillmentCandidates(needStep: Step, varInd: Int, plan: Plan): List<Any> =
+            plan.steps.filter { it != needStep && ((needStep.before.domains[varInd] as Domain<Any>)
+            .supersetOf(it.after.domains[varInd] as Domain<Any>) ||
+                    it.action.operations[varInd] is AddArbitrary) &&
+            (it.action == INITIALIZE || it.action.operations[varInd] != null)
+            && !plan.orderings.precedes(needStep, it) } +
+            actions.filter { it.operations[varInd] != null && canAchieve(it.operations[varInd] as Operation<Any>,
+                    needStep.before.domains[varInd] as Domain<Any>) }
 
     fun <T> canAchieve(operation: Operation<T>, domain: Domain<T>): Boolean =
             if (domain is AnyValue) {
