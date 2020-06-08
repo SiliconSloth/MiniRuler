@@ -167,6 +167,7 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
                 }
 
                 if (newStep != null && canPrune(plan, newStep, needStep)) {
+                    println("Prune!")
                     return@forEachIndexed
                 }
 
@@ -276,8 +277,8 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
     fun canPrune(plan: Plan, newStep: Step, needStep: Step): Boolean {
         plan.steps.filter { otherStep -> otherStep.action == newStep.action &&
                 plan.links.filter { it.setter == otherStep }.all {
-                    canAchieve(newStep.action.operations[it.variable] as Operation<Any>,
-                            it.dependent.before.domains[it.variable] as Domain<Any>)
+                    (it.dependent.before.domains[it.variable] as Domain<Any>)
+                            .supersetOf(newStep.after.domains[it.variable] as Domain<Any>)
                 } }.forEach { otherStep ->
 
             val frontier = mutableListOf(needStep)
