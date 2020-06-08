@@ -128,17 +128,17 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
 
         println(candidates)
 
-//        val choice = if (choices.isEmpty()) {
-//        println(plan)
-//        println(needStep)
-//        println(variable)
-//        candidates.forEachIndexed() { i, cand ->
-//            println("$i: $cand")
-//        }
-//        print(">: ")
-//        val choice = readLine()!!.toInt()
+//        val choice = if (candidates.size != 1) {
+//            println(plan)
+//            println(needStep)
+//            println(variable)
+//            candidates.forEachIndexed() { i, cand ->
+//                println("$i: $cand")
+//            }
+//            print(">: ")
+//            readLine()!!.toInt()
 //        } else {
-//            choices.removeAt(0)
+//            0
 //        }
 
         val newPlans = mutableListOf<Pair<Plan, Int>>()
