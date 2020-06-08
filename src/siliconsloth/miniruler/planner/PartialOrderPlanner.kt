@@ -166,6 +166,10 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
                     else -> error("Unexpected candidate type")
                 }
 
+                if (newStep != null && canPrune(plan, newStep, needStep)) {
+                    return@forEachIndexed
+                }
+
                 val threats = plan.steps.filter { step -> threatens(step, newLink, newPlan.orderings) }
                         .map { newLink to it }.toMutableList()
                 assert(threats.all { it.first.setter != it.second && it.first.dependent != it.second }) { threats.map { (it.first.setter.hashCode() to it.first.dependent.hashCode()) to it.second.hashCode() } }
@@ -268,4 +272,27 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
                 link.setter.action.operations[link.variable] is AddArbitrary ||
                 step.action.operations[link.variable] == null ||
                 orderings.precedes(step, link.setter) || orderings.precedes(link.dependent, step))
+
+    fun canPrune(plan: Plan, newStep: Step, needStep: Step): Boolean {
+        plan.steps.filter { otherStep -> otherStep.action == newStep.action &&
+                plan.links.filter { it.setter == otherStep }.all {
+                    canAchieve(newStep.action.operations[it.variable] as Operation<Any>,
+                            it.dependent.before.domains[it.variable] as Domain<Any>)
+                } }.forEach { otherStep ->
+
+            val frontier = mutableListOf(needStep)
+            while (frontier.isNotEmpty()) {
+                val current = frontier.removeAt(0)
+                if (current.action == FINALIZE) {
+                    return@forEach
+                } else if (current != otherStep) {
+                    frontier.addAll(plan.links.filter { it.setter == current }.map { it.dependent })
+                }
+            }
+
+            return true
+        }
+
+        return false
+    }
 }
