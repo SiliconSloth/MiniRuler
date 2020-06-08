@@ -22,20 +22,10 @@ val FINALIZE = Action("FINALIZE", state(), mapOf())
 class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
     var nextId = 0
     var timeStep = 0
-    var edgeId = 0
     var lastPlan = Plan(listOf(), setOf(), PartialOrder())
 
     val choices = mutableListOf(0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 4, 1, 0, 1, 0, 1, 1, 4, 0, 1)
     val demotions = mutableListOf(true, true, true, true, false, true, true, true, true, true, true, true, true, true)
-
-    val gexf = GexfImpl()
-    val graph = gexf.graph.apply {
-        defaultEdgeType = EdgeType.DIRECTED
-        mode = Mode.DYNAMIC
-        timeType = "integer"
-    }
-    val nodes = mutableMapOf<Step, Node>()
-    val edges = mutableMapOf<Link, Edge>()
 
     data class Step(val before: State, val action: Action, val after: State, val id: Int) {
         override fun toString(): String =
@@ -54,7 +44,8 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
                 listOf(initialStep, finalStep),
                 setOf(),
                 PartialOrder<Step>().apply { add(initialStep, finalStep) }) to 0)
- 
+
+        var plan: Plan? = null
         while (frontier.isNotEmpty()) {
 //            println(frontier.size)
 //            val current = frontier.minBy { it.second }!!
@@ -63,14 +54,44 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
 
             val children = fulfillPreconditions(current.first)
             if (children == null) {
-                println("Done!")
-                println(current)
-                return
+                plan = current.first
+                break
             } else {
                 frontier.addAll(children.map { it.first to it.second + current.second }.reversed())
             }
         }
-        println("No plan found.")
+
+        if (plan == null) {
+            println("No plan found.")
+        } else {
+            println("Done!")
+
+            val gexf = GexfImpl()
+            val graph = gexf.graph.apply {
+                defaultEdgeType = EdgeType.DIRECTED
+                mode = Mode.STATIC
+            }
+
+            val nodes = plan.steps.associateWith {
+                graph.createNode().apply {
+                    label = it.toString()
+                }
+            }
+
+            var edgeId = 0
+            plan.links.groupBy { it.setter to it.dependent }.mapValues { (_,v) ->
+                v.joinToString(", ") {
+                    initialStep.before.variables[it.variable].toString()
+                }
+            }.forEach { (k,v) ->
+                nodes[k.first]!!.connectTo((edgeId++).toString(), v, EdgeType.DIRECTED, nodes[k.second]!!)
+            }
+
+            val graphWriter = StaxGraphWriter()
+            val file = File("graphs/output.gexf")
+            val out = FileWriter(file, false)
+            graphWriter.writeToStream(gexf, out, "UTF-8")
+        }
     }
 
     fun fulfillPreconditions(plan: Plan): List<Pair<Plan, Int>>? {
