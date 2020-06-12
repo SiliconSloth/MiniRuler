@@ -32,4 +32,26 @@ class PartialOrder<T>() {
 
     fun precedes(lesser: T, greater: T): Boolean =
         successors[lesser]?.let { greater in it } == true
+
+    fun replace(old: T, new: T) {
+        successors.remove(old)?.let {
+            successors[new] = it
+        }
+
+        predecessors.remove(old)?.let {
+            predecessors[new] = it
+        }
+
+        successors.values.forEach {
+            if (it.remove(old)) {
+                it.add(new)
+            }
+        }
+
+        predecessors.values.forEach {
+            if (it.remove(old)) {
+                it.add(new)
+            }
+        }
+    }
 }

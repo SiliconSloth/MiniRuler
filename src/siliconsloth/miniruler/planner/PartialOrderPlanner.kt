@@ -34,7 +34,14 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
 
     data class Link(val setter: Step, val dependent: Step, val variable: Int)
 
-    data class Plan(val steps: List<Step>, val links: Set<Link>, val orderings: PartialOrder<Step>)
+    data class Plan(val steps: List<Step>, val links: Set<Link>, val orderings: PartialOrder<Step>) {
+        fun replaced(oldStep: Step, newStep: Step): Plan =
+                Plan(steps - oldStep + newStep, links.map {
+                        Link(if (it.setter == oldStep) newStep else it.setter,
+                             if (it.dependent == oldStep) newStep else it.dependent,
+                             it.variable)
+                }.toSet(), PartialOrder(orderings).apply { replace(oldStep, newStep) })
+    }
 
     fun run(start: State) {
         val initialStep = Step(state(), INITIALIZE, start, nextId++)
@@ -163,31 +170,39 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
 //        }
 
         val newPlans = mutableListOf<Pair<Plan, Int>>()
-        candidates.forEachIndexed() { i,candidate ->
+        candidates.forEachIndexed() { i, (candidate, isNew) ->
 //            if (i == choice) {
-                val newLink: Link
-                var newStep: Step? = null
-                val newPlan = when (candidate) {
-                    is Step -> {
-                        newLink = Link(candidate, needStep, varInd)
+                val newCandidate: Step
+                val newPlan = if (isNew) {
+                        Plan(plan.steps + candidate, plan.links + Link(candidate, needStep, varInd),
+                                plan.orderings.plus(plan.steps.find { it.action == INITIALIZE }!!, candidate)
+                                        .plus(candidate, needStep))
+                    } else {
                         assert(needStep != candidate)
                         assert(!plan.orderings.precedes(needStep, candidate))
-                        Plan(plan.steps, plan.links + newLink,
+                        Plan(plan.steps, plan.links + Link(candidate, needStep, varInd),
                                 plan.orderings.plus(candidate, needStep))
-                    }
-                    is Action -> {
-                        val stepPre = candidate.unapply(state(variable to needStep.before.domains[varInd]))
-                        newStep = Step(stepPre, candidate, candidate.apply(stepPre), nextId++)
-                        newLink = Link(newStep, needStep, varInd)
+                    }.let { plan ->
+                        if (!(needStep.before.domains[varInd] as Domain<Any>)
+                                        .supersetOf(candidate.after.domains[varInd] as Domain<Any>)) {
+                            val newAfter = candidate.after.intersect(state(variable to needStep.before.domains[varInd]))
+                            val newSetter = Step(candidate.before, candidate.action, newAfter, nextId++)
 
-                        Plan(plan.steps + newStep, plan.links + newLink,
-                                plan.orderings.plus(plan.steps.find { it.action == INITIALIZE }!!, newStep)
-                                        .plus(newStep, needStep))
+                            newCandidate = newSetter
+                            plan.replaced(candidate, newSetter)
+                        } else {
+                            newCandidate = candidate
+                            plan
+                        }
                     }
-                    else -> error("Unexpected candidate type")
-                }
 
-                if (newStep != null && canPrune(plan, newStep, needStep)) {
+                val newLink = Link(newCandidate, needStep, varInd)
+
+                assert((newLink.dependent.before.domains[newLink.variable] as Domain<Any>).supersetOf(
+                        newLink.setter.after.domains[newLink.variable] as Domain<Any>
+                )) { "$newLink ${newCandidate.before.variables[newLink.variable]}"}
+
+                if (isNew && canPrune(plan, newCandidate, needStep)) {
                     println("Prune!")
                     return@forEachIndexed
                 }
@@ -195,10 +210,10 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
                 val threats = plan.steps.filter { step -> threatens(step, newLink, newPlan.orderings) }
                         .map { newLink to it }.toMutableList()
                 assert(threats.all { it.first.setter != it.second && it.first.dependent != it.second }) { threats.map { (it.first.setter.hashCode() to it.first.dependent.hashCode()) to it.second.hashCode() } }
-                if (newStep != null) {
+                if (isNew) {
                     newPlan.orderings.precedes(needStep, needStep)
-                    threats += plan.links.filter { link -> threatens(newStep, link, newPlan.orderings) }
-                            .map { it to newStep }
+                    threats += plan.links.filter { link -> threatens(newCandidate, link, newPlan.orderings) }
+                            .map { it to newCandidate }
                 }
                 assert(threats.all { it.first.setter != it.second && it.first.dependent != it.second }) { threats.map { (it.first.setter.hashCode() to it.first.dependent.hashCode()) to it.second.hashCode() } }
 
@@ -216,7 +231,26 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
 //        println("$timeStep")
 //        timeStep++
         val threat = threats[0]
+        val variable = threat.first.variable
         val newPlans = mutableListOf<Plan>()
+
+        if (threat.first.setter.action.operations[variable] is AddArbitrary &&
+                threat.second.action.operations[variable] is Add) {
+            println(threat)
+            println(threat.first.setter.before.variables[variable])
+            val setter = threat.first.setter
+            val newAfter = setter.after.intersect(state(setter.before.variables[variable] to
+                    LowerBounded((setter.after.domains[variable] as LowerBounded).min -
+                            (threat.second.action.operations[variable] as Add).value)))
+            val replacement = Step(setter.before, setter.action, newAfter, nextId++)
+            val replacePlan = plan.replaced(setter, replacement)
+
+            if (threats.size > 1) {
+                newPlans.addAll(resolveThreatsAndConditions(replacePlan, threats.drop(1)))
+            } else {
+                newPlans.add(replacePlan)
+            }
+        }
 
         if (!plan.orderings.precedes(threat.first.setter, threat.second)) {
 //            val choice = if (!plan.orderings.precedes(threat.second, threat.first.dependent)) {
@@ -268,14 +302,19 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
                 }.filterNotNull()
             }.flatten()
 
-    fun fulfillmentCandidates(needStep: Step, varInd: Int, plan: Plan): List<Any> =
+    fun fulfillmentCandidates(needStep: Step, varInd: Int, plan: Plan): List<Pair<Step, Boolean>> =
             plan.steps.filter { it != needStep && ((needStep.before.domains[varInd] as Domain<Any>)
             .supersetOf(it.after.domains[varInd] as Domain<Any>) ||
                     it.action.operations[varInd] is AddArbitrary) &&
             (it.action == INITIALIZE || it.action.operations[varInd] != null)
-            && !plan.orderings.precedes(needStep, it) } +
+            && !plan.orderings.precedes(needStep, it) }.map { it to false } +
+
             actions.filter { it.operations[varInd] != null && canAchieve(it.operations[varInd] as Operation<Any>,
-                    needStep.before.domains[varInd] as Domain<Any>) }
+                    needStep.before.domains[varInd] as Domain<Any>) }.map { action ->
+                val stepGoal = state(needStep.before.variables[varInd] to needStep.before.domains[varInd])
+                val stepPre = action.unapply(stepGoal)
+                Step(stepPre, action, action.apply(stepPre).intersect(stepGoal), nextId++)
+            }.map { it to true }
 
     fun <T> canAchieve(operation: Operation<T>, domain: Domain<T>): Boolean =
             if (domain is AnyValue) {
@@ -291,7 +330,6 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
                 !(step == link.setter || step == link.dependent ||
                 (link.dependent.before.domains[link.variable] as Domain<Any>)
                         .supersetOf(step.after.domains[link.variable] as Domain<Any>) ||
-                link.setter.action.operations[link.variable] is AddArbitrary ||
                 step.action.operations[link.variable] == null ||
                 orderings.precedes(step, link.setter) || orderings.precedes(link.dependent, step))
 
