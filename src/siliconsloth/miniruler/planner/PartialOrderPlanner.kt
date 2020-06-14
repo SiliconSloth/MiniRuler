@@ -22,7 +22,7 @@ val FINALIZE = Action("FINALIZE", state(), mapOf())
 class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
     var nextId = 0
     var timeStep = 0
-    var lastPlan = Plan(listOf(), setOf(), PartialOrder())
+    var lastPlan = Plan(listOf(), setOf(), PartialOrder(), "Empty")
 
     val choices = mutableListOf(0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 4, 1, 0, 1, 0, 1, 1, 4, 0, 1)
     val demotions = mutableListOf(true, true, true, true, false, true, true, true, true, true, true, true, true, true)
@@ -34,13 +34,17 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
 
     data class Link(val setter: Step, val dependent: Step, val variable: Int)
 
-    data class Plan(val steps: List<Step>, val links: Set<Link>, val orderings: PartialOrder<Step>) {
+    data class Plan(val steps: List<Step>, val links: Set<Link>, val orderings: PartialOrder<Step>, val label: String) {
+        val cost = steps.map { it.action.cost(it.before, it.after) }.sum()
+
         fun replaced(oldStep: Step, newStep: Step): Plan =
                 Plan(steps - oldStep + newStep, links.map {
                         Link(if (it.setter == oldStep) newStep else it.setter,
                              if (it.dependent == oldStep) newStep else it.dependent,
                              it.variable)
-                }.toSet(), PartialOrder(orderings).apply { replace(oldStep, newStep) })
+                }.toSet(), PartialOrder(orderings).apply { replace(oldStep, newStep) }, "Replace $oldStep")
+
+        override fun toString(): String = label
     }
 
     fun run(start: State) {
@@ -50,7 +54,7 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
         val frontier = mutableListOf(Plan(
                 listOf(initialStep, finalStep),
                 setOf(),
-                PartialOrder<Step>().apply { add(initialStep, finalStep) }) to 0)
+                PartialOrder<Step>().apply { add(initialStep, finalStep) }, "Initial") to 0)
 
         var plan: Plan? = null
         while (frontier.isNotEmpty()) {
@@ -64,7 +68,8 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
                 plan = current.first
                 break
             } else {
-                frontier.addAll(children.map { it.first to it.second + current.second }.reversed())
+                println(children.map { it.first }.sortedBy { it.cost })
+                frontier.addAll(children.map { it.first to it.second + current.second }.sortedByDescending { it.first.cost })
             }
         }
 
@@ -158,9 +163,9 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
 
 //        val choice = if (candidates.size != 1) {
 //            println(plan)
-//            println(needStep)
-//            println(variable)
-//            candidates.forEachIndexed() { i, cand ->
+            println(needStep)
+            println(variable)
+//            candidates.fo rEachIndexed() { i, cand ->
 //                println("$i: $cand")
 //            }
 //            print(">: ")
@@ -176,12 +181,12 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
                 val newPlan = if (isNew) {
                         Plan(plan.steps + candidate, plan.links + Link(candidate, needStep, varInd),
                                 plan.orderings.plus(plan.steps.find { it.action == INITIALIZE }!!, candidate)
-                                        .plus(candidate, needStep))
+                                        .plus(candidate, needStep), "Add $candidate")
                     } else {
                         assert(needStep != candidate)
                         assert(!plan.orderings.precedes(needStep, candidate))
                         Plan(plan.steps, plan.links + Link(candidate, needStep, varInd),
-                                plan.orderings.plus(candidate, needStep))
+                                plan.orderings.plus(candidate, needStep), "Link $candidate")
                     }.let { plan ->
                         if (!(needStep.before.domains[varInd] as Domain<Any>)
                                         .supersetOf(candidate.after.domains[varInd] as Domain<Any>)) {
@@ -264,7 +269,7 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
 //                true
 //            }
 //            if (choice) {
-                val demotePlan = Plan(plan.steps, plan.links, plan.orderings.plus(threat.second, threat.first.setter))
+                val demotePlan = Plan(plan.steps, plan.links, plan.orderings.plus(threat.second, threat.first.setter), "D $plan")
                 if (threats.size > 1) {
                     newPlans.addAll(resolveThreatsAndConditions(demotePlan, threats.drop(1)))
                 } else {
@@ -278,7 +283,7 @@ class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
 //            print("Promote? ")
 //            val choice = readLine()!!.startsWith("y")
 //            if (choice) {
-                val promotePlan = Plan(plan.steps, plan.links, plan.orderings.plus(threat.first.dependent, threat.second))
+                val promotePlan = Plan(plan.steps, plan.links, plan.orderings.plus(threat.first.dependent, threat.second), "P $plan")
                 if (threats.size > 1) {
                     newPlans.addAll(resolveThreatsAndConditions(promotePlan, threats.drop(1)))
                 } else {
