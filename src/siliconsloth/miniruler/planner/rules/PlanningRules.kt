@@ -37,14 +37,19 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     fulfillmentRule(planner, itemCount(Item.GLASS), CRAFT_ACTIONS[Item.GLASS]!!)
     fulfillmentRule(planner, itemCount(Item.FURNACE), CRAFT_ACTIONS[Item.FURNACE]!!)
     fulfillmentRule(planner, itemCount(Item.ROCK_PICKAXE), CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!)
+    fulfillmentRule(planner, itemCount(Item.STONE), MINE_ROCK_WITH_HAND, CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!)
+    fulfillmentRule(planner, itemCount(Item.WORKBENCH), planner.initialize!!)
 
+    aggregateFulfillmentRule(planner, listOf(itemCount(Item.WOOD)), CHOP_TREES)
     aggregateFulfillmentRule(planner, listOf(itemCount(Item.SAND)), DIG_SAND)
     aggregateFulfillmentRule(planner, listOf(itemCount(Item.COAL), itemCount(Item.STONE)),
             MINE_ROCK_WITH_ROCK, CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!)
 }
 
-fun RuleEngine.fulfillmentRule(planner: RulePlanner, variable: Variable<*>, action: Action) = rule {
-    val uc by find<UnfulfilledPrecondition> { precondition.variable == variable }
+fun RuleEngine.fulfillmentRule(planner: RulePlanner, variable: Variable<*>,
+                               action: Action, condAction: Action? = null) = rule {
+    val uc by find<UnfulfilledPrecondition> { precondition.variable == variable &&
+            (condAction == null || precondition.step.action == condAction) }
 
     fire {
         val newStep = planner.newStepFulfilling(action, uc.precondition)

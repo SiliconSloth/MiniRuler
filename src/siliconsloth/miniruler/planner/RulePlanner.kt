@@ -1,22 +1,24 @@
 package siliconsloth.miniruler.planner
 
-import siliconsloth.miniruler.DIG_SAND
 import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.engine.matching.CompleteMatch
 import siliconsloth.miniruler.planner.rules.planningRules
-import siliconsloth.miniruler.state
-
-val INITIALIZE = Action("INITIALIZE", state(), mapOf())
-val FINALIZE = Action("FINALIZE", state(), mapOf())
 
 class RulePlanner(val engine: RuleEngine, val variables: Array<Variable<*>>, val goal: State) {
     var nextId = 0
 
+    var initialize: Action? = null
+    val finalize = Action("FINALIZE", goal, mapOf())
+
     fun run(start: State) {
+        initialize = Action("INITIALIZE", state(),
+                start.map { (v,d) -> (d as? Enumeration)?.let { v to SetTo((it.values.first())) } }
+                        .filterNotNull().toMap())
+
         engine.planningRules(this)
         engine.atomic {
-            insert(Step(state(), INITIALIZE, start, nextId++))
-            insert(Step(goal, FINALIZE, state(), nextId++))
+            insert(Step(state(), initialize!!, start, nextId++))
+            insert(Step(goal, finalize, state(), nextId++))
         }
 
         while (engine.allMatches.any { it.state == CompleteMatch.State.MATCHED || it.state == CompleteMatch.State.DROPPED }) {

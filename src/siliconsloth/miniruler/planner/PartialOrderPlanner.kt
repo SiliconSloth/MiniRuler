@@ -16,6 +16,9 @@ import java.io.File
 import java.io.FileWriter
 import java.lang.IllegalArgumentException
 
+val INITIALIZE = Action("INITIALIZE", state(), mapOf())
+val FINALIZE = Action("FINALIZE", state(), mapOf())
+
 class PartialOrderPlanner(val goal: State, val actions: List<Action>) {
     var nextId = 0
     var timeStep = 0
