@@ -167,7 +167,7 @@ val CRAFT_ACTIONS = listOf(
                 Item.SAND to 4,
                 Item.COAL to 1
         ), menu = Menu.FURNACE)
-)
+).associateBy { it.result }
 
 val MINE_ROCK_WITH_HAND = MineRock(null, 50)
 val MINE_ROCK_WITH_WOOD = MineRock(Item.WOOD_PICKAXE, 20)
@@ -175,5 +175,5 @@ val MINE_ROCK_WITH_ROCK = MineRock(Item.ROCK_PICKAXE, 15)
 
 val ALL_ACTIONS = listOf(CHOP_TREES, DIG_SAND, OPEN_INVENTORY, CLOSE_INVENTORY, CLOSE_CRAFTING,
         MINE_ROCK_WITH_HAND, MINE_ROCK_WITH_WOOD, MINE_ROCK_WITH_ROCK)
-        .plus(PLACE_ACTIONS).plus(OPEN_ACTIONS).plus(PICK_UP_ACTIONS).plus(CRAFT_ACTIONS)
+        .plus(PLACE_ACTIONS).plus(OPEN_ACTIONS).plus(PICK_UP_ACTIONS).plus(CRAFT_ACTIONS.values)
         .plus(Item.values().map { Select(it) })

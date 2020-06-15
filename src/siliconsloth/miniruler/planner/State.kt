@@ -8,7 +8,7 @@ import java.util.*
  * Variables in the problem that are not included in the State default to
  * their full domains given by Variable.initializeDomain().
  */
-class State(val variables: Array<Variable<*>>, val domains: Array<Domain<*>>) {
+class State(val variables: Array<Variable<*>>, val domains: Array<Domain<*>>): Sequence<Pair<Variable<*>, Domain<*>>> {
 
     constructor(variables: Array<Variable<*>>, valMap: Map<Variable<*>, Domain<*>>):
             this(variables, variables.map { valMap[it] ?: it.initializeDomain() }.toTypedArray())
@@ -39,4 +39,7 @@ class State(val variables: Array<Variable<*>>, val domains: Array<Domain<*>>) {
     override fun toString(): String =
             "State" + variables.zip(domains).filter { it.second != LowerBounded(0) && it.second != Enumeration(0)
                     && it.second != Enumeration(false) && it.second !is AnyValue }.toMap()
+
+    override fun iterator(): Iterator<Pair<Variable<*>, Domain<*>>> =
+            variables.zip(domains).iterator()
 }
