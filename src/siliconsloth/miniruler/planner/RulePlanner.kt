@@ -18,6 +18,11 @@ class RulePlanner(val engine: RuleEngine, val variables: Array<Variable<*>>, val
             insert(Step(state(), INITIALIZE, start, nextId++))
             insert(Step(goal, FINALIZE, state(), nextId++))
         }
+
+        while (engine.allMatches.any { it.state == CompleteMatch.State.MATCHED || it.state == CompleteMatch.State.DROPPED }) {
+            engine.insert("Dummy")
+            engine.delete("Dummy")
+        }
     }
 
     fun state(domains: Map<Variable<*>, Domain<*>>): State =
