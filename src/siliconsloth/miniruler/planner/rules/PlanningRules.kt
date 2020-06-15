@@ -1,10 +1,7 @@
 package siliconsloth.miniruler.planner.rules
 
-import siliconsloth.miniruler.CRAFT_ACTIONS
-import siliconsloth.miniruler.DIG_SAND
-import siliconsloth.miniruler.Item
+import siliconsloth.miniruler.*
 import siliconsloth.miniruler.engine.RuleEngine
-import siliconsloth.miniruler.itemCount
 import siliconsloth.miniruler.planner.*
 
 fun RuleEngine.planningRules(planner: RulePlanner) {
@@ -41,21 +38,8 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     fulfillmentRule(planner, itemCount(Item.FURNACE), CRAFT_ACTIONS[Item.FURNACE]!!)
     fulfillmentRule(planner, itemCount(Item.ROCK_PICKAXE), CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!)
 
-    rule {
-        val ucs by all<UnfulfilledPrecondition> { precondition.variable == itemCount(Item.SAND) }
-        delay = 6
-
-        fire {
-            if (ucs.any()) {
-                val needed = ucs.map { (it.precondition.step.before[it.precondition.variable] as LowerBounded).min }.sum()
-                val newStep = planner.newStep(DIG_SAND, planner.state(itemCount(Item.SAND) to LowerBounded(needed)))
-                insert(newStep)
-                for (uc in ucs) {
-                    insert(Link(newStep, uc.precondition))
-                }
-            }
-        }
-    }
+    aggregateFulfillmentRule(planner, itemCount(Item.SAND), DIG_SAND)
+    aggregateFulfillmentRule(planner, itemCount(Item.COAL), MINE_ROCK_WITH_ROCK)
 }
 
 fun RuleEngine.fulfillmentRule(planner: RulePlanner, variable: Variable<*>, action: Action) = rule {
@@ -65,5 +49,21 @@ fun RuleEngine.fulfillmentRule(planner: RulePlanner, variable: Variable<*>, acti
         val newStep = planner.newStepFulfilling(action, uc.precondition)
         insert(newStep)
         insert(Link(newStep, uc.precondition))
+    }
+}
+
+fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, variable: Variable<*>, action: Action) = rule {
+    val ucs by all<UnfulfilledPrecondition> { precondition.variable == variable }
+    delay = 6
+
+    fire {
+        if (ucs.any()) {
+            val needed = ucs.map { (it.precondition.step.before[it.precondition.variable] as LowerBounded).min }.sum()
+            val newStep = planner.newStep(action, planner.state(variable to LowerBounded(needed)))
+            insert(newStep)
+            for (uc in ucs) {
+                insert(Link(newStep, uc.precondition))
+            }
+        }
     }
 }
