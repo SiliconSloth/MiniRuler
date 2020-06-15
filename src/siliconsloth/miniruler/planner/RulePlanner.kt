@@ -31,10 +31,14 @@ class RulePlanner(val engine: RuleEngine, val variables: Array<Variable<*>>, val
     fun state(vararg domains: Pair<Variable<*>, Domain<*>>): State =
             state(mapOf(*domains))
 
+    fun newStep(before: State, action: Action, after: State): Step {
+        return Step(before, action, after, nextId++)
+    }
+
     fun newStep(action: Action, stepGoal: State): Step {
         val stepBefore = action.unapply(stepGoal)
         val stepAfter = action.apply(stepGoal).intersect(stepGoal)
-        return Step(stepBefore, action, stepAfter, nextId++)
+        return newStep(stepBefore, action, stepAfter)
     }
 
     fun newStepFulfilling(action: Action, precondition: Precondition): Step {

@@ -38,8 +38,9 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     fulfillmentRule(planner, itemCount(Item.FURNACE), CRAFT_ACTIONS[Item.FURNACE]!!)
     fulfillmentRule(planner, itemCount(Item.ROCK_PICKAXE), CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!)
 
-    aggregateFulfillmentRule(planner, itemCount(Item.SAND), DIG_SAND)
-    aggregateFulfillmentRule(planner, itemCount(Item.COAL), MINE_ROCK_WITH_ROCK)
+    aggregateFulfillmentRule(planner, listOf(itemCount(Item.SAND)), DIG_SAND)
+    aggregateFulfillmentRule(planner, listOf(itemCount(Item.COAL), itemCount(Item.STONE)),
+            MINE_ROCK_WITH_ROCK, CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!)
 }
 
 fun RuleEngine.fulfillmentRule(planner: RulePlanner, variable: Variable<*>, action: Action) = rule {
@@ -52,14 +53,27 @@ fun RuleEngine.fulfillmentRule(planner: RulePlanner, variable: Variable<*>, acti
     }
 }
 
-fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, variable: Variable<*>, action: Action) = rule {
-    val ucs by all<UnfulfilledPrecondition> { precondition.variable == variable }
-    delay = 6
+fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, variables: List<Variable<*>>, action: Action,
+                                        blacklist: Action? = null) = rule {
+    val ucs by all<UnfulfilledPrecondition> { precondition.variable in variables && precondition.step.action != blacklist }
+    val candidates by all<Step> { this.action == action }
+    this.delay = 6
 
     fire {
         if (ucs.any()) {
-            val needed = ucs.map { (it.precondition.step.before[it.precondition.variable] as LowerBounded).min }.sum()
-            val newStep = planner.newStep(action, planner.state(variable to LowerBounded(needed)))
+            val needed = ucs.groupBy { it.precondition.variable }.mapValues { (v,us) ->
+                LowerBounded(us.map { (it.precondition.step.before[v] as LowerBounded).min }.sum()) }
+            val stepGoal = planner.state(needed)
+
+            val newStep = if (candidates.any()) {
+                candidates.first().let {
+                    delete(it)
+                    planner.newStep(it.before, it.action, it.after.intersect(stepGoal))
+                }
+            } else {
+                planner.newStep(action, stepGoal)
+            }
+
             insert(newStep)
             for (uc in ucs) {
                 insert(Link(newStep, uc.precondition))
