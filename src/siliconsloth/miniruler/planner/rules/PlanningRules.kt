@@ -88,6 +88,8 @@ fun <T> RuleEngine.fulfillmentRule(planner: RulePlanner, variable: Variable<T>,
     val candidates by all<PossibleOrdering> { after == uc.precondition.step && before.action == action &&
             uc.precondition.step.before[variable].supersetOf(before.after[variable]) }
 
+    delay = 3
+
     fire {
         val chosen: Step
         if (candidates.any()) {
