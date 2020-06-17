@@ -39,7 +39,7 @@ class RulePlanner(val engine: RuleEngine, val variables: Array<Variable<*>>, val
 
     fun newStep(action: Action, stepGoal: State): Step {
         val stepBefore = action.unapply(stepGoal)
-        val stepAfter = action.apply(stepGoal).intersect(stepGoal)
+        val stepAfter = action.apply(stepBefore).intersect(stepGoal)
         return newStep(stepBefore, action, stepAfter)
     }
 
