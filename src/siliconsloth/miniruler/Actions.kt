@@ -131,14 +131,14 @@ val PLACE_ACTIONS = listOf(
         Place(Item.FURNACE, Entity.FURNACE),
         Place(Item.OVEN, Entity.OVEN),
         Place(Item.WORKBENCH, Entity.WORKBENCH)
-)
+).associateBy { it.item }
 
 val OPEN_ACTIONS = listOf(
         Open(Menu.ANVIL, Entity.ANVIL),
         Open(Menu.FURNACE, Entity.FURNACE),
         Open(Menu.OVEN, Entity.OVEN),
         Open(Menu.WORKBENCH, Entity.WORKBENCH)
-)
+).associateBy { it.menu }
 
 val PICK_UP_ACTIONS = listOf(
         PickUp(Entity.ANVIL, Item.ANVIL),
@@ -175,5 +175,5 @@ val MINE_ROCK_WITH_ROCK = MineRock(Item.ROCK_PICKAXE, 15)
 
 val ALL_ACTIONS = listOf(CHOP_TREES, DIG_SAND, OPEN_INVENTORY, CLOSE_INVENTORY, CLOSE_CRAFTING,
         MINE_ROCK_WITH_HAND, MINE_ROCK_WITH_WOOD, MINE_ROCK_WITH_ROCK)
-        .plus(PLACE_ACTIONS).plus(OPEN_ACTIONS).plus(PICK_UP_ACTIONS).plus(CRAFT_ACTIONS.values)
+        .plus(PLACE_ACTIONS.values).plus(OPEN_ACTIONS.values).plus(PICK_UP_ACTIONS).plus(CRAFT_ACTIONS.values)
         .plus(Item.values().map { Select(it) })
