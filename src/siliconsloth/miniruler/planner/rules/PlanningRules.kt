@@ -55,10 +55,35 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     }
 
     rule {
+        val link by find<Link>()
+        val threat by find<Step> { this != link.setter && this != link.precondition.step &&
+                action[link.precondition.variable] != null &&
+                @Suppress("UNCHECKED_CAST")
+                !(link.precondition.step.before[link.precondition.variable] as Domain<Any?>)
+                        .supersetOf(after[link.precondition.variable]) }
+        find(EqualityFilter { Ordering(link.setter, threat) })
+        find(EqualityFilter { Ordering(threat, link.precondition.step) })
+
+        fire {
+            maintain(Conflict(link, threat))
+        }
+    }
+
+    rule {
         val unfulfilled by all<UnfulfilledPrecondition>()
+        delay = 10
 
         fire {
             println(unfulfilled)
+        }
+    }
+
+    rule {
+        val conflicts by all<Conflict>()
+        delay = 10
+
+        fire {
+            println(conflicts)
         }
     }
 

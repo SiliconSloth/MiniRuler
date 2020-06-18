@@ -9,6 +9,10 @@ open class Action(val name: String, val prerequisite: State, val varOps: Map<Var
     val variables = prerequisite.variables
     val operations = variables.map { varOps[it] }.toTypedArray()
 
+    operator fun <T> get(variable: Variable<T>): Operation<T>? =
+            @Suppress("UNCHECKED_CAST")
+            (operations[variables.indexOf(variable)] as Operation<T>?)
+
     fun apply(before: State): State =
             apply(before.intersect(prerequisite)) { op, dom -> op.apply(dom) }
 
