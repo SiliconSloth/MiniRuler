@@ -17,8 +17,7 @@ class AggregateMatchSet<T: Any>(val binding: AggregateBinding<T>, val nextBindin
     var nextMatch: MatchNode = matchRemaining()
 
     fun matchRemaining(): MatchNode {
-        // Copy to ensure immutability despite future changes to matches
-        binding.value = HashSet(matches)
+        binding.value = matches
         return makeMatchTree(nextBindings, rule)
     }
 
