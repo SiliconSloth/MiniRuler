@@ -119,6 +119,8 @@ class RuleEngine(val reportInterval: Int = 0, recordPath: String? = null): FactU
                         }
                     }
                 }
+
+                recorder?.tick()
             }
             running = false
         }
