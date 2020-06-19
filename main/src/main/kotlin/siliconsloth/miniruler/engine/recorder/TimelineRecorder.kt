@@ -10,6 +10,14 @@ class TimelineRecorder(outputPath: String) {
 
     var timestep = 0
 
+    init {
+        Runtime.getRuntime().addShutdownHook(object : Thread() {
+            override fun run() {
+                writer.close()
+            }
+        })
+    }
+
     fun tick() =
             timestep++
 
