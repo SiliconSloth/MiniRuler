@@ -4,7 +4,7 @@ import kotlin.reflect.KClass
 import siliconsloth.miniruler.engine.builders.AtomicBuilder
 import siliconsloth.miniruler.engine.builders.RuleBuilder
 import siliconsloth.miniruler.engine.matching.CompleteMatch
-import siliconsloth.miniruler.engine.recorder.Recorder
+import siliconsloth.miniruler.engine.recorder.TimelineRecorder
 import siliconsloth.miniruler.engine.stores.FactSet
 import siliconsloth.miniruler.engine.stores.FactStore
 
@@ -12,7 +12,7 @@ class RuleEngine(val reportInterval: Int = 0, recordPath: String? = null): FactU
     data class Update<T: Any>(val fact: T, val isInsert: Boolean, val maintain: Boolean, val producer: CompleteMatch?)
 
     var reportCountdown = reportInterval
-    val recorder = recordPath?.let { Recorder(it) }
+    val recorder = recordPath?.let { TimelineRecorder(it) }
 
     /**
      * All the rules in the engine, grouped by the fact types they bind to.

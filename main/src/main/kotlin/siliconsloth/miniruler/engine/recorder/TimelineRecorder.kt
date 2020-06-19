@@ -5,7 +5,7 @@ import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.engine.matching.CompleteMatch
 import java.io.File
 
-class Recorder(outputPath: String) {
+class TimelineRecorder(outputPath: String) {
     val writer = File(outputPath).bufferedWriter()
 
     var timestep = 0
