@@ -35,7 +35,7 @@ class RuleEngine(val reportInterval: Int = 0, recordPath: String? = null): FactU
      */
     val maintainers = mutableMapOf<Any, MutableList<CompleteMatch>>()
 
-    var nextMatchID = 1
+    var nextMatchID = 0
 
     // Some variables used by applyUpdates().
     var running = false
