@@ -1,5 +1,6 @@
 package siliconsloth.miniruler.engine.recorder
 
+import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.engine.matching.CompleteMatch
 
 class Recorder(val outputPath: String) {
@@ -9,5 +10,9 @@ class Recorder(val outputPath: String) {
             println(match.rule.name)
             println(match.bindValues.values)
         }
+    }
+
+    fun recordUpdate(update: RuleEngine.Update<*>) {
+        println("Fact: ${update.fact} Producer: ${update.producer?.id} Insert: ${update.isInsert} Maintain: ${update.maintain}")
     }
 }

@@ -8,8 +8,8 @@ import siliconsloth.miniruler.engine.recorder.Recorder
 import siliconsloth.miniruler.engine.stores.FactSet
 import siliconsloth.miniruler.engine.stores.FactStore
 
-class RuleEngine(val reportInterval: Int = 0, val recordPath: String? = null): FactUpdater<Any> {
-    data class Update<T: Any>(val fact: T, val isInsert: Boolean, val maintainer: CompleteMatch? = null)
+class RuleEngine(val reportInterval: Int = 0, recordPath: String? = null): FactUpdater<Any> {
+    data class Update<T: Any>(val fact: T, val isInsert: Boolean, val maintain: Boolean, val producer: CompleteMatch?)
 
     var reportCountdown = reportInterval
     val recorder = recordPath?.let { Recorder(it) }
@@ -73,12 +73,16 @@ class RuleEngine(val reportInterval: Int = 0, val recordPath: String? = null): F
             while (updateQueue.isNotEmpty()) {
                 // Remove any insertions of facts maintained by matches that have already ended.
                 val batch = updateQueue.mapValues { it.value.filter {
-                    !(it.isInsert && it.maintainer?.state == CompleteMatch.State.ENDED) } }
+                    !(it.isInsert && it.maintain && it.producer!!.state == CompleteMatch.State.ENDED) } }
                     // Remove any insertions that are immediately undone by a deletion or vice versa.
                     .mapValues { (_,ups) ->
                         ups.filter { a -> !ups.any { b -> a.fact == b.fact && a.isInsert != b.isInsert } }
                     }
                 updateQueue.clear()
+
+                if (recorder != null) {
+                    batch.values.flatten().forEach { recorder.recordUpdate(it) }
+                }
 
                 // Update the fact stores.
                 batch.forEach {
@@ -130,8 +134,8 @@ class RuleEngine(val reportInterval: Int = 0, val recordPath: String? = null): F
         updates.forEach {
             if (it.isInsert) {
                 store.insert(it.fact)
-                if (it.maintainer != null) {
-                    maintainers.getOrPut(it.fact) { mutableListOf() }.add(it.maintainer)
+                if (it.maintain) {
+                    maintainers.getOrPut(it.fact) { mutableListOf() }.add(it.producer!!)
                 }
             } else {
                 store.delete(it.fact)
@@ -148,7 +152,7 @@ class RuleEngine(val reportInterval: Int = 0, val recordPath: String? = null): F
             nextMatchID++
 
     fun atomic(updates: AtomicBuilder.() -> Unit) =
-        applyUpdates(AtomicBuilder(this).apply(updates).updates)
+        applyUpdates(AtomicBuilder(this, null).apply(updates).updates)
 
     override fun insert(fact: Any) = atomic {
         insert(fact)
