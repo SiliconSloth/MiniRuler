@@ -43,7 +43,7 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
      * At the time of creation of a CompleteMatch all the bindings' values will have been
      * set to the values represented by this match, so we can save these values to be restored later.
      */
-    val bindValues = rule.bindings.map { it to it.value }.toMap()
+    val bindValues = rule.bindings.map { it.value }
 
     /**
      * List of facts inserted with maintain() by the firing (or ending) of this match.
@@ -153,9 +153,9 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
      * Set the values of the rule's bindings to those contained in this match.
      */
     fun restoreBindings() {
-        bindValues.forEach { (binding, value) ->
+        bindValues.forEachIndexed { index, value ->
             @Suppress("UNCHECKED_CAST")
-            (binding as Binding<*, Any>).value = value
+            (rule.bindings[index] as Binding<*,Any>).value = value
         }
     }
 
