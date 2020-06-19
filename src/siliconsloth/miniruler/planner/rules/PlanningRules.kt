@@ -12,7 +12,7 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
         fire {
             step.before.forEach { (v,d) ->
                 if (d != v.initializeDomain()) {
-                    insert(Precondition(step, v))
+                    maintain(Precondition(step, v))
                 }
             }
         }
@@ -24,6 +24,25 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
 
         fire {
             maintain(UnfulfilledPrecondition(cond))
+        }
+    }
+
+    rule {
+        val link by find<Link>()
+        not(EqualityFilter { link.setter })
+
+        fire {
+            delete(link)
+        }
+    }
+
+    rule {
+        val link by find<Link>()
+        not(EqualityFilter { link.precondition })
+        delay = 2
+
+        fire {
+            delete(link)
         }
     }
 
@@ -70,8 +89,55 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     }
 
     rule {
+        val conflicts by all<Conflict> { link.precondition.variable == itemCount(Item.SAND) }
+        val links by all<Link>()
+        delay = 6
+        debug = true
+
+        fire {
+            val conflict = conflicts.firstOrNull() ?: return@fire
+
+            val setter = conflict.link.setter
+            val threat = conflict.threat
+            val dependent = conflict.link.precondition.step
+            val variable = conflict.link.precondition.variable
+
+            val stepGoal = threat.after.intersect(planner.state(variable to dependent.before[variable]))
+            val newStep = planner.newStep(threat.action, stepGoal)
+
+            replace(threat, newStep)
+
+            insert(Link(setter, Precondition(newStep, variable)))
+            insert(Link(threat, Precondition(dependent, variable)))
+
+            links.filter { it.setter == threat }.forEach { replace(it, Link(newStep, it.precondition)) }
+
+            links.filter { it.precondition.step == threat }.forEach { replace(it,
+                    Link(it.setter, Precondition(newStep, it.precondition.variable))) }
+        }
+    }
+
+    rule {
+        val conflict by find<Conflict>()
+        find(EqualityFilter { Ordering(conflict.link.precondition.step, conflict.threat) })
+
+        fire {
+            error("Bad conflict $conflict")
+        }
+    }
+
+    rule {
+        val oa by find<Ordering>()
+        find(EqualityFilter { Ordering(oa.after, oa.before) })
+
+        fire {
+            error("Bad ordering $oa")
+        }
+    }
+
+    rule {
         val unfulfilled by all<UnfulfilledPrecondition>()
-        delay = 10
+        delay = 30
 
         fire {
             println(unfulfilled)
@@ -80,7 +146,7 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
 
     rule {
         val conflicts by all<Conflict>()
-        delay = 10
+        delay = 30
 
         fire {
             println(conflicts)
@@ -131,7 +197,7 @@ fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, variables: List<Va
                                         blacklist: Action? = null) = rule {
     val ucs by all<UnfulfilledPrecondition> { precondition.variable in variables && precondition.step.action != blacklist }
     val candidates by all<Step> { this.action == action }
-    this.delay = 6
+    this.delay = 10
 
     fire {
         if (ucs.any()) {
@@ -160,7 +226,7 @@ fun <T> RuleEngine.multiFulfillmentRule(planner: RulePlanner, variable: Variable
     val ucs by all<UnfulfilledPrecondition> { precondition.variable == variable &&
             precondition.step.before[variable] == Enumeration(value) }
     val candidates by all<Step> { this.action == action }
-    this.delay = 6
+    this.delay = 10
 
     fire {
         if (ucs.any()) {
