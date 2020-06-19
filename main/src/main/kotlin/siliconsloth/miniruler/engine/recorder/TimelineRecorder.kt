@@ -33,7 +33,8 @@ class TimelineRecorder(outputPath: String) {
                 "type" to "fact",
                 "fact" to update.fact.toString(),
                 "insert" to update.isInsert,
-                "maintain" to update.maintain
+                "maintain" to update.maintain,
+                "time" to timestep
         )
         update.producer?.let { fields["producer"] = it.id }
 
