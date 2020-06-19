@@ -14,7 +14,7 @@ import siliconsloth.miniruler.planner.RulePlanner
 import siliconsloth.miniruler.rules.*
 
 fun main() {
-    val engine = RuleEngine()
+    val engine = RuleEngine(0, "recording.json")
     val spatialStore = SpatialMap<Memory>()
     engine.addFactStore(spatialStore)
 

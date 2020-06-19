@@ -63,7 +63,10 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
      */
     var state = State.MATCHED
 
+    val id = rule.engine.nextMatchID()
+
     init {
+        rule.engine.recorder?.recordMatchState(this)
         rule.engine.addMatch(this)
     }
 
@@ -92,6 +95,7 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
             State.FIRED -> State.DROPPED    // Queue calling end() later
             else -> throw RuntimeException("Match already dropped")
         }
+        rule.engine.recorder?.recordMatchState(this)
 
         // Countdown until end() can be called
         if (state == State.DROPPED) {
@@ -111,6 +115,7 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
         rule.fire?.invoke(this)
 
         state = State.FIRED
+        rule.engine.recorder?.recordMatchState(this)
         rule.fireCount++
     }
 
@@ -141,6 +146,7 @@ class CompleteMatch(rule: Rule): MatchNode(rule), FactUpdater<Any> {
         }
 
         state = State.ENDED
+        rule.engine.recorder?.recordMatchState(this)
     }
 
     /**

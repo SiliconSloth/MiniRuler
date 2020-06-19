@@ -4,13 +4,15 @@ import kotlin.reflect.KClass
 import siliconsloth.miniruler.engine.builders.AtomicBuilder
 import siliconsloth.miniruler.engine.builders.RuleBuilder
 import siliconsloth.miniruler.engine.matching.CompleteMatch
+import siliconsloth.miniruler.engine.recorder.Recorder
 import siliconsloth.miniruler.engine.stores.FactSet
 import siliconsloth.miniruler.engine.stores.FactStore
 
-class RuleEngine(val reportInterval: Int = 0): FactUpdater<Any> {
+class RuleEngine(val reportInterval: Int = 0, val recordPath: String? = null): FactUpdater<Any> {
     data class Update<T: Any>(val fact: T, val isInsert: Boolean, val maintainer: CompleteMatch? = null)
 
     var reportCountdown = reportInterval
+    val recorder = recordPath?.let { Recorder(it) }
 
     /**
      * All the rules in the engine, grouped by the fact types they bind to.
@@ -32,6 +34,8 @@ class RuleEngine(val reportInterval: Int = 0): FactUpdater<Any> {
      * Facts with no maintainers in the first place are not affected.
      */
     val maintainers = mutableMapOf<Any, MutableList<CompleteMatch>>()
+
+    var nextMatchID = 1
 
     // Some variables used by applyUpdates().
     var running = false
@@ -139,6 +143,9 @@ class RuleEngine(val reportInterval: Int = 0): FactUpdater<Any> {
     fun addMatch(match: CompleteMatch) {
         allMatches.add(match)
     }
+
+    fun nextMatchID(): Int =
+            nextMatchID++
 
     fun atomic(updates: AtomicBuilder.() -> Unit) =
         applyUpdates(AtomicBuilder(this).apply(updates).updates)
