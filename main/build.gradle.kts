@@ -9,6 +9,7 @@ repositories {
 
 application {
     mainClassName = "siliconsloth.miniruler.MainKt"
+    applicationDefaultJvmArgs = listOf("-ea")
 }
 
 dependencies {
