@@ -7,10 +7,6 @@ repositories {
     jcenter()
 }
 
-sourceSets.main {
-    java.srcDirs("src")
-}
-
 application {
     mainClassName = "siliconsloth.miniruler.MainKt"
 }
