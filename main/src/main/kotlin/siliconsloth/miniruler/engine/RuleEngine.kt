@@ -8,11 +8,11 @@ import siliconsloth.miniruler.engine.recorder.TimelineRecorder
 import siliconsloth.miniruler.engine.stores.FactSet
 import siliconsloth.miniruler.engine.stores.FactStore
 
-class RuleEngine(val reportInterval: Int = 0, recordPath: String? = null): FactUpdater<Any> {
+class RuleEngine(val reportInterval: Int = 0, timelinePath: String? = null): FactUpdater<Any> {
     data class Update<T: Any>(val fact: T, val isInsert: Boolean, val maintain: Boolean, val producer: CompleteMatch?)
 
     var reportCountdown = reportInterval
-    val recorder = recordPath?.let { TimelineRecorder(it) }
+    val recorder = timelinePath?.let { TimelineRecorder(it) }
 
     /**
      * All the rules in the engine, grouped by the fact types they bind to.
