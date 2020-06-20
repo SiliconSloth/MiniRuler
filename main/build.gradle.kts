@@ -1,15 +1,9 @@
 plugins {
     kotlin("jvm") version "1.3.72"
-    application
 }
 
 repositories {
     jcenter()
-}
-
-application {
-    mainClassName = "siliconsloth.miniruler.MainKt"
-    applicationDefaultJvmArgs = listOf("-ea")
 }
 
 dependencies {
@@ -19,9 +13,18 @@ dependencies {
     implementation("com.beust:klaxon:5.2")
 }
 
+tasks.register<JavaExec>("run") {
+    dependsOn("classes")
+    classpath = sourceSets.main.get().runtimeClasspath
+    workingDir = rootDir.resolve("run")
+    main = "siliconsloth.miniruler.MainKt"
+    jvmArgs = listOf("-ea")
+}
+
 tasks.register<JavaExec>("viewer") {
     dependsOn("classes")
     classpath = sourceSets.main.get().runtimeClasspath
+    workingDir = rootDir.resolve("run")
     main = "siliconsloth.miniruler.engine.recorder.TimelineViewerKt"
     jvmArgs = listOf("-ea")
 }
