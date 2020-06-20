@@ -10,10 +10,10 @@ import javax.swing.JFrame
 import javax.swing.JPanel
 
 class TimelineViewer(inputPath: String): JPanel() {
-    data class Match(val id: Int, val rule: String, val bindings: List<String>)
-    data class MatchEvent(val id: Int, val state: CompleteMatch.State, val time: Int)
+    data class Match(val rule: String, val bindings: List<String>)
+    data class MatchEvent(val match: Match, val state: CompleteMatch.State, val time: Int)
     data class FactEvent(val fact: String, val isInsert: Boolean, val maintain: Boolean,
-                               val producer: Int?, val time: Int)
+                               val producer: Match?, val time: Int)
 
     val matches = mutableListOf<Match>()
     val matchEvents = mutableSetOf<MatchEvent>()
@@ -44,22 +44,29 @@ class TimelineViewer(inputPath: String): JPanel() {
     }
 
     fun parseMatchEvent(json: JsonObject) {
-        val event = MatchEvent(json.int("id")!!, CompleteMatch.State.valueOf(json.string("state")!!),
-                json.int("time")!!)
-        matchEvents.add(event)
+        val id = json.int("id")!!
+        val state = CompleteMatch.State.valueOf(json.string("state")!!)
 
-        if (event.state == CompleteMatch.State.MATCHED) {
-            if (event.id != matches.size) {
-                error("Bad match ID ${event.id}, expected ${matches.size}")
+        val match: Match
+        if (state == CompleteMatch.State.MATCHED) {
+            if (id != matches.size) {
+                error("Bad match ID $id, expected ${matches.size}")
             }
 
-            matches.add(Match(event.id, json.string("rule")!!, ArrayList(json.array("bindings")!!)))
+            match = Match(json.string("rule")!!, ArrayList(json.array("bindings")!!))
+            matches.add(match)
+        } else {
+            match = matches[id]
         }
+
+        val event = MatchEvent(match, state, json.int("time")!!)
+        matchEvents.add(event)
     }
 
     fun parseFactEvent(json: JsonObject) {
+        val producer = json.int("producer")?.let { matches[it] }
         val event = FactEvent(json.string("fact")!!, json.boolean("insert")!!, json.boolean("maintain")!!,
-                json.int("producer"), json.int("time")!!)
+                producer, json.int("time")!!)
         factEvents.add(event)
     }
 }
