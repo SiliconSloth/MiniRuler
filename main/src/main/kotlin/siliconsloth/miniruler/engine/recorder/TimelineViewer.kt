@@ -3,31 +3,33 @@ package siliconsloth.miniruler.engine.recorder
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
 import siliconsloth.miniruler.engine.matching.CompleteMatch
-import java.awt.Dimension
+import java.awt.*
 import java.io.File
+import java.lang.Exception
 import java.lang.StringBuilder
-import javax.swing.JFrame
-import javax.swing.JPanel
+import javax.swing.*
+import kotlin.math.max
 
 class TimelineViewer(inputPath: String): JPanel() {
-    data class Match(val rule: String, val bindings: List<String>)
-    data class MatchEvent(val match: Match, val state: CompleteMatch.State, val time: Int)
-    data class FactEvent(val fact: String, val isInsert: Boolean, val maintain: Boolean,
-                               val producer: Match?, val time: Int)
-
     val matches = mutableListOf<Match>()
     val matchEvents = mutableSetOf<MatchEvent>()
-    val factEvents = mutableSetOf<FactEvent>()
+    val factTracks = mutableMapOf<String, Track>()
 
     val parser = Parser.default()
 
+    var maxTime = 0
+
     init {
-        preferredSize = Dimension(1800, 1000)
         loadTimeline(inputPath)
 
-        println(matches)
-        println(matchEvents)
-        println(factEvents)
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+
+        layout = BorderLayout()
+        add(JScrollPane(TimelinePane(factTracks.values.toList(), maxTime)))
     }
 
     fun loadTimeline(path: String) {
@@ -39,8 +41,11 @@ class TimelineViewer(inputPath: String): JPanel() {
                     "fact" -> parseFactEvent(json)
                     else -> error("Unknown event type: ${json["type"]}")
                 }
+                maxTime = max(maxTime, json.int("time")!!)
             }
         }
+
+        factTracks.values.forEach { it.finalize(maxTime) }
     }
 
     fun parseMatchEvent(json: JsonObject) {
@@ -64,10 +69,10 @@ class TimelineViewer(inputPath: String): JPanel() {
     }
 
     fun parseFactEvent(json: JsonObject) {
+        val fact = json.string("fact")!!
         val producer = json.int("producer")?.let { matches[it] }
-        val event = FactEvent(json.string("fact")!!, json.boolean("insert")!!, json.boolean("maintain")!!,
-                producer, json.int("time")!!)
-        factEvents.add(event)
+        val event = FactEvent(json.boolean("insert")!!, json.boolean("maintain")!!, producer, json.int("time")!!)
+        factTracks.getOrPut(fact) { Track(fact) }.addEvent(event)
     }
 }
 
