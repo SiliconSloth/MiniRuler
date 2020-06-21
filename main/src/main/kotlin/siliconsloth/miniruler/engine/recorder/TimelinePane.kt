@@ -17,7 +17,7 @@ class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrolla
                 max(tracks.size * defaultScale.y, defaultViewportSize.height))
     }
 
-    override fun paint(g: Graphics?) {
+    override fun paintComponent(g: Graphics?) {
         val g2d = g as Graphics2D
         val xScale = width.toFloat() / maxTime
         val yScale = height.toFloat() / tracks.size
