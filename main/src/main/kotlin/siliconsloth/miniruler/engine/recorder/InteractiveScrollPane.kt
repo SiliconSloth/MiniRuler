@@ -30,11 +30,11 @@ class InteractiveScrollPane(content: JComponent): JScrollPane(content), MouseLis
         viewport.view.preferredSize = Dimension(max((s.width * xScale).toInt(), viewport.width),
                 max((s.height * yScale).toInt(), viewport.height))
 
-        scaleBarCenter(horizontalScrollBar, xScale, focusPos.x)
-        scaleBarCenter(verticalScrollBar, yScale, focusPos.y)
-
         viewport.revalidate()
         repaint()
+
+        scaleBarCenter(horizontalScrollBar, xScale, focusPos.x)
+        scaleBarCenter(verticalScrollBar, yScale, focusPos.y)
     }
 
     fun scaleBarCenter(scrollBar: JScrollBar, scale: Float, focusPos: Int) {
