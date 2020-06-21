@@ -77,7 +77,7 @@ class TimelineViewer(inputPath: String): JPanel() {
 }
 
 fun main() {
-    val viewer = TimelineViewer("timeline.json")
+    val viewer = TimelineViewer("timeline.jtl")
 
     val frame = JFrame("MiniRuler Timeline Recorder")
     frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE

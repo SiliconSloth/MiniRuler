@@ -14,7 +14,7 @@ import siliconsloth.miniruler.planner.RulePlanner
 import siliconsloth.miniruler.rules.*
 
 fun main() {
-    val engine = RuleEngine(0, "timeline.json")
+    val engine = RuleEngine(0, "timeline.jtl")
     val spatialStore = SpatialMap<Memory>()
     engine.addFactStore(spatialStore)
 
