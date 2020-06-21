@@ -33,11 +33,11 @@ class InteractiveScrollPane(content: JComponent): JScrollPane(content), MouseLis
         viewport.revalidate()
         repaint()
 
-        scaleBarCenter(horizontalScrollBar, xScale, focusPos.x)
-        scaleBarCenter(verticalScrollBar, yScale, focusPos.y)
+        scaleBarFocus(horizontalScrollBar, xScale, focusPos.x)
+        scaleBarFocus(verticalScrollBar, yScale, focusPos.y)
     }
 
-    fun scaleBarCenter(scrollBar: JScrollBar, scale: Float, focusPos: Int) {
+    fun scaleBarFocus(scrollBar: JScrollBar, scale: Float, focusPos: Int) {
         val center = scrollBar.value + focusPos
         scrollBar.value = (center * scale - focusPos).toInt()
     }
