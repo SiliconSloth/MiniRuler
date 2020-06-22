@@ -9,7 +9,7 @@ import java.lang.StringBuilder
 import javax.swing.*
 import kotlin.math.max
 
-class TimelineViewer(inputPath: String): JPanel() {
+class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder") {
     val matches = mutableListOf<Match>()
     val matchEvents = mutableSetOf<MatchEvent>()
     val factTracks = mutableMapOf<Pair<String, String>, Track>()
@@ -27,6 +27,7 @@ class TimelineViewer(inputPath: String): JPanel() {
             ex.printStackTrace()
         }
 
+        defaultCloseOperation = EXIT_ON_CLOSE
         layout = BorderLayout()
 
         val timelinePane = TimelinePane(factTracks.values.toList(), maxTime)
@@ -37,6 +38,7 @@ class TimelineViewer(inputPath: String): JPanel() {
         scrollPane.addMouseMotionListener(timelinePane)
 
         add(scrollPane)
+        pack()
     }
 
     fun loadTimeline(path: String) {
@@ -92,10 +94,5 @@ class TimelineViewer(inputPath: String): JPanel() {
 
 fun main() {
     val viewer = TimelineViewer("timeline.jtl")
-
-    val frame = JFrame("MiniRuler Timeline Recorder")
-    frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-    frame.add(viewer)
-    frame.pack()
-    frame.isVisible = true
+    viewer.isVisible = true
 }
