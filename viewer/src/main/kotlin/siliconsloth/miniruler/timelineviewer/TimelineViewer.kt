@@ -81,7 +81,12 @@ class TimelineViewer(inputPath: String): JPanel() {
         val producer = json.int("producer")?.let { matches[it] }
 
         val event = FactEvent(json.boolean("insert")!!, json.boolean("maintain")!!, producer, json.int("time")!!)
-        factTracks.getOrPut(fact to fClass) { Track(fact, fClass) }.addEvent(event)
+        val track = factTracks.getOrPut(fact to fClass) { Track(fact, fClass) }
+
+        track.addEvent(event)
+        if (!event.isInsert) {
+            track.closePeriod()
+        }
     }
 }
 

@@ -53,6 +53,11 @@ class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrolla
 
                 g2d.color = Color.getHSBColor(track.hue, 0.8f, 1f)
                 g2d.drawRect(x, y, w, h)
+
+                for (time in period.eventTimes) {
+                    val x2 = (time * xScale).toInt()
+                    g2d.drawLine(x2, y, x2, y + h)
+                }
             }
 
             g2d.color = Color.BLACK
