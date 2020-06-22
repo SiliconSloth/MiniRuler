@@ -66,15 +66,16 @@ class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Sc
                 }
             }
 
-            val label: String
-            if (track.label.length <= 80 || track == selectedPeriod?.track || track == mouseOverTrack) {
-                label = track.label
-            } else {
-                label = track.label.substring(0, 80) + "..."
-            }
+            if (yScale > g2d.fontMetrics.ascent * 0.6f) {
+                val label = if (track.label.length <= 80 || track == selectedPeriod?.track || track == mouseOverTrack) {
+                    track.label
+                } else {
+                    track.label.substring(0, 80) + "..."
+                }
 
-            g2d.color = Color.BLACK
-            g2d.drawString(label, visibleRect.x, y + g2d.fontMetrics.ascent)
+                g2d.color = Color.BLACK
+                g2d.drawString(label, visibleRect.x, y + g2d.fontMetrics.ascent)
+            }
         }
     }
 
