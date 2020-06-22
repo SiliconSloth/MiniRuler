@@ -23,21 +23,20 @@ class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrolla
                 max(tracks.size * defaultScale, defaultViewportSize.height))
     }
 
-    override fun paintComponent(g: Graphics?) {
+    override fun paintComponent(g: Graphics) {
         val g2d = g as Graphics2D
         val xScale = width.toFloat() / maxTime
         val yScale = height.toFloat() / tracks.size
 
         updateMouseOverPeriod()
 
-        g2d.clearRect(0, 0, width, height)
+        g2d.clearRect(visibleRect.x, visibleRect.y, visibleRect.width, visibleRect.height)
+
+        paintGridlines(g2d, xScale, yScale)
 
         val h = ceil(yScale).toInt()
         for ((i, track) in tracks.withIndex()) {
             val y = (i * yScale).toInt()
-
-            g2d.color = Color(240, 240, 240)
-            g2d.drawLine(visibleRect.x, y, visibleRect.x + visibleRect.width, y)
 
             for (period in track.periods) {
                 val x = (period.start * xScale).toInt()
@@ -51,7 +50,20 @@ class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrolla
             }
 
             g2d.color = Color.BLACK
-            g2d.drawString(track.name, visibleRect.x, (i * yScale).toInt() + g2d.fontMetrics.ascent)
+            g2d.drawString(track.name, visibleRect.x, y + g2d.fontMetrics.ascent)
+        }
+    }
+
+    fun paintGridlines(g2d: Graphics2D, xScale: Float, yScale: Float) {
+        g2d.color = Color(240, 240, 240)
+        for (i in 1 until tracks.size) {
+            val y = (i * yScale).toInt()
+            g2d.drawLine(visibleRect.x, y, visibleRect.x + visibleRect.width, y)
+        }
+
+        for (i in 1 until maxTime) {
+            val x = (i * xScale).toInt()
+            g2d.drawLine(x, visibleRect.y, x, visibleRect.y + visibleRect.height)
         }
     }
 
