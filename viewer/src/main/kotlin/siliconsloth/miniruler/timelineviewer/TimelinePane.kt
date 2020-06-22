@@ -1,15 +1,19 @@
 package siliconsloth.miniruler.timelineviewer
 
 import java.awt.*
+import java.awt.event.MouseEvent
+import java.awt.event.MouseMotionListener
 import javax.swing.JPanel
 import javax.swing.Scrollable
 import javax.swing.SwingConstants
 import kotlin.math.max
 
-class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrollable {
+class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrollable, MouseMotionListener {
 
     val defaultScale = 10
     val defaultViewportSize = Dimension(1800, 900)
+
+    var mouseOverPeriod: Track.Period? = null
 
     init {
         preferredSize = Dimension(max(maxTime * defaultScale, defaultViewportSize.width),
@@ -21,11 +25,13 @@ class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrolla
         val xScale = width.toFloat() / maxTime
         val yScale = height.toFloat() / tracks.size
 
+        updateMouseOverPeriod()
+
         g2d.clearRect(0, 0, width, height)
 
         for ((i, track) in tracks.withIndex()) {
-            g2d.color = Color.MAGENTA
             for (period in track.periods) {
+                g2d.color = if (period == mouseOverPeriod) Color.GREEN else Color.MAGENTA
                 g2d.fillRect((period.start * xScale).toInt(), (i * yScale).toInt(),
                         ((period.end - period.start) * xScale).toInt(), yScale.toInt())
             }
@@ -33,6 +39,26 @@ class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrolla
             g2d.color = Color.BLACK
             g2d.drawString(track.name, visibleRect.x, ((i + 1) * yScale).toInt())
         }
+    }
+
+    fun updateMouseOverPeriod() {
+        val mouse = mousePosition()
+        if (visibleRect.contains(mouse)) {
+            val track = mouse.y * tracks.size / height
+            val time = mouse.x * maxTime / width
+
+            mouseOverPeriod = tracks[track].periods.firstOrNull {
+                it.start <= time && time <= it.end
+            }
+        } else {
+            mouseOverPeriod = null
+        }
+    }
+
+    fun mousePosition(): Point {
+        val ms = MouseInfo.getPointerInfo().location
+        val cs = locationOnScreen
+        return Point(ms.x - cs.x, ms.y - cs.y)
     }
 
     override fun getScrollableTracksViewportWidth() = false
@@ -60,4 +86,11 @@ class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrolla
 
     override fun getPreferredScrollableViewportSize(): Dimension =
             defaultViewportSize
+
+    override fun mouseMoved(e: MouseEvent) {
+        repaint()
+    }
+
+    override fun mouseDragged(e: MouseEvent) {
+    }
 }

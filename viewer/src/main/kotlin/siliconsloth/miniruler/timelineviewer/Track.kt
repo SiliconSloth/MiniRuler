@@ -1,7 +1,7 @@
 package siliconsloth.miniruler.timelineviewer
 
 class Track(val name: String) {
-    data class Period(val start: Int, val end: Int, val inserter: Match?, val deleter: Match?)
+    data class Period(val track: Track, val start: Int, val end: Int, val inserter: Match?, val deleter: Match?)
 
     val periods = mutableListOf<Period>()
 
@@ -16,7 +16,7 @@ class Track(val name: String) {
             }
         } else {
             if (!event.isInsert) {
-                periods.add(Period(lastStart!!, event.time, lastInserter, event.producer))
+                periods.add(Period(this, lastStart!!, event.time, lastInserter, event.producer))
                 lastStart = null
             }
         }
@@ -24,7 +24,7 @@ class Track(val name: String) {
 
     fun finalize(maxTime: Int) {
         if (lastStart != null) {
-            periods.add(Period(lastStart!!, maxTime, lastInserter, null))
+            periods.add(Period(this, lastStart!!, maxTime, lastInserter, null))
             lastStart = null
         }
     }

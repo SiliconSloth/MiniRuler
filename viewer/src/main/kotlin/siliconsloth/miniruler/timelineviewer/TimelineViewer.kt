@@ -29,8 +29,10 @@ class TimelineViewer(inputPath: String): JPanel() {
 
         layout = BorderLayout()
 
-        val scrollPane = InteractiveScrollPane(TimelinePane(factTracks.values.toList(), maxTime))
+        val timelinePane = TimelinePane(factTracks.values.toList(), maxTime)
+        val scrollPane = InteractiveScrollPane(timelinePane)
         scrollPane.viewport.scrollMode = JViewport.SIMPLE_SCROLL_MODE
+        scrollPane.addMouseMotionListener(timelinePane)
         add(scrollPane)
     }
 
