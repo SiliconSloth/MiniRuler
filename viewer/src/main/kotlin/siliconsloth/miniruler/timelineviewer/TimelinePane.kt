@@ -15,6 +15,7 @@ class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Sc
     val defaultScale = 10
     val defaultViewportSize = Dimension(1800, 900)
 
+    var mouseOverTrack: Track<*,*>? = null
     var mouseOverPeriod: Track.Period<*>? = null
     var selectedPeriod: Track.Period<*>? = null
 
@@ -28,7 +29,7 @@ class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Sc
         val xScale = width.toFloat() / maxTime
         val yScale = height.toFloat() / tracks.size
 
-        updateMouseOverPeriod()
+        updateMouseOver()
 
         g2d.clearRect(visibleRect.x, visibleRect.y, visibleRect.width, visibleRect.height)
 
@@ -60,8 +61,15 @@ class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Sc
                 }
             }
 
+            val label: String
+            if (track.label.length <= 80 || track == selectedPeriod?.track || track == mouseOverTrack) {
+                label = track.label
+            } else {
+                label = track.label.substring(0, 80) + "..."
+            }
+
             g2d.color = Color.BLACK
-            g2d.drawString(track.label, visibleRect.x, y + g2d.fontMetrics.ascent)
+            g2d.drawString(label, visibleRect.x, y + g2d.fontMetrics.ascent)
         }
     }
 
@@ -78,16 +86,18 @@ class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Sc
         }
     }
 
-    fun updateMouseOverPeriod() {
+    fun updateMouseOver() {
         val mouse = mousePosition()
         if (visibleRect.contains(mouse)) {
             val track = mouse.y * tracks.size / height
             val time = mouse.x * maxTime / width
 
-            mouseOverPeriod = tracks[track].periods.firstOrNull { it: Track.Period<*> ->
+            mouseOverTrack = tracks[track]
+            mouseOverPeriod = mouseOverTrack!!.periods.firstOrNull { it: Track.Period<*> ->
                 it.start <= time && it.end?.let { e -> time <= e } != false
             }
         } else {
+            mouseOverTrack = null
             mouseOverPeriod = null
         }
     }
