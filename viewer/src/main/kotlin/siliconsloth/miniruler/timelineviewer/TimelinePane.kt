@@ -42,10 +42,16 @@ class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrolla
                 val x = (period.start * xScale).toInt()
                 val w = ((period.end - period.start) * xScale).toInt()
 
-                g2d.color = Color.getHSBColor(track.hue, 0.5f, 1f)
+                val sat = when (period) {
+                    selectedPeriod -> 1f
+                    mouseOverPeriod -> 0.3f
+                    else -> 0.4f
+                }
+
+                g2d.color = Color.getHSBColor(track.hue, sat, 1f)
                 g2d.fillRect(x, y, w, h)
 
-                g2d.color = Color.getHSBColor(track.hue, 1f, 1f)
+                g2d.color = Color.getHSBColor(track.hue, 0.8f, 1f)
                 g2d.drawRect(x, y, w, h)
             }
 
