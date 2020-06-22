@@ -47,7 +47,7 @@ class RuleEngine(val reportInterval: Int = 0, timelinePath: String? = null): Fac
 
     fun rule(definition: RuleBuilder.() -> Unit) {
         val callLine = Throwable().stackTrace[1]
-        val rule = RuleBuilder(callLine.toString(), this).apply(definition).build()
+        val rule = RuleBuilder("${callLine.fileName}:${callLine.lineNumber}", this).apply(definition).build()
 
         rule.bindings.forEach {
             rules.getOrPut(it.type) { mutableListOf() }.add(rule)
