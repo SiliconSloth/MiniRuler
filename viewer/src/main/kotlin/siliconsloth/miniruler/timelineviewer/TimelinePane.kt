@@ -2,18 +2,20 @@ package siliconsloth.miniruler.timelineviewer
 
 import java.awt.*
 import java.awt.event.MouseEvent
+import java.awt.event.MouseListener
 import java.awt.event.MouseMotionListener
 import javax.swing.JPanel
 import javax.swing.Scrollable
 import javax.swing.SwingConstants
 import kotlin.math.max
 
-class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrollable, MouseMotionListener {
+class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrollable, MouseListener, MouseMotionListener {
 
     val defaultScale = 10
     val defaultViewportSize = Dimension(1800, 900)
 
     var mouseOverPeriod: Track.Period? = null
+    var selectedPeriod: Track.Period? = null
 
     init {
         preferredSize = Dimension(max(maxTime * defaultScale, defaultViewportSize.width),
@@ -31,7 +33,11 @@ class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrolla
 
         for ((i, track) in tracks.withIndex()) {
             for (period in track.periods) {
-                g2d.color = if (period == mouseOverPeriod) Color.GREEN else Color.MAGENTA
+                g2d.color = when (period) {
+                    selectedPeriod -> Color.GREEN
+                    mouseOverPeriod -> Color.CYAN
+                    else -> Color.MAGENTA
+                }
                 g2d.fillRect((period.start * xScale).toInt(), (i * yScale).toInt(),
                         ((period.end - period.start) * xScale).toInt(), yScale.toInt())
             }
@@ -91,6 +97,25 @@ class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrolla
         repaint()
     }
 
+    override fun mousePressed(e: MouseEvent) {
+        if (e.button == MouseEvent.BUTTON1) {
+            selectedPeriod = mouseOverPeriod
+        }
+        repaint()
+    }
+
     override fun mouseDragged(e: MouseEvent) {
+    }
+
+    override fun mouseEntered(e: MouseEvent) {
+    }
+
+    override fun mouseClicked(e: MouseEvent) {
+    }
+
+    override fun mouseExited(e: MouseEvent) {
+    }
+
+    override fun mouseReleased(e: MouseEvent) {
     }
 }
