@@ -13,7 +13,7 @@ import kotlin.math.min
 
 class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Scrollable, MouseListener, MouseMotionListener {
 
-    val defaultScale = 10
+    val defaultScale = 20
     val defaultViewportSize = Dimension(1800, 900)
 
     var mouseOverTrack: Track<*,*>? = null
