@@ -35,6 +35,10 @@ class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrolla
         val h = ceil(yScale).toInt()
         for ((i, track) in tracks.withIndex()) {
             val y = (i * yScale).toInt()
+
+            g2d.color = Color(240, 240, 240)
+            g2d.drawLine(visibleRect.x, y, visibleRect.x + visibleRect.width, y)
+
             for (period in track.periods) {
                 val x = (period.start * xScale).toInt()
                 val w = ((period.end - period.start) * xScale).toInt()
