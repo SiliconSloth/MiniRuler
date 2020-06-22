@@ -9,6 +9,7 @@ import javax.swing.Scrollable
 import javax.swing.SwingConstants
 import kotlin.math.ceil
 import kotlin.math.max
+import kotlin.math.min
 
 class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Scrollable, MouseListener, MouseMotionListener {
 
@@ -33,10 +34,14 @@ class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Sc
 
         g2d.clearRect(visibleRect.x, visibleRect.y, visibleRect.width, visibleRect.height)
 
-        paintGridlines(g2d, xScale, yScale)
+        val minTrack = trackAt(visibleRect.minY.toInt())
+        val maxTrack = min(trackAt(visibleRect.maxY.toInt()), tracks.size - 1)
+
+        paintGridlines(g2d, minTrack, maxTrack, xScale, yScale)
 
         val h = ceil(yScale).toInt()
-        for ((i, track) in tracks.withIndex()) {
+        for (i in minTrack..maxTrack) {
+            val track = tracks[i]
             val y = (i * yScale).toInt()
 
             for (period in track.periods) {
@@ -73,10 +78,10 @@ class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Sc
         }
     }
 
-    fun paintGridlines(g2d: Graphics2D, xScale: Float, yScale: Float) {
+    fun paintGridlines(g2d: Graphics2D, minTrack: Int, maxTrack: Int, xScale: Float, yScale: Float) {
         g2d.color = Color(240, 240, 240)
-        for (i in 1 until tracks.size) {
-            val y = (i * yScale).toInt()
+        for (i in minTrack..maxTrack) {
+            val y = ((i + 1) * yScale).toInt()
             g2d.drawLine(visibleRect.x, y, visibleRect.x + visibleRect.width, y)
         }
 
@@ -89,7 +94,7 @@ class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Sc
     fun updateMouseOver() {
         val mouse = mousePosition()
         if (visibleRect.contains(mouse)) {
-            val track = mouse.y * tracks.size / height
+            val track = trackAt(mouse.y)
             val time = mouse.x * maxTime / width
 
             mouseOverTrack = tracks[track]
@@ -101,6 +106,9 @@ class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Sc
             mouseOverPeriod = null
         }
     }
+
+    fun trackAt(y: Int): Int =
+            y * tracks.size / height
 
     fun mousePosition(): Point {
         val ms = MouseInfo.getPointerInfo().location
