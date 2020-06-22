@@ -40,7 +40,7 @@ class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Sc
         paintGridlines(g2d, minTrack, maxTrack, xScale, yScale)
 
         val h = ceil(yScale).toInt()
-        for (i in minTrack..maxTrack) {
+        for (i in maxTrack.downTo(minTrack)) {
             val track = tracks[i]
             val y = (i * yScale).toInt()
 
