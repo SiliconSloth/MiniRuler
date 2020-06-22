@@ -38,6 +38,7 @@ class TimelineRecorder(outputPath: String) {
     fun recordUpdate(update: RuleEngine.Update<*>) {
         val fields = mutableMapOf<String, Any>(
                 "type" to "fact",
+                "class" to (update.fact::class.simpleName ?: "null"),
                 "fact" to update.fact.toString(),
                 "insert" to update.isInsert,
                 "maintain" to update.maintain,

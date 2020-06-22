@@ -12,7 +12,7 @@ import kotlin.math.max
 class TimelineViewer(inputPath: String): JPanel() {
     val matches = mutableListOf<Match>()
     val matchEvents = mutableSetOf<MatchEvent>()
-    val factTracks = mutableMapOf<String, Track>()
+    val factTracks = mutableMapOf<Pair<String, String>, Track>()
 
     val parser = Parser.default()
 
@@ -77,9 +77,11 @@ class TimelineViewer(inputPath: String): JPanel() {
 
     fun parseFactEvent(json: JsonObject) {
         val fact = json.string("fact")!!
+        val fClass = json.string("class")!!
         val producer = json.int("producer")?.let { matches[it] }
+
         val event = FactEvent(json.boolean("insert")!!, json.boolean("maintain")!!, producer, json.int("time")!!)
-        factTracks.getOrPut(fact) { Track(fact) }.addEvent(event)
+        factTracks.getOrPut(fact to fClass) { Track(fact, fClass) }.addEvent(event)
     }
 }
 

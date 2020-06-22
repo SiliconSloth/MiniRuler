@@ -1,6 +1,6 @@
 package siliconsloth.miniruler.timelineviewer
 
-class Track(val name: String) {
+data class Track(val name: String, val factClass: String) {
     data class Period(val track: Track, val start: Int, val end: Int, val inserter: Match?, val deleter: Match?)
 
     val periods = mutableListOf<Period>()
