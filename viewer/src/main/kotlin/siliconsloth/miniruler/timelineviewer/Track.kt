@@ -1,4 +1,4 @@
-package siliconsloth.miniruler.engine.recorder
+package siliconsloth.miniruler.timelineviewer
 
 class Track(val name: String) {
     data class Period(val start: Int, val end: Int, val inserter: Match?, val deleter: Match?)

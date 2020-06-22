@@ -4,7 +4,6 @@ import kotlin.reflect.KClass
 import siliconsloth.miniruler.engine.builders.AtomicBuilder
 import siliconsloth.miniruler.engine.builders.RuleBuilder
 import siliconsloth.miniruler.engine.matching.CompleteMatch
-import siliconsloth.miniruler.engine.recorder.TimelineRecorder
 import siliconsloth.miniruler.engine.stores.FactSet
 import siliconsloth.miniruler.engine.stores.FactStore
 

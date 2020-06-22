@@ -1,6 +1,5 @@
-package siliconsloth.miniruler.engine.recorder
+package siliconsloth.miniruler.timelineviewer
 
-import siliconsloth.miniruler.math.Vector
 import java.awt.Dimension
 import java.awt.Point
 import java.awt.event.*
@@ -17,14 +16,14 @@ class InteractiveScrollPane(content: JComponent): JScrollPane(content), MouseLis
         addComponentListener(this)
     }
 
-    fun pan(displacement: Vector) {
-        horizontalScrollBar.value -= displacement.x
-        verticalScrollBar.value -= displacement.y
+    fun pan(dx: Int, dy: Int) {
+        horizontalScrollBar.value -= dx
+        verticalScrollBar.value -= dy
     }
 
-    fun zoom(displacement: Vector, focusPos: Point) {
-        val xScale = (displacement.x / 100f) + 1
-        val yScale = (displacement.y / 100f) + 1
+    fun zoom(dx: Int, dy: Int, focusPos: Point) {
+        val xScale = (dx / 100f) + 1
+        val yScale = (dy / 100f) + 1
 
         val s = viewport.view.size
         viewport.view.preferredSize = Dimension(max((s.width * xScale).toInt(), viewport.width),
@@ -70,12 +69,13 @@ class InteractiveScrollPane(content: JComponent): JScrollPane(content), MouseLis
 
     override fun mouseDragged(e: MouseEvent) {
         lastDrag?.let {
-            val displacement = Vector(e.x - it.x, e.y - it.y)
+            val dx = e.x - it.x
+            val dy = e.y - it.y
             if (button1Down) {
-                pan(displacement)
+                pan(dx, dy)
             }
             if (button3Down) {
-                zoom(displacement, dragStart!!)
+                zoom(dx, dy, dragStart!!)
             }
         }
         lastDrag = e.point

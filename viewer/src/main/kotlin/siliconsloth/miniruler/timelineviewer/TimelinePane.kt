@@ -1,6 +1,5 @@
-package siliconsloth.miniruler.engine.recorder
+package siliconsloth.miniruler.timelineviewer
 
-import siliconsloth.miniruler.math.Vector
 import java.awt.*
 import javax.swing.JPanel
 import javax.swing.Scrollable
@@ -9,12 +8,12 @@ import kotlin.math.max
 
 class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrollable {
 
-    val defaultScale = Vector(10, 10)
+    val defaultScale = 10
     val defaultViewportSize = Dimension(1800, 900)
 
     init {
-        preferredSize = Dimension(max(maxTime * defaultScale.x, defaultViewportSize.width),
-                max(tracks.size * defaultScale.y, defaultViewportSize.height))
+        preferredSize = Dimension(max(maxTime * defaultScale, defaultViewportSize.width),
+                max(tracks.size * defaultScale, defaultViewportSize.height))
     }
 
     override fun paintComponent(g: Graphics?) {

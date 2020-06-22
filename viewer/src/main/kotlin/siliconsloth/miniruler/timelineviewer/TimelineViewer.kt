@@ -1,8 +1,7 @@
-package siliconsloth.miniruler.engine.recorder
+package siliconsloth.miniruler.timelineviewer
 
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
-import siliconsloth.miniruler.engine.matching.CompleteMatch
 import java.awt.*
 import java.io.File
 import java.lang.Exception
@@ -53,10 +52,10 @@ class TimelineViewer(inputPath: String): JPanel() {
 
     fun parseMatchEvent(json: JsonObject) {
         val id = json.int("id")!!
-        val state = CompleteMatch.State.valueOf(json.string("state")!!)
+        val state = MatchState.valueOf(json.string("state")!!)
 
         val match: Match
-        if (state == CompleteMatch.State.MATCHED) {
+        if (state == MatchState.MATCHED) {
             if (id != matches.size) {
                 error("Bad match ID $id, expected ${matches.size}")
             }

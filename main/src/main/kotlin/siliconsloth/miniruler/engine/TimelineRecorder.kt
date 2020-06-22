@@ -1,7 +1,6 @@
-package siliconsloth.miniruler.engine.recorder
+package siliconsloth.miniruler.engine
 
 import com.beust.klaxon.JsonObject
-import siliconsloth.miniruler.engine.RuleEngine
 import siliconsloth.miniruler.engine.matching.CompleteMatch
 import java.io.File
 
