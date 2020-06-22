@@ -10,7 +10,7 @@ import javax.swing.SwingConstants
 import kotlin.math.ceil
 import kotlin.math.max
 
-class TimelinePane(val tracks: List<Track<*>>, val maxTime: Int): JPanel(), Scrollable, MouseListener, MouseMotionListener {
+class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Scrollable, MouseListener, MouseMotionListener {
 
     val defaultScale = 10
     val defaultViewportSize = Dimension(1800, 900)
@@ -61,7 +61,7 @@ class TimelinePane(val tracks: List<Track<*>>, val maxTime: Int): JPanel(), Scro
             }
 
             g2d.color = Color.BLACK
-            g2d.drawString(track.name, visibleRect.x, y + g2d.fontMetrics.ascent)
+            g2d.drawString(track.label, visibleRect.x, y + g2d.fontMetrics.ascent)
         }
     }
 

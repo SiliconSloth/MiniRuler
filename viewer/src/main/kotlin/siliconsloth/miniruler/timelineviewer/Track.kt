@@ -1,11 +1,16 @@
 package siliconsloth.miniruler.timelineviewer
 
-data class Track<E: Track.Event>(val name: String, val factClass: String) {
+data class Track<T: Track.Owner, E: Track.Event>(val owner: T) {
     interface Event {
         val time: Int
     }
 
-    data class Period<E: Event>(val track: Track<*>, val events: MutableList<E>, var closed: Boolean = false) {
+    interface Owner {
+        val label: String
+        val hue: Float
+    }
+
+    data class Period<E: Event>(val track: Track<*,E>, val events: MutableList<E>, var closed: Boolean = false) {
         val start: Int
         get() = events[0].time
 
@@ -15,7 +20,11 @@ data class Track<E: Track.Event>(val name: String, val factClass: String) {
 
     val periods = mutableListOf(Period<E>(this, mutableListOf()))
 
-    val hue = (factClass.hashCode() * 17 % 1000) / 1000f
+    val label: String
+    get() = owner.label
+
+    val hue: Float
+    get() = owner.hue
 
     fun addEvent(event: E) {
         periods.last().events.add(event)
