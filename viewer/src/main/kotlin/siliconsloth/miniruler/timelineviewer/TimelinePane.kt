@@ -7,6 +7,7 @@ import java.awt.event.MouseMotionListener
 import javax.swing.JPanel
 import javax.swing.Scrollable
 import javax.swing.SwingConstants
+import kotlin.math.ceil
 import kotlin.math.max
 
 class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrollable, MouseListener, MouseMotionListener {
@@ -31,15 +32,18 @@ class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrolla
 
         g2d.clearRect(0, 0, width, height)
 
+        val h = ceil(yScale).toInt()
         for ((i, track) in tracks.withIndex()) {
+            val y = (i * yScale).toInt()
             for (period in track.periods) {
-                g2d.color = when (period) {
-                    selectedPeriod -> Color.GREEN
-                    mouseOverPeriod -> Color.CYAN
-                    else -> Color.MAGENTA
-                }
-                g2d.fillRect((period.start * xScale).toInt(), (i * yScale).toInt(),
-                        ((period.end - period.start) * xScale).toInt(), yScale.toInt())
+                val x = (period.start * xScale).toInt()
+                val w = ((period.end - period.start) * xScale).toInt()
+
+                g2d.color = Color.getHSBColor(track.hue, 0.5f, 1f)
+                g2d.fillRect(x, y, w, h)
+
+                g2d.color = Color.getHSBColor(track.hue, 1f, 1f)
+                g2d.drawRect(x, y, w, h)
             }
 
             g2d.color = Color.BLACK

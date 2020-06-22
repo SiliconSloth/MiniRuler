@@ -8,6 +8,8 @@ data class Track(val name: String, val factClass: String) {
     var lastStart: Int? = null
     var lastInserter: Match? = null
 
+    val hue = (factClass.hashCode() * 17 % 1000) / 1000f
+
     fun addEvent(event: FactEvent) {
         if (lastStart == null) {
             if (event.isInsert) {
