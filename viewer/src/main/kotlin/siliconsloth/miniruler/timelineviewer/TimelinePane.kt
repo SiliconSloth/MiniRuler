@@ -10,13 +10,13 @@ import javax.swing.SwingConstants
 import kotlin.math.ceil
 import kotlin.math.max
 
-class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrollable, MouseListener, MouseMotionListener {
+class TimelinePane(val tracks: List<Track<*>>, val maxTime: Int): JPanel(), Scrollable, MouseListener, MouseMotionListener {
 
     val defaultScale = 10
     val defaultViewportSize = Dimension(1800, 900)
 
-    var mouseOverPeriod: Track.Period? = null
-    var selectedPeriod: Track.Period? = null
+    var mouseOverPeriod: Track.Period<*>? = null
+    var selectedPeriod: Track.Period<*>? = null
 
     init {
         preferredSize = Dimension(max(maxTime * defaultScale, defaultViewportSize.width),
@@ -40,7 +40,7 @@ class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrolla
 
             for (period in track.periods) {
                 val x = (period.start * xScale).toInt()
-                val w = ((period.end - period.start) * xScale).toInt()
+                val w = (((period.end ?: maxTime) - period.start) * xScale).toInt()
 
                 val sat = when (period) {
                     selectedPeriod -> 1f
@@ -54,8 +54,8 @@ class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrolla
                 g2d.color = Color.getHSBColor(track.hue, 0.8f, 1f)
                 g2d.drawRect(x, y, w, h)
 
-                for (time in period.eventTimes) {
-                    val x2 = (time * xScale).toInt()
+                for (event in period.events) {
+                    val x2 = (event.time * xScale).toInt()
                     g2d.drawLine(x2, y, x2, y + h)
                 }
             }
@@ -84,8 +84,8 @@ class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrolla
             val track = mouse.y * tracks.size / height
             val time = mouse.x * maxTime / width
 
-            mouseOverPeriod = tracks[track].periods.firstOrNull {
-                it.start <= time && time <= it.end
+            mouseOverPeriod = tracks[track].periods.firstOrNull { it: Track.Period<*> ->
+                it.start <= time && it.end?.let { e -> time <= e } != false
             }
         } else {
             mouseOverPeriod = null

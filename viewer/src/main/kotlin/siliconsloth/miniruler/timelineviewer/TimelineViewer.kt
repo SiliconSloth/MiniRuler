@@ -12,7 +12,7 @@ import kotlin.math.max
 class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder") {
     val matches = mutableListOf<Match>()
     val matchEvents = mutableSetOf<MatchEvent>()
-    val factTracks = mutableMapOf<Pair<String, String>, Track>()
+    val factTracks = mutableMapOf<Pair<String, String>, Track<FactEvent>>()
 
     val parser = Parser.default()
 
@@ -82,7 +82,7 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder") {
         val fClass = json.string("class")!!
         val producer = json.int("producer")?.let { matches[it] }
 
-        val event = FactEvent(json.boolean("insert")!!, json.boolean("maintain")!!, producer, json.int("time")!!)
+        val event = FactEvent(json.int("time")!!, json.boolean("insert")!!, json.boolean("maintain")!!, producer)
         val track = factTracks.getOrPut(fact to fClass) { Track(fact, fClass) }
 
         track.addEvent(event)
