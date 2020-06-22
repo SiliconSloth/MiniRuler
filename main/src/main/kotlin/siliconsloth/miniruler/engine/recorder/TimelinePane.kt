@@ -32,7 +32,7 @@ class TimelinePane(val tracks: List<Track>, val maxTime: Int): JPanel(), Scrolla
             }
 
             g2d.color = Color.BLACK
-            g2d.drawString(track.name, 0, ((i + 1) * yScale).toInt())
+            g2d.drawString(track.name, visibleRect.x, ((i + 1) * yScale).toInt())
         }
     }
 
