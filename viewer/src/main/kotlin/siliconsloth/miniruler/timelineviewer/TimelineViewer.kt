@@ -11,7 +11,7 @@ import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 import kotlin.math.max
 
-class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder") {
+class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder"), TimelinePane.SelectionListener {
     val matches = mutableListOf<Match>()
     val tracks = mutableMapOf<Track.Owner, Track<*,*>>()
 
@@ -19,8 +19,9 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder") {
 
     var maxTime = 0
 
-    lateinit var searchField: JTextField
-    lateinit var timelinePane: TimelinePane
+    val searchField: JTextField
+    val timelinePane: TimelinePane
+    val infoPanel: InfoPanel
 
     init {
         loadTimeline(inputPath)
@@ -34,27 +35,26 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder") {
         defaultCloseOperation = EXIT_ON_CLOSE
         layout = BorderLayout()
 
-        makeSearchBar()
-        makeViewport()
+        val leftPanel = JPanel(BorderLayout())
 
-        pack()
-    }
-
-    fun makeSearchBar() {
         searchField = JTextField()
         searchField.document.addDocumentListener(SearchFieldListener())
-        add(searchField, BorderLayout.PAGE_START)
-    }
+        leftPanel.add(searchField, BorderLayout.PAGE_START)
 
-    fun makeViewport() {
         timelinePane = TimelinePane(tracks.values.toList(), maxTime)
+        timelinePane.addSelectionListener(this)
+
         val scrollPane = InteractiveScrollPane(timelinePane)
         scrollPane.viewport.scrollMode = JViewport.SIMPLE_SCROLL_MODE
-
         scrollPane.addMouseListener(timelinePane)
         scrollPane.addMouseMotionListener(timelinePane)
 
-        add(scrollPane)
+        leftPanel.add(scrollPane)
+
+        infoPanel = InfoPanel()
+
+        add(JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, infoPanel))
+        pack()
     }
 
     inner class SearchFieldListener: DocumentListener {
@@ -68,6 +68,10 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder") {
 
         override fun changedUpdate(e: DocumentEvent) {
         }
+    }
+
+    override fun periodSelected(period: Track.Period<*>?) {
+        infoPanel.period = period
     }
 
     fun loadTimeline(path: String) {

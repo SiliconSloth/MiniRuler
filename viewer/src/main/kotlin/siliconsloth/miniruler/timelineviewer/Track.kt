@@ -6,6 +6,7 @@ data class Track<T: Track.Owner, E: Track.Event>(val owner: T) {
     }
 
     interface Owner {
+        val name: String
         val label: String
         val hue: Float
     }

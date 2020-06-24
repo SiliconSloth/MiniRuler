@@ -12,10 +12,16 @@ import kotlin.math.max
 import kotlin.math.min
 
 class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Scrollable, MouseListener, MouseMotionListener {
+    interface SelectionListener {
+        fun periodSelected(period: Track.Period<*>?)
+    }
+
+    val selectionListeners = mutableListOf<SelectionListener>()
+
     var visibleTracks = allTracks
 
     val defaultScale = 20
-    val defaultViewportSize = Dimension(1800, 900)
+    val defaultViewportSize = Dimension(1600, 900)
 
     var mouseOverTrack: Track<*,*>? = null
     var mouseOverPeriod: Track.Period<*>? = null
@@ -24,6 +30,10 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
     init {
         preferredSize = Dimension(max(maxTime * defaultScale, defaultViewportSize.width),
                 max(visibleTracks.size * defaultScale, defaultViewportSize.height))
+    }
+
+    fun addSelectionListener(listener: SelectionListener) {
+        selectionListeners.add(listener)
     }
 
     fun updateFilter(query: String) {
@@ -166,8 +176,9 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
     override fun mousePressed(e: MouseEvent) {
         if (e.button == MouseEvent.BUTTON1) {
             selectedPeriod = mouseOverPeriod
+            selectionListeners.forEach { it.periodSelected(selectedPeriod) }
+            repaint()
         }
-        repaint()
     }
 
     override fun mouseDragged(e: MouseEvent) {
