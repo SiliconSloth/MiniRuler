@@ -29,7 +29,13 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
     fun updateFilter(query: String) {
         val oldTrackCount = visibleTracks.size
         visibleTracks = allTracks.filter { it.label.contains(query) }
-        preferredSize = Dimension(width, max(parent.height, height * visibleTracks.size / oldTrackCount))
+
+        val newHeight = if (oldTrackCount == 0) {
+            visibleTracks.size * defaultScale
+        } else {
+            height * visibleTracks.size / oldTrackCount
+        }
+        preferredSize = Dimension(width, max(parent.height, newHeight))
 
         revalidate()
         repaint()
@@ -104,7 +110,7 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
 
     fun updateMouseOver() {
         val mouse = mousePosition()
-        if (visibleRect.contains(mouse)) {
+        if (visibleTracks.isNotEmpty() && visibleRect.contains(mouse)) {
             val track = trackAt(mouse.y)
             val time = mouse.x * maxTime / width
 
