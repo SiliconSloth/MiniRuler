@@ -11,7 +11,8 @@ import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
 
-class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Scrollable, MouseListener, MouseMotionListener {
+class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Scrollable, MouseListener, MouseMotionListener {
+    var visibleTracks = allTracks
 
     val defaultScale = 20
     val defaultViewportSize = Dimension(1800, 900)
@@ -22,26 +23,35 @@ class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Sc
 
     init {
         preferredSize = Dimension(max(maxTime * defaultScale, defaultViewportSize.width),
-                max(tracks.size * defaultScale, defaultViewportSize.height))
+                max(visibleTracks.size * defaultScale, defaultViewportSize.height))
+    }
+
+    fun updateFilter(query: String) {
+        val oldTrackCount = visibleTracks.size
+        visibleTracks = allTracks.filter { it.label.contains(query) }
+        preferredSize = Dimension(width, max(parent.height, height * visibleTracks.size / oldTrackCount))
+
+        revalidate()
+        repaint()
     }
 
     override fun paintComponent(g: Graphics) {
         val g2d = g as Graphics2D
         val xScale = width.toFloat() / maxTime
-        val yScale = height.toFloat() / tracks.size
+        val yScale = height.toFloat() / visibleTracks.size
 
         updateMouseOver()
 
         g2d.clearRect(visibleRect.x, visibleRect.y, visibleRect.width, visibleRect.height)
 
         val minTrack = trackAt(visibleRect.minY.toInt())
-        val maxTrack = min(trackAt(visibleRect.maxY.toInt()), tracks.size - 1)
+        val maxTrack = min(trackAt(visibleRect.maxY.toInt()), visibleTracks.size - 1)
 
         paintGridlines(g2d, minTrack, maxTrack, xScale, yScale)
 
         val h = ceil(yScale).toInt()
         for (i in maxTrack.downTo(minTrack)) {
-            val track = tracks[i]
+            val track = visibleTracks[i]
             val y = (i * yScale).toInt()
 
             for (period in track.periods) {
@@ -98,7 +108,7 @@ class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Sc
             val track = trackAt(mouse.y)
             val time = mouse.x * maxTime / width
 
-            mouseOverTrack = tracks[track]
+            mouseOverTrack = visibleTracks[track]
             mouseOverPeriod = mouseOverTrack!!.periods.firstOrNull { it: Track.Period<*> ->
                 it.start <= time && it.end?.let { e -> time <= e } != false
             }
@@ -109,7 +119,7 @@ class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Sc
     }
 
     fun trackAt(y: Int): Int =
-            y * tracks.size / height
+            y * visibleTracks.size / height
 
     fun mousePosition(): Point {
         val ms = MouseInfo.getPointerInfo().location
@@ -129,7 +139,7 @@ class TimelinePane(val tracks: List<Track<*,*>>, val maxTime: Int): JPanel(), Sc
 
     fun scrollIncrement(visibleRect: Rectangle, orientation: Int, direction: Int, blockSize: Int, exposeFull: Boolean): Int {
         val horizontal = orientation == SwingConstants.HORIZONTAL
-        val unitSize = (if (horizontal) width.toFloat() / maxTime else height.toFloat() / tracks.size) * blockSize
+        val unitSize = (if (horizontal) width.toFloat() / maxTime else height.toFloat() / visibleTracks.size) * blockSize
         val pos = if (horizontal) visibleRect.x else visibleRect.y
 
         val relPos = pos % unitSize

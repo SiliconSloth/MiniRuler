@@ -7,6 +7,8 @@ import java.io.File
 import java.lang.Exception
 import java.lang.StringBuilder
 import javax.swing.*
+import javax.swing.event.DocumentEvent
+import javax.swing.event.DocumentListener
 import kotlin.math.max
 
 class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder") {
@@ -16,6 +18,9 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder") {
     val parser = Parser.default()
 
     var maxTime = 0
+
+    lateinit var searchField: JTextField
+    lateinit var timelinePane: TimelinePane
 
     init {
         loadTimeline(inputPath)
@@ -29,7 +34,20 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder") {
         defaultCloseOperation = EXIT_ON_CLOSE
         layout = BorderLayout()
 
-        val timelinePane = TimelinePane(tracks.values.toList(), maxTime)
+        makeSearchBar()
+        makeViewport()
+
+        pack()
+    }
+
+    fun makeSearchBar() {
+        searchField = JTextField()
+        searchField.document.addDocumentListener(SearchFieldListener())
+        add(searchField, BorderLayout.PAGE_START)
+    }
+
+    fun makeViewport() {
+        timelinePane = TimelinePane(tracks.values.toList(), maxTime)
         val scrollPane = InteractiveScrollPane(timelinePane)
         scrollPane.viewport.scrollMode = JViewport.SIMPLE_SCROLL_MODE
 
@@ -37,7 +55,19 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder") {
         scrollPane.addMouseMotionListener(timelinePane)
 
         add(scrollPane)
-        pack()
+    }
+
+    inner class SearchFieldListener: DocumentListener {
+        override fun insertUpdate(e: DocumentEvent) {
+            timelinePane.updateFilter(searchField.text)
+        }
+
+        override fun removeUpdate(e: DocumentEvent) {
+            timelinePane.updateFilter(searchField.text)
+        }
+
+        override fun changedUpdate(e: DocumentEvent) {
+        }
     }
 
     fun loadTimeline(path: String) {
