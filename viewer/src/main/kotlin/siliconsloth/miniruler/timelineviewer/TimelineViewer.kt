@@ -48,6 +48,7 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder"), 
         scrollPane.viewport.scrollMode = JViewport.SIMPLE_SCROLL_MODE
         scrollPane.addMouseListener(timelinePane)
         scrollPane.addMouseMotionListener(timelinePane)
+        timelinePane.scrollPane = scrollPane
 
         leftPanel.add(scrollPane)
 

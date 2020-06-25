@@ -5,6 +5,7 @@ import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
 import java.awt.event.MouseMotionListener
 import javax.swing.JPanel
+import javax.swing.JScrollPane
 import javax.swing.Scrollable
 import javax.swing.SwingConstants
 import kotlin.math.ceil
@@ -17,6 +18,7 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
     }
 
     val selectionListeners = mutableListOf<SelectionListener>()
+    lateinit var scrollPane: JScrollPane
 
     var visibleTracks = allTracks
 
@@ -46,8 +48,15 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
             height * visibleTracks.size / oldTrackCount
         }
         preferredSize = Dimension(width, max(parent.height, newHeight))
+        size = preferredSize
+        scrollPane.verticalScrollBar.maximum = height
 
-        revalidate()
+        if (selectedPeriod?.track in visibleTracks) {
+            val ind = visibleTracks.indexOf(selectedPeriod!!.track)
+            val center = (ind.toFloat() + 0.5f) * height.toFloat() / visibleTracks.size.toFloat() - parent.height.toFloat() / 2
+            scrollPane.verticalScrollBar.value = center.toInt()
+        }
+
         repaint()
     }
 
