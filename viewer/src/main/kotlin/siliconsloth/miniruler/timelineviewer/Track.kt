@@ -1,6 +1,6 @@
 package siliconsloth.miniruler.timelineviewer
 
-data class Track<T: Track.Owner, E: Track.Event>(val owner: T) {
+abstract class Track<T: Track.Owner, E: Track.Event>(val owner: T) {
     interface Event {
         val time: Int
     }
@@ -10,6 +10,16 @@ data class Track<T: Track.Owner, E: Track.Event>(val owner: T) {
         val label: String
         val hue: Float
     }
+
+    abstract val bindingsTitle: String
+    abstract val insertsTitle: String
+    abstract val maintainsTitle: String
+    abstract val deletesTitle: String
+
+    abstract fun getBindings(period: Period<E>): List<String>?
+    abstract fun getInserts(period: Period<E>): List<String>
+    abstract fun getMaintains(period: Period<E>): List<String>
+    abstract fun getDeletes(period: Period<E>): List<String>
 
     data class Period<E: Event>(val track: Track<*,E>, val events: MutableList<E>, var closed: Boolean = false) {
         val start: Int

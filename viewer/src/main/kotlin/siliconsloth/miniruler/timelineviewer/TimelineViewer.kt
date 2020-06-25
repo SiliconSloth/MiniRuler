@@ -13,6 +13,7 @@ import kotlin.math.max
 
 class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder"), TimelinePane.SelectionListener {
     val matches = mutableListOf<Match>()
+    val facts = mutableMapOf<String, Fact>()
     val tracks = mutableMapOf<Track.Owner, Track<*,*>>()
 
     val parser = Parser.default()
@@ -108,12 +109,16 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder"), 
         }
 
         val event = MatchEvent(json.int("time")!!, match, state)
-        val track = tracks.getOrPut(match) { Track<Match, MatchEvent>(match) }
+        val track = tracks.getOrPut(match) { MatchTrack(match) }
 
         @Suppress("UNCHECKED_CAST")
         (track as Track<Match, MatchEvent>).addEvent(event)
         if (state == MatchState.ENDED) {
             track.closePeriod()
+        }
+
+        for (fact in match.bindings) {
+            facts[fact]?.triggeredMatches?.add(match)
         }
     }
 
@@ -121,15 +126,28 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder"), 
         val fact = json.string("fact")!!
         val fClass = json.string("class")!!
         val producer = json.int("producer")?.let { matches[it] }
+        val isInsert = json.boolean("insert")!!
+        val isMaintained = json.boolean("maintain")!!
 
         val owner = Fact(fact, fClass)
-        val event = FactEvent(json.int("time")!!, json.boolean("insert")!!, json.boolean("maintain")!!, producer)
-        val track = tracks.getOrPut(owner) { Track<Fact, FactEvent>(owner) }
+        val event = FactEvent(json.int("time")!!, isInsert, isMaintained, producer)
+        val track = tracks.getOrPut(owner) { FactTrack(owner) }
+        facts[fact] = owner
 
         @Suppress("UNCHECKED_CAST")
         (track as Track<Fact, FactEvent>).addEvent(event)
         if (!event.isInsert) {
             track.closePeriod()
+        }
+
+        if (producer != null) {
+            val prodEvent = tracks[producer]!!.periods.last { it.events.isNotEmpty() }.events[0] as MatchEvent
+            when {
+                isInsert && !isMaintained -> prodEvent.inserted.add(fact)
+                isInsert && isMaintained -> prodEvent.maintained.add(fact)
+                !isInsert && !isMaintained -> prodEvent.deleted.add(fact)
+                else -> error("Maintained deletes are not allowed")
+            }
         }
     }
 }
