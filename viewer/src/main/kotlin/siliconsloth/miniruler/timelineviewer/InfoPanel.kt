@@ -32,6 +32,8 @@ class InfoPanel(): JPanel() {
         inserterList.setEntries(value?.track?.getInserts(value) ?: listOf())
         maintainerList.setEntries(value?.track?.getMaintains(value) ?: listOf())
         deleterList.setEntries(value?.track?.getDeletes(value) ?: listOf())
+
+        revalidate()
     }
 
     override fun getPreferredSize(): Dimension {
