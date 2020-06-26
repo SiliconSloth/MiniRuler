@@ -1,5 +1,6 @@
 package siliconsloth.miniruler.timelineviewer
 
+import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
 import java.awt.*
@@ -104,7 +105,7 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder"), 
                 error("Bad match ID $id, expected ${matches.size}")
             }
 
-            match = Match(json.string("rule")!!, ArrayList(json.array("bindings")!!))
+            match = Match(json.string("rule")!!, json.array<Any?>("bindings")!!.map { deserializeBindValue(it) })
             matches.add(match)
         } else {
             match = matches[id]
@@ -119,10 +120,23 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder"), 
             track.closePeriod()
         }
 
-        for (fact in match.bindings) {
-            facts[fact]?.triggeredMatches?.add(match)
+        for (binding in match.bindings) {
+            when (binding) {
+                is SimpleBindValue -> facts[binding.value]!!.triggeredMatches.add(match)
+                is AggregateBindValue -> binding.value.forEach { facts[it]!!.triggeredMatches.add(match) }
+            }
         }
     }
+
+    fun deserializeBindValue(value: Any?): BindValue<*> =
+            @Suppress("UNCHECKED_CAST")
+            when (value) {
+                is String -> SimpleBindValue(value)
+                null -> InvertedBindValue()
+                is JsonArray<*> -> AggregateBindValue(ArrayList(value as JsonArray<String>))
+                else -> error("Bad bind value: $value")
+            }
+
 
     fun parseFactEvent(json: JsonObject) {
         val fact = json.string("fact")!!

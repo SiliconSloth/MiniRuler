@@ -8,6 +8,28 @@ enum class MatchState {
     MATCHED, FIRED, DROPPED, ENDED;
 }
 
+abstract class BindValue<T>(val value: T) {
+    abstract val trackString: String
+    abstract val listingString: String
+
+    override fun toString() = trackString
+}
+
+class SimpleBindValue(value: String): BindValue<String>(value) {
+    override val trackString = value
+    override val listingString = value
+}
+
+class InvertedBindValue: BindValue<Nothing?>(null) {
+    override val trackString = "null"
+    override val listingString = "N/A"
+}
+
+class AggregateBindValue(values: List<String>): BindValue<List<String>>(values) {
+    override val trackString = values.toString()
+    override val listingString = "[${values.joinToString(",\n")}]"
+}
+
 const val MATCH_HUE = 0.7f
 const val HUE_RANGE = 0.2f
 const val PRECISION = 1000f
@@ -15,7 +37,7 @@ const val PRECISION = 1000f
 fun generateHue(obj: Any, base: Float): Float =
         base + (obj.hashCode() * 113 % PRECISION) * (HUE_RANGE / PRECISION)  - HUE_RANGE / 2
 
-data class Match(val rule: String, val bindings: List<String>): Track.Owner {
+data class Match(val rule: String, val bindings: List<BindValue<*>>): Track.Owner {
     override val name = rule
     override val label = "$rule: $bindings"
     override val hue = generateHue(rule, MATCH_HUE)
@@ -63,7 +85,7 @@ class MatchTrack(owner: Match): Track<Match, MatchEvent>(owner) {
     override val deletesTitle = "Deletes"
 
     override fun getBindings(period: Period<MatchEvent>): List<String>? =
-            owner.bindings
+            owner.bindings.map { it.listingString }
 
     override fun getInserts(period: Period<MatchEvent>): List<String> =
             period.events[0].inserted

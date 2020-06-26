@@ -1,6 +1,10 @@
 package siliconsloth.miniruler.engine
 
 import com.beust.klaxon.JsonObject
+import siliconsloth.miniruler.engine.bindings.AggregateBinding
+import siliconsloth.miniruler.engine.bindings.Binding
+import siliconsloth.miniruler.engine.bindings.InvertedBinding
+import siliconsloth.miniruler.engine.bindings.SimpleBinding
 import siliconsloth.miniruler.engine.matching.CompleteMatch
 import java.io.File
 
@@ -29,7 +33,7 @@ class TimelineRecorder(outputPath: String) {
         )
         if (match.state == CompleteMatch.State.MATCHED) {
             fields["rule"] = match.rule.name
-            fields["bindings"] = match.bindValues.map { it.toString() }
+            fields["bindings"] = match.rule.bindings.zip(match.bindValues) { b,v -> serializeBinding(b,v) }
         }
 
         writeObject(fields)
@@ -48,6 +52,14 @@ class TimelineRecorder(outputPath: String) {
 
         writeObject(fields)
     }
+
+    fun serializeBinding(binding: Binding<*,*>, value: Any?): Any? =
+            when (binding) {
+                is SimpleBinding<*> -> value.toString()
+                is InvertedBinding<*> -> null
+                is AggregateBinding<*> -> (value as Iterable<*>).map { it.toString() }
+                else -> error("Unknown binding class: ${binding::class}")
+            }
 
     fun writeObject(fields: Map<String, Any?>) {
         writer.write(JsonObject(fields).toJsonString()+"\n")
