@@ -1,11 +1,12 @@
 package siliconsloth.miniruler.timelineviewer
 
-import java.awt.BorderLayout
-import java.awt.Dimension
+import java.awt.*
 import javax.swing.BoxLayout
 import javax.swing.JPanel
+import javax.swing.JScrollPane
 
-class InfoPanel: JPanel() {
+class InfoPanel(): JPanel() {
+    lateinit var scrollPane: JScrollPane
     val nameField = makeTextArea()
 
     val bindingList = TitledList("")
@@ -31,8 +32,10 @@ class InfoPanel: JPanel() {
         inserterList.setEntries(value?.track?.getInserts(value) ?: listOf())
         maintainerList.setEntries(value?.track?.getMaintains(value) ?: listOf())
         deleterList.setEntries(value?.track?.getDeletes(value) ?: listOf())
+    }
 
-        nameField.revalidate()
+    override fun getPreferredSize(): Dimension {
+        return Dimension(200, components.map { it.preferredSize.height }.sum())
     }
 
     init {
@@ -49,5 +52,9 @@ class InfoPanel: JPanel() {
         panel.add(deleterList)
 
         add(panel, BorderLayout.PAGE_START)
+    }
+
+    override fun scrollRectToVisible(aRect: Rectangle?) {
+        // Stop TextAreas moving the scrollbar around when they're updated
     }
 }
