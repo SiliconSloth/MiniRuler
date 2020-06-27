@@ -32,7 +32,7 @@ data class MatchEvent(override val time: Int, val match: Match, val state: Match
 data class FactEvent(override val time: Int, val isInsert: Boolean, val maintain: Boolean, val producer: Track.Period<*>?): Track.Event
 
 class FactTrack(owner: Fact): Track<Fact, FactEvent>(owner) {
-    override val bindingsTitle = "Triggers"
+    override val bindingsTitle = "Triggered"
     override val insertsTitle = "Inserted by"
     override val maintainsTitle = "Maintained by"
     override val deletesTitle = "Deleted by"
@@ -40,9 +40,9 @@ class FactTrack(owner: Fact): Track<Fact, FactEvent>(owner) {
 
 class MatchTrack(owner: Match): Track<Match, MatchEvent>(owner) {
     override val bindingsTitle = "Bindings"
-    override val insertsTitle = "Inserts"
-    override val maintainsTitle = "Maintains"
-    override val deletesTitle = "Deletes"
+    override val insertsTitle = "Inserted"
+    override val maintainsTitle = "Maintained"
+    override val deletesTitle = "Deleted"
 }
 
 interface InfoListing {
