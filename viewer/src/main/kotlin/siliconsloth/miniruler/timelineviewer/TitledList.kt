@@ -1,8 +1,10 @@
 package siliconsloth.miniruler.timelineviewer
 
+import java.awt.event.MouseEvent
+import java.awt.event.MouseListener
 import javax.swing.*
 
-class TitledList(title: String): JPanel() {
+class TitledList(title: String, val timelinePane: TimelinePane): JPanel() {
     val titleLabel = JLabel(title)
 
     val listPanel = JPanel().also {
@@ -22,8 +24,43 @@ class TitledList(title: String): JPanel() {
     fun setEntries(entries: List<InfoListing>) {
         listPanel.removeAll()
         for (entry in entries) {
-            listPanel.add(makeTextArea(entry.listing.joinToString("") { it.first }))
+            listPanel.add(ListEntry(entry))
         }
         isVisible = entries.isNotEmpty()
+    }
+
+    inner class ListEntry(val listing: InfoListing): JTextArea(listing.listing.joinToString("") { it.first }), MouseListener {
+        init {
+            configureTextArea(this)
+            addMouseListener(this)
+        }
+
+        override fun mouseClicked(e: MouseEvent) {
+            if (SwingUtilities.isLeftMouseButton(e) && e.clickCount == 2) {
+                var relPos = caretPosition
+                for ((section, period) in listing.listing) {
+                    if (relPos > section.length) {
+                        relPos -= section.length
+                    } else {
+                        if (period != null) {
+                            timelinePane.selectPeriod(period)
+                        }
+                        break
+                    }
+                }
+            }
+        }
+
+        override fun mouseReleased(e: MouseEvent) {
+        }
+
+        override fun mouseEntered(e: MouseEvent) {
+        }
+
+        override fun mouseExited(e: MouseEvent) {
+        }
+
+        override fun mousePressed(e: MouseEvent) {
+        }
     }
 }

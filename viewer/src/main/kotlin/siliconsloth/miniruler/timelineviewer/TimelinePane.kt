@@ -4,10 +4,7 @@ import java.awt.*
 import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
 import java.awt.event.MouseMotionListener
-import javax.swing.JPanel
-import javax.swing.JScrollPane
-import javax.swing.Scrollable
-import javax.swing.SwingConstants
+import javax.swing.*
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -38,6 +35,13 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
         selectionListeners.add(listener)
     }
 
+    fun selectPeriod(period: Track.Period<*>?) {
+        selectedPeriod = period
+        selectedPeriod?.track?.let { scrollToTrack(it) }
+        selectionListeners.forEach { it.periodSelected(selectedPeriod) }
+        repaint()
+    }
+
     fun updateFilter(query: String) {
         val oldTrackCount = visibleTracks.size
         visibleTracks = allTracks.filter { it.label.contains(query) }
@@ -51,13 +55,20 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
         size = preferredSize
         scrollPane.verticalScrollBar.maximum = height
 
-        if (selectedPeriod?.track in visibleTracks) {
-            val ind = visibleTracks.indexOf(selectedPeriod!!.track)
+        selectedPeriod?.track?.let { scrollToTrack(it) }
+
+        repaint()
+    }
+
+    fun scrollToTrack(track: Track<*,*>) {
+        val minTrack = trackAt(visibleRect.minY.toInt())
+        val maxTrack = min(trackAt(visibleRect.maxY.toInt()), visibleTracks.size - 1)
+
+        val ind = visibleTracks.indexOf(track)
+        if (ind !in minTrack..maxTrack) {
             val center = (ind.toFloat() + 0.5f) * height.toFloat() / visibleTracks.size.toFloat() - parent.height.toFloat() / 2
             scrollPane.verticalScrollBar.value = center.toInt()
         }
-
-        repaint()
     }
 
     override fun paintComponent(g: Graphics) {
@@ -183,10 +194,8 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
     }
 
     override fun mousePressed(e: MouseEvent) {
-        if (e.button == MouseEvent.BUTTON1) {
-            selectedPeriod = mouseOverPeriod
-            selectionListeners.forEach { it.periodSelected(selectedPeriod) }
-            repaint()
+        if (SwingUtilities.isLeftMouseButton(e)) {
+            selectPeriod(mouseOverPeriod)
         }
     }
 

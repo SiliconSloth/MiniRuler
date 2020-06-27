@@ -4,15 +4,16 @@ import java.awt.*
 import javax.swing.BoxLayout
 import javax.swing.JPanel
 import javax.swing.JScrollPane
+import javax.swing.JTextArea
 
-class InfoPanel(): JPanel() {
+class InfoPanel(timelinePane: TimelinePane): JPanel() {
     lateinit var scrollPane: JScrollPane
-    val nameField = makeTextArea()
+    val nameField = configureTextArea(JTextArea())
 
-    val bindingList = TitledList("")
-    val inserterList = TitledList("")
-    val maintainerList = TitledList("")
-    val deleterList = TitledList("")
+    val bindingList = TitledList("", timelinePane)
+    val inserterList = TitledList("", timelinePane)
+    val maintainerList = TitledList("", timelinePane)
+    val deleterList = TitledList("", timelinePane)
 
     var period: Track.Period<*>? = null
     set(value) {

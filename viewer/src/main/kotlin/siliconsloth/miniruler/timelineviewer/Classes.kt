@@ -45,8 +45,7 @@ class MatchTrack(owner: Match): Track<Match, MatchEvent>(owner) {
     override val deletesTitle = "Deleted"
 }
 
-fun makeTextArea(text: String = ""): JTextArea {
-    val textArea = JTextArea(text)
+fun configureTextArea(textArea: JTextArea): JTextArea {
     textArea.isEditable = false
     textArea.lineWrap = true
     textArea.border = BorderFactory.createEtchedBorder()
