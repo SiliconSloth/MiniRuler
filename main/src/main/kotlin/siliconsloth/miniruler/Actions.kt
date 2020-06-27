@@ -145,7 +145,7 @@ val PICK_UP_ACTIONS = listOf(
         PickUp(Entity.FURNACE, Item.FURNACE),
         PickUp(Entity.OVEN, Item.OVEN),
         PickUp(Entity.WORKBENCH, Item.WORKBENCH)
-)
+).associateBy { it.entity }
 
 val CRAFT_ACTIONS = listOf(
         Craft(Item.WOOD_PICKAXE, mapOf(
@@ -175,5 +175,5 @@ val MINE_ROCK_WITH_ROCK = MineRock(Item.ROCK_PICKAXE, 15)
 
 val ALL_ACTIONS = listOf(CHOP_TREES, DIG_SAND, OPEN_INVENTORY, CLOSE_INVENTORY, CLOSE_CRAFTING,
         MINE_ROCK_WITH_HAND, MINE_ROCK_WITH_WOOD, MINE_ROCK_WITH_ROCK)
-        .plus(PLACE_ACTIONS.values).plus(OPEN_ACTIONS.values).plus(PICK_UP_ACTIONS).plus(CRAFT_ACTIONS.values)
+        .plus(PLACE_ACTIONS.values).plus(OPEN_ACTIONS.values).plus(PICK_UP_ACTIONS.values).plus(CRAFT_ACTIONS.values)
         .plus(Item.values().map { Select(it) })

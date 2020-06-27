@@ -93,7 +93,6 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
                 it == itemCount(Item.SAND) || it == itemCount(Item.COAL) } }
         val links by all<Link>()
         delay = 6
-        debug = true
 
         fire {
             val conflict = conflicts.firstOrNull() ?: return@fire
@@ -115,6 +114,20 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
 
             links.filter { it.precondition.step == threat }.forEach { replace(it,
                     Link(it.setter, Precondition(newStep, it.precondition.variable))) }
+        }
+    }
+
+    rule {
+        val conflict by find<Conflict> { link.precondition.variable == itemCount(Item.FURNACE) &&
+                threat.action == PLACE_ACTIONS[Item.FURNACE] }
+
+        fire {
+            val pickupStep = planner.newStep(PICK_UP_ACTIONS[Entity.FURNACE]!!, state())
+            insert(pickupStep)
+
+            delete(conflict.link)
+            insert(Link(conflict.threat, Precondition(pickupStep, nextTo(Entity.FURNACE))))
+            insert(Link(pickupStep, conflict.link.precondition))
         }
     }
 
