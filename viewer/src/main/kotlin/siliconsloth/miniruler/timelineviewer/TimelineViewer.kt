@@ -98,6 +98,7 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder"), 
     fun parseMatchEvent(json: JsonObject) {
         val id = json.int("id")!!
         val state = MatchState.valueOf(json.string("state")!!)
+        val bindings = json.array<Any?>("bindings")?.map { deserializeBindValue(it) }
 
         val match: Match
         if (state == MatchState.MATCHED) {
@@ -105,7 +106,7 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder"), 
                 error("Bad match ID $id, expected ${matches.size}")
             }
 
-            match = Match(json.string("rule")!!, json.array<Any?>("bindings")!!.map { deserializeBindValue(it) })
+            match = Match(json.string("rule")!!, bindings!!.map { it.toString() })
             matches.add(match)
         } else {
             match = matches[id]
@@ -119,29 +120,33 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder"), 
         if (state == MatchState.ENDED) {
             track.closePeriod()
         }
+        val period = track.lastPeriod()
 
-        for (binding in match.bindings) {
-            when (binding) {
-                is SimpleBindValue -> facts[binding.value]!!.triggeredMatches.add(match)
-                is AggregateBindValue -> binding.value.forEach { facts[it]!!.triggeredMatches.add(match) }
+        if (bindings != null) {
+            period.bindings.addAll(bindings)
+
+            for (binding in bindings) {
+                when (binding) {
+                    is SingletonListing -> binding.period.bindings.add(SingletonListing(period))
+                    is MultiListing -> binding.periods.forEach { it.bindings.add(SingletonListing(period)) }
+                }
             }
         }
     }
 
-    fun deserializeBindValue(value: Any?): BindValue<*> =
+    fun deserializeBindValue(value: Any?): InfoListing =
             @Suppress("UNCHECKED_CAST")
             when (value) {
-                is String -> SimpleBindValue(value)
-                null -> InvertedBindValue()
-                is JsonArray<*> -> AggregateBindValue(ArrayList(value as JsonArray<String>))
+                is String -> SingletonListing(tracks[facts[value]!!]!!.lastPeriod())
+                null -> EmptyListing()
+                is JsonArray<*> -> MultiListing(value.map { tracks[facts[it]!!]!!.lastPeriod() })
                 else -> error("Bad bind value: $value")
             }
-
 
     fun parseFactEvent(json: JsonObject) {
         val fact = json.string("fact")!!
         val fClass = json.string("class")!!
-        val producer = json.int("producer")?.let { matches[it] }
+        val producer = json.int("producer")?.let { tracks[matches[it]]!!.lastPeriod() }
         val isInsert = json.boolean("insert")!!
         val isMaintained = json.boolean("maintain")!!
 
@@ -155,15 +160,20 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder"), 
         if (!event.isInsert) {
             track.closePeriod()
         }
+        val period = track.lastPeriod()
+
+        val updateList = when {
+            isInsert && !isMaintained -> Track.Period<*>::inserts
+            isInsert && isMaintained -> Track.Period<*>::maintains
+            !isInsert && !isMaintained -> Track.Period<*>::deletes
+            else -> error("Maintained deletes are not allowed")
+        }
 
         if (producer != null) {
-            val prodEvent = tracks[producer]!!.periods.last { it.events.isNotEmpty() }.events[0] as MatchEvent
-            when {
-                isInsert && !isMaintained -> prodEvent.inserted.add(fact)
-                isInsert && isMaintained -> prodEvent.maintained.add(fact)
-                !isInsert && !isMaintained -> prodEvent.deleted.add(fact)
-                else -> error("Maintained deletes are not allowed")
-            }
+            updateList.get(period).add(SingletonListing(producer))
+            updateList.get(producer).add(SingletonListing(period))
+        } else {
+            updateList.get(period).add(EmptyListing())
         }
     }
 }

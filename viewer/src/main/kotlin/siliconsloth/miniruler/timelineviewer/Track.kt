@@ -16,20 +16,22 @@ abstract class Track<T: Track.Owner, E: Track.Event>(val owner: T) {
     abstract val maintainsTitle: String
     abstract val deletesTitle: String
 
-    abstract fun getBindings(period: Period<E>): List<String>?
-    abstract fun getInserts(period: Period<E>): List<String>
-    abstract fun getMaintains(period: Period<E>): List<String>
-    abstract fun getDeletes(period: Period<E>): List<String>
+    data class Period<E: Event>(val track: Track<*,E>, val events: MutableList<E> = mutableListOf<E>()) {
+        var closed: Boolean = false
 
-    data class Period<E: Event>(val track: Track<*,E>, val events: MutableList<E>, var closed: Boolean = false) {
         val start: Int
         get() = events[0].time
 
         val end: Int?
         get() = if (closed) events.last().time else null
+
+        val bindings = mutableListOf<InfoListing>()
+        val inserts = mutableListOf<InfoListing>()
+        val maintains = mutableListOf<InfoListing>()
+        val deletes = mutableListOf<InfoListing>()
     }
 
-    val periods = mutableListOf(Period<E>(this, mutableListOf()))
+    val periods = mutableListOf(Period(this))
 
     val label: String
     get() = owner.label
@@ -49,8 +51,11 @@ abstract class Track<T: Track.Owner, E: Track.Event>(val owner: T) {
             periods.last().closed = true
         }
 
-        periods.add(Period(this, mutableListOf()))
+        periods.add(Period(this))
     }
+
+    fun lastPeriod(): Period<E> =
+            periods.last { it.events.isNotEmpty() }
 
     fun finalize(maxTime: Int) {
         val events = periods.last().events

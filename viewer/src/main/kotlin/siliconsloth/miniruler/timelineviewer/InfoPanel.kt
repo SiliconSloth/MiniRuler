@@ -28,10 +28,10 @@ class InfoPanel(): JPanel() {
         maintainerList.setTitle(value?.track?.maintainsTitle ?: "")
         deleterList.setTitle(value?.track?.deletesTitle ?: "")
 
-        bindingList.setEntries(value?.track?.getBindings(value) ?: listOf())
-        inserterList.setEntries(value?.track?.getInserts(value) ?: listOf())
-        maintainerList.setEntries(value?.track?.getMaintains(value) ?: listOf())
-        deleterList.setEntries(value?.track?.getDeletes(value) ?: listOf())
+        bindingList.setEntries(value?.bindings ?: listOf())
+        inserterList.setEntries(value?.inserts ?: listOf())
+        maintainerList.setEntries(value?.maintains ?: listOf())
+        deleterList.setEntries(value?.deletes ?: listOf())
 
         revalidate()
     }

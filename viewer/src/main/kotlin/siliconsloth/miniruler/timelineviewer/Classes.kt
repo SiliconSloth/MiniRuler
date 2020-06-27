@@ -8,28 +8,6 @@ enum class MatchState {
     MATCHED, FIRED, DROPPED, ENDED;
 }
 
-abstract class BindValue<T>(val value: T) {
-    abstract val trackString: String
-    abstract val listingString: String
-
-    override fun toString() = trackString
-}
-
-class SimpleBindValue(value: String): BindValue<String>(value) {
-    override val trackString = value
-    override val listingString = value
-}
-
-class InvertedBindValue: BindValue<Nothing?>(null) {
-    override val trackString = "null"
-    override val listingString = "N/A"
-}
-
-class AggregateBindValue(values: List<String>): BindValue<List<String>>(values) {
-    override val trackString = values.toString()
-    override val listingString = "[${values.joinToString(",\n")}]"
-}
-
 const val MATCH_HUE = 0.7f
 const val HUE_RANGE = 0.2f
 const val PRECISION = 1000f
@@ -37,45 +15,27 @@ const val PRECISION = 1000f
 fun generateHue(obj: Any, base: Float): Float =
         base + (obj.hashCode() * 113 % PRECISION) * (HUE_RANGE / PRECISION)  - HUE_RANGE / 2
 
-data class Match(val rule: String, val bindings: List<BindValue<*>>): Track.Owner {
+data class Match(val rule: String, val bindings: List<String>): Track.Owner {
     override val name = rule
     override val label = "$rule: $bindings"
     override val hue = generateHue(rule, MATCH_HUE)
 }
 
 data class Fact(val fact: String, val factClass: String): Track.Owner {
-    val triggeredMatches = mutableListOf<Match>()
-
     override val name = fact
     override val label = fact
     override val hue = generateHue(factClass, MATCH_HUE + 0.5f)
 }
 
-data class MatchEvent(override val time: Int, val match: Match, val state: MatchState): Track.Event {
-    val inserted = mutableListOf<String>()
-    val maintained = mutableListOf<String>()
-    val deleted = mutableListOf<String>()
-}
+data class MatchEvent(override val time: Int, val match: Match, val state: MatchState): Track.Event
 
-data class FactEvent(override val time: Int, val isInsert: Boolean, val maintain: Boolean, val producer: Match?): Track.Event
+data class FactEvent(override val time: Int, val isInsert: Boolean, val maintain: Boolean, val producer: Track.Period<*>?): Track.Event
 
 class FactTrack(owner: Fact): Track<Fact, FactEvent>(owner) {
     override val bindingsTitle = "Triggers"
     override val insertsTitle = "Inserted by"
     override val maintainsTitle = "Maintained by"
     override val deletesTitle = "Deleted by"
-
-    override fun getBindings(period: Period<FactEvent>): List<String>? =
-            owner.triggeredMatches.map { it.rule }
-
-    override fun getInserts(period: Period<FactEvent>): List<String> =
-            period.events.filter { it.isInsert && !it.maintain }.map { it.producer?.name ?: "N/A" }
-
-    override fun getMaintains(period: Period<FactEvent>): List<String> =
-            period.events.filter { it.isInsert && it.maintain }.map { it.producer?.name ?: "N/A" }
-
-    override fun getDeletes(period: Period<FactEvent>): List<String> =
-            period.events.filter { !it.isInsert }.map { it.producer?.name ?: "N/A" }
 }
 
 class MatchTrack(owner: Match): Track<Match, MatchEvent>(owner) {
@@ -83,18 +43,34 @@ class MatchTrack(owner: Match): Track<Match, MatchEvent>(owner) {
     override val insertsTitle = "Inserts"
     override val maintainsTitle = "Maintains"
     override val deletesTitle = "Deletes"
+}
 
-    override fun getBindings(period: Period<MatchEvent>): List<String>? =
-            owner.bindings.map { it.listingString }
+interface InfoListing {
+    val listing: List<Pair<String, Track.Period<*>?>>
+}
 
-    override fun getInserts(period: Period<MatchEvent>): List<String> =
-            period.events[0].inserted
+class SingletonListing(val period: Track.Period<*>): InfoListing {
+    override val listing = listOf(period.track.owner.name to period)
 
-    override fun getMaintains(period: Period<MatchEvent>): List<String> =
-            period.events[0].maintained
+    override fun toString() = period.track.owner.name
+}
 
-    override fun getDeletes(period: Period<MatchEvent>): List<String> =
-            period.events[0].deleted
+class EmptyListing: InfoListing {
+    override val listing = listOf("N/A" to null)
+
+    override fun toString() = "null"
+}
+
+class MultiListing(val periods: List<Track.Period<*>>): InfoListing {
+    override val listing = when (periods.size) {
+        0 -> listOf("[]" to null)
+        1 -> listOf("[${periods[0].track.label}]" to periods[0])
+        else -> listOf("[${periods[0].track.label},\n" to periods[0]) +
+                periods.subList(1, periods.size - 1).map { "${it.track.label},\n" to it } +
+                listOf("${periods.last().track.label}]" to periods.last())
+    }
+
+    override fun toString() = periods.map { it.track.owner.name }.toString()
 }
 
 fun makeTextArea(text: String = ""): JTextArea {

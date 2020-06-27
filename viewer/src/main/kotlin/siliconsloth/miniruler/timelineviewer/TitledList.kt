@@ -19,10 +19,10 @@ class TitledList(title: String): JPanel() {
         titleLabel.text = value
     }
 
-    fun setEntries(entries: List<String>) {
+    fun setEntries(entries: List<InfoListing>) {
         listPanel.removeAll()
         for (entry in entries) {
-            listPanel.add(makeTextArea(entry))
+            listPanel.add(makeTextArea(entry.listing.joinToString("") { it.first }))
         }
         isVisible = entries.isNotEmpty()
     }
