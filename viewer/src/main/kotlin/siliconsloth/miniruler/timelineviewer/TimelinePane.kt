@@ -146,7 +146,7 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
 
             mouseOverTrack = visibleTracks[track]
             mouseOverPeriod = mouseOverTrack!!.periods.firstOrNull { it: Track.Period<*> ->
-                it.start <= time && it.end?.let { e -> time <= e } != false
+                it.start <= time && it.end?.let { e -> time < e } != false
             }
         } else {
             mouseOverTrack = null
