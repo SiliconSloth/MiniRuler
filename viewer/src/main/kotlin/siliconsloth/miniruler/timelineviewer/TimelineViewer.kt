@@ -12,7 +12,7 @@ import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 import kotlin.math.max
 
-class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Recorder"), TimelinePane.SelectionListener {
+class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Viewer"), TimelinePane.SelectionListener {
     val matches = mutableListOf<Match>()
     val facts = mutableMapOf<String, Fact>()
     val tracks = mutableMapOf<Track.Owner, Track<*,*>>()
