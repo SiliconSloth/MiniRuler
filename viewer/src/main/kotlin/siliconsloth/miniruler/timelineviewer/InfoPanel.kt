@@ -56,6 +56,6 @@ class InfoPanel(timelinePane: TimelinePane): JPanel() {
     }
 
     override fun scrollRectToVisible(aRect: Rectangle?) {
-        // Stop TextAreas moving the scrollbar around when they're updated
+        // Stop JTextAreas moving the scrollbar around when they're updated.
     }
 }

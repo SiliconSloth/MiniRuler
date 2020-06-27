@@ -8,6 +8,7 @@ import java.lang.StringBuilder
 import kotlin.math.max
 
 class TimelineLoader(path: String) {
+    // Index should always be equal to ID of that match.
     val matches = mutableListOf<Match>()
     val facts = mutableMapOf<String, Fact>()
     val tracks = mutableMapOf<Track.Owner, Track<*,*>>()

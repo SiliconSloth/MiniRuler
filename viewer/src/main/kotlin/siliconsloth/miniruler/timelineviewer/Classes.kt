@@ -8,8 +8,17 @@ enum class MatchState {
     MATCHED, FIRED, DROPPED, ENDED;
 }
 
+/**
+ * Base hue for match tracks. Facts use opposite base hue.
+ */
 const val MATCH_HUE = 0.7f
+/**
+ * Range of possible hues around base.
+ */
 const val HUE_RANGE = 0.2f
+/**
+ * Number of possible hues for each of the two track types.
+ */
 const val PRECISION = 1000f
 
 fun generateHue(obj: Any, base: Float): Float =

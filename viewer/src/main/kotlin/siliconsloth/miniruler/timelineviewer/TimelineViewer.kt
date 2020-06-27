@@ -33,6 +33,7 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Viewer"), Ti
         timelinePane.addSelectionListener(this)
 
         val scrollPane = InteractiveScrollPane(timelinePane)
+        // Ensure that track labels are repainted in their correct positions every time the timeline pane moves.
         scrollPane.viewport.scrollMode = JViewport.SIMPLE_SCROLL_MODE
         scrollPane.addMouseListener(timelinePane)
         scrollPane.addMouseMotionListener(timelinePane)

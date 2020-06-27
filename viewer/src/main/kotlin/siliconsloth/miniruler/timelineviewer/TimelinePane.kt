@@ -17,6 +17,9 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
     val selectionListeners = mutableListOf<SelectionListener>()
     lateinit var scrollPane: JScrollPane
 
+    /**
+     * Tracks that are not hidden by the current filter.
+     */
     var visibleTracks = allTracks
 
     val defaultScale = 20
@@ -27,6 +30,7 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
     var selectedPeriod: Track.Period<*>? = null
 
     init {
+        // Make sure the timeline pane is no smaller than the scroll viewport.
         preferredSize = Dimension(max(maxTime * defaultScale, defaultViewportSize.width),
                 max(visibleTracks.size * defaultScale, defaultViewportSize.height))
     }
@@ -49,6 +53,7 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
         val newHeight = if (oldTrackCount == 0) {
             visibleTracks.size * defaultScale
         } else {
+            // Try to retain the current scaling.
             height * visibleTracks.size / oldTrackCount
         }
         preferredSize = Dimension(width, max(parent.height, newHeight))
@@ -60,12 +65,16 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
         repaint()
     }
 
+    /**
+     * If the specified track is off-screen, but not hidden by the filter, scroll such that it is in the centre
+     * of the viewport.
+     */
     fun scrollToTrack(track: Track<*,*>) {
         val minTrack = trackAt(visibleRect.minY.toInt())
         val maxTrack = min(trackAt(visibleRect.maxY.toInt()), visibleTracks.size - 1)
 
         val ind = visibleTracks.indexOf(track)
-        if (ind !in minTrack..maxTrack) {
+        if (ind != -1 && ind !in minTrack..maxTrack) {
             val center = (ind.toFloat() + 0.5f) * height.toFloat() / visibleTracks.size.toFloat() - parent.height.toFloat() / 2
             scrollPane.verticalScrollBar.value = center.toInt()
         }
@@ -86,6 +95,8 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
         paintGridlines(g2d, minTrack, maxTrack, xScale, yScale)
 
         val h = ceil(yScale).toInt()
+        // Tracks at the top of the screen are painted on top of those lower down,
+        // because any overlap looks a little nicer that way.
         for (i in maxTrack.downTo(minTrack)) {
             val track = visibleTracks[i]
             val y = (i * yScale).toInt()
@@ -112,6 +123,7 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
                 }
             }
 
+            // Only show track labels if they won't be squashed together.
             if (yScale > g2d.fontMetrics.ascent * 0.6f) {
                 val label = if (track.label.length <= 80 || track == selectedPeriod?.track || track == mouseOverTrack) {
                     track.label
@@ -145,7 +157,7 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
             val time = mouse.x * maxTime / width
 
             mouseOverTrack = visibleTracks[track]
-            mouseOverPeriod = mouseOverTrack!!.periods.firstOrNull { it: Track.Period<*> ->
+            mouseOverPeriod = mouseOverTrack!!.periods.firstOrNull {
                 it.start <= time && it.end?.let { e -> time < e } != false
             }
         } else {
@@ -173,6 +185,10 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
     override fun getScrollableUnitIncrement(visibleRect: Rectangle, orientation: Int, direction: Int): Int =
             scrollIncrement(visibleRect, orientation, direction, 1, true)
 
+    /**
+     * Computes the increment required to scroll blockSize grid cells along the specified axis.
+     * If exposeFull is true. this will be increased to ensure that an entire new block of cells is exposed.
+     */
     fun scrollIncrement(visibleRect: Rectangle, orientation: Int, direction: Int, blockSize: Int, exposeFull: Boolean): Int {
         val horizontal = orientation == SwingConstants.HORIZONTAL
         val unitSize = (if (horizontal) width.toFloat() / maxTime else height.toFloat() / visibleTracks.size) * blockSize
@@ -180,6 +196,7 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
 
         val relPos = pos % unitSize
         var dist = if (direction < 0) relPos else unitSize - relPos
+        // Ensure that at least one more pixel is exposed.
         if (dist < 1 || (exposeFull && dist < unitSize)) {
             dist += unitSize
         }

@@ -4,6 +4,10 @@ import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
 import javax.swing.*
 
+/**
+ * A list of facts or matches in the info panel, consisting of a column of text areas below a title.
+ * Double clicking on a text area will select the period referenced by that section of the text in the timeline view.
+ */
 class TitledList(title: String, val timelinePane: TimelinePane): JPanel() {
     val titleLabel = JLabel(title)
 

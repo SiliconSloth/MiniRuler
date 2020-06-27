@@ -1,5 +1,10 @@
 package siliconsloth.miniruler.timelineviewer
 
+/**
+ * A list of match or fact periods to be displayed in a single text box on the info panel.
+ * The Strings are concatenated to form the box content, and double clicking on part of the text will
+ * select the corresponding period (if non-null) in the timeline view.
+ */
 interface InfoListing {
     val listing: List<Pair<String, Track.Period<*>?>>
 }
