@@ -3,11 +3,9 @@ package siliconsloth.miniruler.timelineviewer
 import java.awt.*
 import javax.swing.BoxLayout
 import javax.swing.JPanel
-import javax.swing.JScrollPane
 import javax.swing.JTextArea
 
 class InfoPanel(timelinePane: TimelinePane): JPanel() {
-    lateinit var scrollPane: JScrollPane
     val nameField = configureTextArea(JTextArea())
 
     val bindingList = TitledList("", timelinePane)

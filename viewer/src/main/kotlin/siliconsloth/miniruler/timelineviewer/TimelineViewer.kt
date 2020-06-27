@@ -42,7 +42,6 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Viewer"), Ti
 
         infoPanel = InfoPanel(timelinePane)
         val infoScrollPane = JScrollPane(infoPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER)
-        infoPanel.scrollPane = infoScrollPane
 
         add(JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, infoScrollPane))
         pack()
