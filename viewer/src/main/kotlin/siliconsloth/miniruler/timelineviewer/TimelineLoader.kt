@@ -2,6 +2,7 @@ package siliconsloth.miniruler.timelineviewer
 
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
+import com.beust.klaxon.KlaxonException
 import com.beust.klaxon.Parser
 import java.io.File
 import java.lang.StringBuilder
@@ -20,13 +21,17 @@ class TimelineLoader(path: String) {
     init {
         File(path).bufferedReader().useLines { lines ->
             for (line in lines) {
-                val json = parser.parse(StringBuilder(line)) as JsonObject
-                when (json["type"]) {
-                    "match" -> parseMatchEvent(json)
-                    "fact" -> parseFactEvent(json)
-                    else -> error("Unknown event type: ${json["type"]}")
+                try {
+                    val json = parser.parse(StringBuilder(line)) as JsonObject
+                    when (json["type"]) {
+                        "match" -> parseMatchEvent(json)
+                        "fact" -> parseFactEvent(json)
+                        else -> error("Unknown event type: ${json["type"]}")
+                    }
+                    maxTime = max(maxTime, json.int("time")!!)
+                } catch (ex: KlaxonException) {
+                    println("Warning: Skipping corrupt line in timeline file")
                 }
-                maxTime = max(maxTime, json.int("time")!!)
             }
         }
 
