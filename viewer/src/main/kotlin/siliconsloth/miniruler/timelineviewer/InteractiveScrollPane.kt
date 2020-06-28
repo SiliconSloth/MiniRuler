@@ -92,7 +92,7 @@ class InteractiveScrollPane(content: JComponent): JScrollPane(content), MouseLis
 
     override fun componentResized(e: ComponentEvent?) {
         // Ensure that if the viewport is resized to be larger than the view, the view is resized to fill it.
-        if (viewport.view.width < viewport.width || viewport.view.height < viewport.view.height) {
+        if (viewport.view.width < viewport.width || viewport.view.height < viewport.height) {
             viewport.view.preferredSize = Dimension(max(viewport.width, viewport.view.width),
                     max(viewport.height, viewport.view.height))
             viewport.revalidate()
