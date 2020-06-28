@@ -58,9 +58,9 @@ class TimelineLoader(path: String) {
         if (state == MatchState.ENDED) {
             track.closePeriod()
         }
-        val period = track.lastPeriod()
 
         if (bindings != null) {
+            val period = track.lastPeriod()
             period.bindings.addAll(bindings)
 
             for (binding in bindings) {
