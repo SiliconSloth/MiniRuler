@@ -35,6 +35,7 @@ class RuleEngine(val reportInterval: Int = 0, timelinePath: String? = null): Fac
     val maintainers = mutableMapOf<Any, MutableList<CompleteMatch>>()
 
     var nextMatchID = 0
+    val ruleNames = mutableSetOf<String>()
 
     // Some variables used by applyUpdates().
     var running = false
@@ -47,7 +48,8 @@ class RuleEngine(val reportInterval: Int = 0, timelinePath: String? = null): Fac
 
     fun rule(definition: RuleBuilder.() -> Unit) {
         val callLine = Throwable().stackTrace[1]
-        val rule = RuleBuilder("${callLine.fileName}:${callLine.lineNumber}", this).apply(definition).build()
+        val name = allocateRuleName("${callLine.fileName}:${callLine.lineNumber}")
+        val rule = RuleBuilder(name, this).apply(definition).build()
 
         rule.bindings.forEach {
             rules.getOrPut(it.type) { mutableListOf() }.add(rule)
@@ -151,6 +153,20 @@ class RuleEngine(val reportInterval: Int = 0, timelinePath: String? = null): Fac
 
     fun nextMatchID(): Int =
             nextMatchID++
+
+    /**
+     * Add a suffix to a requested new rule name if necessary to make sure it is unique.
+     */
+    fun allocateRuleName(requested: String): String {
+        if (ruleNames.add(requested)) {
+            return requested
+        }
+        var suffix = 1
+        while (!ruleNames.add("$requested-$suffix")) {
+            suffix++
+        }
+        return "$requested-$suffix"
+    }
 
     fun atomic(updates: AtomicBuilder.() -> Unit) =
         applyUpdates(AtomicBuilder(this, null).apply(updates).updates)
