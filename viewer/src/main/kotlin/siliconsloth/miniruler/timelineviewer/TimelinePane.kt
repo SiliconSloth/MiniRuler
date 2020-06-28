@@ -111,8 +111,11 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
                     else -> 0.4f
                 }
 
-                g2d.color = Color.getHSBColor(track.hue, sat, 1f)
-                g2d.fillRect(x, y, w, h)
+                if (period.bodyStart != null) {
+                    val bx = (period.bodyStart!! * xScale).toInt()
+                    g2d.color = Color.getHSBColor(track.hue, sat, 1f)
+                    g2d.fillRect(bx, y, w + x - bx, h)
+                }
 
                 g2d.color = Color.getHSBColor(track.hue, 0.8f, 1f)
                 g2d.drawRect(x, y, w, h)

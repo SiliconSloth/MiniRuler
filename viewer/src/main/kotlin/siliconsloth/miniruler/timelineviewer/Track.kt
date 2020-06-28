@@ -3,6 +3,11 @@ package siliconsloth.miniruler.timelineviewer
 abstract class Track<T: Track.Owner, E: Track.Event>(val owner: T) {
     interface Event {
         val time: Int
+
+        /**
+         * Whether this event can indicate the start of a Period's main body.
+         */
+        val bodyStart: Boolean
     }
 
     interface Owner {
@@ -33,6 +38,9 @@ abstract class Track<T: Track.Owner, E: Track.Event>(val owner: T) {
 
         val start: Int
         get() = events[0].time
+
+        val bodyStart: Int?
+        get() = events.firstOrNull { it.bodyStart }?.time
 
         val end: Int?
         get() = if (closed) events.last().time else null

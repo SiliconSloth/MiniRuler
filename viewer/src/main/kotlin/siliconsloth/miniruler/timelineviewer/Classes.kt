@@ -36,9 +36,13 @@ data class Fact(val fact: String, val factClass: String): Track.Owner {
     override val hue = generateHue(factClass, MATCH_HUE + 0.5f)
 }
 
-data class MatchEvent(override val time: Int, val match: Match, val state: MatchState): Track.Event
+data class MatchEvent(override val time: Int, val match: Match, val state: MatchState): Track.Event {
+    override val bodyStart = state == MatchState.FIRED
+}
 
-data class FactEvent(override val time: Int, val isInsert: Boolean, val maintain: Boolean, val producer: Track.Period<*>?): Track.Event
+data class FactEvent(override val time: Int, val isInsert: Boolean, val maintain: Boolean, val producer: Track.Period<*>?): Track.Event {
+    override val bodyStart = isInsert
+}
 
 class FactTrack(owner: Fact): Track<Fact, FactEvent>(owner) {
     override val bindingsTitle = "Triggered"
