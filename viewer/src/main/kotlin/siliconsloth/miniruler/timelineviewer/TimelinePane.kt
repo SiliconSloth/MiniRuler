@@ -167,7 +167,7 @@ class TimelinePane(val allTracks: List<Track<*,*>>, val maxTime: Int): JPanel(),
     }
 
     fun trackAt(y: Int): Int =
-            y * visibleTracks.size / height
+            ((y.toFloat() / height) * visibleTracks.size).toInt()
 
     fun mousePosition(): Point {
         val ms = MouseInfo.getPointerInfo().location
