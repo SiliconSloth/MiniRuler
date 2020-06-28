@@ -34,6 +34,7 @@ class RulePlanner(val engine: RuleEngine, val variables: Array<Variable<*>>, val
             state(mapOf(*domains))
 
     fun newStep(before: State, action: Action, after: State): Step {
+        assert(action != initialize && action != finalize)
         return Step(before, action, after, nextId++)
     }
 

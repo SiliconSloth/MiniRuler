@@ -181,6 +181,7 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     aggregateFulfillmentRule(planner, listOf(itemCount(Item.COAL), itemCount(Item.STONE)),
             MINE_ROCK_WITH_ROCK, CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!)
 
+    multiFulfillmentRule(planner, MENU, null, planner.initialize!!)
     multiFulfillmentRule(planner, MENU, Menu.FURNACE, OPEN_ACTIONS[Menu.FURNACE]!!)
 }
 
@@ -246,18 +247,14 @@ fun <T> RuleEngine.multiFulfillmentRule(planner: RulePlanner, variable: Variable
         if (ucs.any()) {
             val stepGoal = planner.state(variable to Enumeration(value))
 
-            val newStep = if (candidates.any()) {
-                candidates.first().let {
-                    delete(it)
-                    planner.newStep(it.before, it.action, it.after.intersect(stepGoal))
-                }
+            val fulfiller = if (candidates.any()) {
+                candidates.first()
             } else {
-                planner.newStep(action, stepGoal)
+                planner.newStep(action, stepGoal).also { insert(it) }
             }
 
-            insert(newStep)
             for (uc in ucs) {
-                insert(Link(newStep, uc.precondition))
+                insert(Link(fulfiller, uc.precondition))
             }
         }
     }
