@@ -172,9 +172,13 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     fulfillmentRule(planner, itemCount(Item.ROCK_PICKAXE), CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!)
     fulfillmentRule(planner, itemCount(Item.STONE), MINE_ROCK_WITH_HAND, null, CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!)
     fulfillmentRule(planner, itemCount(Item.WORKBENCH), planner.initialize!!)
+    fulfillmentRule(planner, itemCount(Item.POWER_GLOVE), planner.initialize!!)
 
     fulfillmentRule(planner, nextTo(Entity.FURNACE), PLACE_ACTIONS[Item.FURNACE]!!)
     fulfillmentRule(planner, HOLDING, Select(Item.FURNACE), Item.FURNACE)
+    fulfillmentRule(planner, HOLDING, Select(Item.ROCK_PICKAXE), Item.ROCK_PICKAXE)
+    fulfillmentRule(planner, HOLDING, Select(Item.ROCK_SHOVEL), Item.ROCK_SHOVEL)
+    fulfillmentRule(planner, HOLDING, Select(Item.POWER_GLOVE), Item.POWER_GLOVE)
 
     aggregateFulfillmentRule(planner, listOf(itemCount(Item.WOOD)), CHOP_TREES)
     aggregateFulfillmentRule(planner, listOf(itemCount(Item.SAND)), DIG_SAND)
