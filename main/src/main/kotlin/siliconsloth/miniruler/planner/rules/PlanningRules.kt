@@ -244,7 +244,8 @@ fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, variables: List<Va
 fun <T> RuleEngine.multiFulfillmentRule(planner: RulePlanner, variable: Variable<T>, value: T, action: Action) = rule {
     val ucs by all<UnfulfilledPrecondition> { precondition.variable == variable &&
             precondition.step.before[variable] == Enumeration(value) }
-    val candidates by all<Step> { this.action == action }
+    val candidates by all<Step> { this.action[variable] !=  null && Enumeration(value).supersetOf(this.after[variable]) }
+    val orderings by all<Ordering>()
     this.delay = 10
 
     fire {
@@ -252,7 +253,7 @@ fun <T> RuleEngine.multiFulfillmentRule(planner: RulePlanner, variable: Variable
             val stepGoal = planner.state(variable to Enumeration(value))
 
             val fulfiller = if (candidates.any()) {
-                candidates.first()
+                candidates.first { c -> !orderings.any { it.before == c && it.after in candidates }  }
             } else {
                 planner.newStep(action, stepGoal).also { insert(it) }
             }
