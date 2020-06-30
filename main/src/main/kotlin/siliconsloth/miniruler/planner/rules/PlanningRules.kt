@@ -108,7 +108,7 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
             replace(threat, newStep)
 
             insert(Link(setter, Precondition(newStep, variable)))
-            insert(Link(threat, Precondition(dependent, variable)))
+            insert(Link(newStep, Precondition(dependent, variable)))
 
             links.filter { it.setter == threat }.forEach { replace(it, Link(newStep, it.precondition)) }
 
