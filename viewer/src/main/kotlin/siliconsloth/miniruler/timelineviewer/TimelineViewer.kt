@@ -11,6 +11,8 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Viewer"), Ti
     val timelinePane: TimelinePane
     val infoPanel: InfoPanel
 
+    val blacklist = listOf("Ordering", "PossibleOrdering", "PlanningRules.kt:57", "PlanningRules.kt:66")
+
     init {
         val loader = TimelineLoader(inputPath)
 
@@ -29,7 +31,13 @@ class TimelineViewer(inputPath: String): JFrame("MiniRuler Timeline Viewer"), Ti
         searchField.document.addDocumentListener(SearchFieldListener())
         leftPanel.add(searchField, BorderLayout.PAGE_START)
 
-        timelinePane = TimelinePane(loader.tracks.values.toList(), loader.maxTime)
+        timelinePane = TimelinePane(loader.tracks.values.toList().filter {
+            when (it.owner) {
+                is Fact -> it.owner.factClass !in blacklist
+                is Match -> it.owner.rule !in blacklist
+                else -> true
+            }
+        }, loader.maxTime)
         timelinePane.addSelectionListener(this)
 
         val scrollPane = InteractiveScrollPane(timelinePane)
