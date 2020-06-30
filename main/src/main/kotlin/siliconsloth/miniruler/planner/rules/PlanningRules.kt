@@ -170,6 +170,7 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     fulfillmentRule(planner, itemCount(Item.GLASS), CRAFT_ACTIONS[Item.GLASS]!!)
     fulfillmentRule(planner, itemCount(Item.FURNACE), CRAFT_ACTIONS[Item.FURNACE]!!)
     fulfillmentRule(planner, itemCount(Item.ROCK_PICKAXE), CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!)
+    fulfillmentRule(planner, itemCount(Item.ROCK_SHOVEL), CRAFT_ACTIONS[Item.ROCK_SHOVEL]!!)
     fulfillmentRule(planner, itemCount(Item.STONE), MINE_ROCK_WITH_HAND, null, CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!)
     fulfillmentRule(planner, itemCount(Item.WORKBENCH), planner.initialize!!)
     fulfillmentRule(planner, itemCount(Item.POWER_GLOVE), planner.initialize!!)
