@@ -216,21 +216,33 @@ fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, variables: List<Va
                                         blacklist: Action? = null) = rule {
     val ucs by all<UnfulfilledPrecondition> { precondition.variable in variables && precondition.step.action != blacklist }
     val candidates by all<Step> { this.action == action }
+    val links by all<Link>()
     this.delay = 10
 
     fire {
         if (ucs.any()) {
+            val candidate = candidates.firstOrNull()
             val needed = ucs.groupBy { it.precondition.variable }.mapValues { (v,us) ->
-                LowerBounded(us.map { (it.precondition.step.before[v] as LowerBounded).min }.sum()) }
+                LowerBounded(us.map { (it.precondition.step.before[v] as LowerBounded).min }.sum() +
+                        ((candidate?.after?.get(v) as? LowerBounded)?.min ?: 0)) }
             val stepGoal = planner.state(needed)
 
-            val newStep = if (candidates.any()) {
-                candidates.first().let {
-                    delete(it)
-                    planner.newStep(it.before, it.action, it.after.intersect(stepGoal))
-                }
+            val newStep = if (candidate != null) {
+                delete(candidate)
+                planner.newStep(candidate.before, candidate.action, candidate.after.intersect(stepGoal))
             } else {
                 planner.newStep(action, stepGoal)
+            }
+
+            if (candidate != null) {
+                for (link in links) {
+                    if (link.setter == candidate) {
+                        replace(link, Link(newStep, link.precondition))
+                    }
+                    if (link.precondition.step == candidate) {
+                        replace(link, Link(link.setter, Precondition(newStep, link.precondition.variable)))
+                    }
+                }
             }
 
             insert(newStep)
