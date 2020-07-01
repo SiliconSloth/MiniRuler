@@ -182,10 +182,10 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     fulfillmentRule(planner, variablePredicate(HOLDING, Item.ROCK_SHOVEL), Select(Item.ROCK_SHOVEL))
     fulfillmentRule(planner, variablePredicate(HOLDING, Item.POWER_GLOVE), Select(Item.POWER_GLOVE))
 
-    aggregateFulfillmentRule(planner, listOf(itemCount(Item.WOOD)), CHOP_TREES)
-    aggregateFulfillmentRule(planner, listOf(itemCount(Item.SAND)), DIG_SAND)
-    aggregateFulfillmentRule(planner, listOf(itemCount(Item.COAL), itemCount(Item.STONE)),
-            MINE_ROCK_WITH_ROCK, CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!)
+    aggregateFulfillmentRule(planner, variablePredicate(itemCount(Item.WOOD)), CHOP_TREES)
+    aggregateFulfillmentRule(planner, variablePredicate(itemCount(Item.SAND)), DIG_SAND)
+    aggregateFulfillmentRule(planner, { it.variable in listOf(itemCount(Item.COAL), itemCount(Item.STONE)) &&
+            it.step.action != CRAFT_ACTIONS[Item.ROCK_PICKAXE]!! }, MINE_ROCK_WITH_ROCK)
 
     multiFulfillmentRule(planner, MENU, null, planner.initialize!!)
     multiFulfillmentRule(planner, MENU, Menu.FURNACE, OPEN_ACTIONS[Menu.FURNACE]!!)
@@ -220,9 +220,8 @@ fun RuleEngine.fulfillmentRule(planner: RulePlanner, preconditionPredicate: (Pre
     }
 }
 
-fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, variables: List<Variable<*>>, action: Action,
-                                        blacklist: Action? = null) = rule {
-    val ucs by all<UnfulfilledPrecondition> { precondition.variable in variables && precondition.step.action != blacklist }
+fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, preconditionPredicate: (Precondition) -> Boolean, action: Action) = rule {
+    val ucs by all<UnfulfilledPrecondition> { preconditionPredicate(precondition) }
     val candidates by all<Step> { this.action == action }
     val links by all<Link>()
     this.delay = 10
