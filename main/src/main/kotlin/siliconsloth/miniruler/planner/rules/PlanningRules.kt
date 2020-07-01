@@ -167,19 +167,20 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
         }
     }
 
-    fulfillmentRule(planner, itemCount(Item.GLASS), CRAFT_ACTIONS[Item.GLASS]!!)
-    fulfillmentRule(planner, itemCount(Item.FURNACE), CRAFT_ACTIONS[Item.FURNACE]!!)
-    fulfillmentRule(planner, itemCount(Item.ROCK_PICKAXE), CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!)
-    fulfillmentRule(planner, itemCount(Item.ROCK_SHOVEL), CRAFT_ACTIONS[Item.ROCK_SHOVEL]!!)
-    fulfillmentRule(planner, itemCount(Item.STONE), MINE_ROCK_WITH_HAND, null, CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!)
-    fulfillmentRule(planner, itemCount(Item.WORKBENCH), planner.initialize!!)
-    fulfillmentRule(planner, itemCount(Item.POWER_GLOVE), planner.initialize!!)
+    fulfillmentRule(planner, variablePredicate(itemCount(Item.GLASS)), CRAFT_ACTIONS[Item.GLASS]!!)
+    fulfillmentRule(planner, variablePredicate(itemCount(Item.FURNACE)), CRAFT_ACTIONS[Item.FURNACE]!!)
+    fulfillmentRule(planner, variablePredicate(itemCount(Item.ROCK_PICKAXE)), CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!)
+    fulfillmentRule(planner, variablePredicate(itemCount(Item.ROCK_SHOVEL)), CRAFT_ACTIONS[Item.ROCK_SHOVEL]!!)
+    fulfillmentRule(planner, { it.variable == itemCount(Item.STONE) &&
+            it.step.action == CRAFT_ACTIONS[Item.ROCK_PICKAXE]!! }, MINE_ROCK_WITH_HAND)
+    fulfillmentRule(planner, variablePredicate(itemCount(Item.WORKBENCH)), planner.initialize!!)
+    fulfillmentRule(planner, variablePredicate(itemCount(Item.POWER_GLOVE)), planner.initialize!!)
 
-    fulfillmentRule(planner, nextTo(Entity.FURNACE), PLACE_ACTIONS[Item.FURNACE]!!)
-    fulfillmentRule(planner, HOLDING, Select(Item.FURNACE), Item.FURNACE)
-    fulfillmentRule(planner, HOLDING, Select(Item.ROCK_PICKAXE), Item.ROCK_PICKAXE)
-    fulfillmentRule(planner, HOLDING, Select(Item.ROCK_SHOVEL), Item.ROCK_SHOVEL)
-    fulfillmentRule(planner, HOLDING, Select(Item.POWER_GLOVE), Item.POWER_GLOVE)
+    fulfillmentRule(planner, variablePredicate(nextTo(Entity.FURNACE)), PLACE_ACTIONS[Item.FURNACE]!!)
+    fulfillmentRule(planner, variablePredicate(HOLDING, Item.FURNACE), Select(Item.FURNACE))
+    fulfillmentRule(planner, variablePredicate(HOLDING, Item.ROCK_PICKAXE), Select(Item.ROCK_PICKAXE))
+    fulfillmentRule(planner, variablePredicate(HOLDING, Item.ROCK_SHOVEL), Select(Item.ROCK_SHOVEL))
+    fulfillmentRule(planner, variablePredicate(HOLDING, Item.POWER_GLOVE), Select(Item.POWER_GLOVE))
 
     aggregateFulfillmentRule(planner, listOf(itemCount(Item.WOOD)), CHOP_TREES)
     aggregateFulfillmentRule(planner, listOf(itemCount(Item.SAND)), DIG_SAND)
@@ -190,14 +191,20 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     multiFulfillmentRule(planner, MENU, Menu.FURNACE, OPEN_ACTIONS[Menu.FURNACE]!!)
 }
 
-fun <T> RuleEngine.fulfillmentRule(planner: RulePlanner, variable: Variable<T>,
-                               action: Action, value: T? = null, condAction: Action? = null) = rule {
-    val uc by find<UnfulfilledPrecondition> { precondition.variable == variable &&
-            (value == null || precondition.step.before[variable] == Enumeration(value)) &&
-            (condAction == null || precondition.step.action == condAction) }
+fun variablePredicate(variable: Variable<*>): (Precondition) -> Boolean = {
+    it.variable == variable
+}
 
+fun <T> variablePredicate(variable: Variable<T>, value: T): (Precondition) -> Boolean = {
+    it.variable == variable && it.step.before[variable].supersetOf(Enumeration(value))
+}
+
+fun RuleEngine.fulfillmentRule(planner: RulePlanner, preconditionPredicate: (Precondition) -> Boolean, action: Action) = rule {
+    val uc by find<UnfulfilledPrecondition> { preconditionPredicate(precondition) }
+
+    @Suppress("UNCHECKED_CAST")
     val candidates by all<PossibleOrdering> { after == uc.precondition.step && before.action == action &&
-            uc.precondition.step.before[variable].supersetOf(before.after[variable]) }
+            (uc.precondition.step.before[uc.precondition.variable] as Domain<Any?>).supersetOf(before.after[uc.precondition.variable]) }
 
     delay = 3
 
