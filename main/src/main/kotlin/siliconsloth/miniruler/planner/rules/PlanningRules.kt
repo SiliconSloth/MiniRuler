@@ -187,8 +187,8 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     aggregateFulfillmentRule(planner, { it.variable in listOf(itemCount(Item.COAL), itemCount(Item.STONE)) &&
             it.step.action != CRAFT_ACTIONS[Item.ROCK_PICKAXE]!! }, MINE_ROCK_WITH_ROCK)
 
-    multiFulfillmentRule(planner, MENU, null, planner.initialize!!)
-    multiFulfillmentRule(planner, MENU, Menu.FURNACE, OPEN_ACTIONS[Menu.FURNACE]!!)
+    multiFulfillmentRule(planner, variablePredicate(MENU, null), planner.initialize!!)
+    multiFulfillmentRule(planner, variablePredicate(MENU, Menu.FURNACE), OPEN_ACTIONS[Menu.FURNACE]!!)
 }
 
 fun variablePredicate(variable: Variable<*>): (Precondition) -> Boolean = {
@@ -260,20 +260,22 @@ fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, preconditionPredic
     }
 }
 
-fun <T> RuleEngine.multiFulfillmentRule(planner: RulePlanner, variable: Variable<T>, value: T, action: Action) = rule {
-    val ucs by all<UnfulfilledPrecondition> { precondition.variable == variable &&
-            precondition.step.before[variable] == Enumeration(value) }
-    val candidates by all<Step> { this.action[variable] !=  null && Enumeration(value).supersetOf(this.after[variable]) }
+fun RuleEngine.multiFulfillmentRule(planner: RulePlanner, preconditionPredicate: (Precondition) -> Boolean, action: Action) = rule {
+    val ucs by all<UnfulfilledPrecondition> { preconditionPredicate(precondition) }
+    @Suppress("UNCHECKED_CAST")
+    val candidates by all<Step> { ucs.any { this.action[it.precondition.variable] !=  null &&
+            (it.precondition.step.before[it.precondition.variable] as Domain<Any?>).supersetOf(this.after[it.precondition.variable]) } }
     val orderings by all<Ordering>()
     this.delay = 10
 
     fire {
         if (ucs.any()) {
-            val stepGoal = planner.state(variable to Enumeration(value))
-
             val fulfiller = if (candidates.any()) {
                 candidates.first { c -> !orderings.any { it.before == c && it.after in candidates }  }
             } else {
+                val stepGoal = planner.state(ucs.groupBy { it.precondition.variable }.mapValues { (v,us) ->
+                    us.first().precondition.step.before[v] })
+
                 planner.newStep(action, stepGoal).also { insert(it) }
             }
 
