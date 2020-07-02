@@ -232,9 +232,15 @@ fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, preconditionPredic
     fire {
         if (ucs.any()) {
             val candidate = candidates.firstOrNull { c -> !orderings.any { it.after == c && it.before in candidates }  }
-            val needed = ucs.groupBy { it.precondition.variable }.mapValues { (v,us) ->
-                LowerBounded(us.map { (it.precondition.step.before[v] as LowerBounded).min }.sum() +
-                        ((candidate?.after?.get(v) as? LowerBounded)?.min ?: 0)) }
+            val needed = ucs.groupBy { it.precondition.variable }.mapValues { (v,us) -> summationAggregator(
+                    us.map { it.precondition.step.before[v] }.let { domains ->
+                        if (candidate == null) {
+                            domains
+                        } else {
+                            domains + candidate.after[v]
+                        }
+                    }
+            ) }
             val stepGoal = planner.state(needed)
 
             val newStep = if (candidate != null) {
@@ -262,6 +268,9 @@ fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, preconditionPredic
         }
     }
 }
+
+fun summationAggregator(domains: List<Domain<*>>): Domain<*> =
+        LowerBounded(domains.map { (it as LowerBounded).min }.sum())
 
 fun RuleEngine.multiFulfillmentRule(planner: RulePlanner, preconditionPredicate: (Precondition) -> Boolean, action: Action) = rule {
     val ucs by all<UnfulfilledPrecondition> { preconditionPredicate(precondition) }
