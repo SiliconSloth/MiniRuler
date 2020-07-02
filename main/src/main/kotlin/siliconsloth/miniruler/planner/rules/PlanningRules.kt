@@ -243,27 +243,33 @@ fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, preconditionPredic
             ) }
             val stepGoal = planner.state(needed)
 
-            val newStep = if (candidate != null) {
-                delete(candidate)
-                planner.newStep(candidate.before, candidate.action, candidate.after.intersect(stepGoal))
+            val fulfiller = if (candidate != null) {
+                if (stepGoal.supersetOf(candidate.after)) {
+                    candidate
+                } else {
+                    delete(candidate)
+                    planner.newStep(candidate.before, candidate.action, candidate.after.intersect(stepGoal))
+                }
             } else {
                 planner.newStep(action, stepGoal)
             }
 
-            if (candidate != null) {
-                for (link in links) {
-                    if (link.setter == candidate) {
-                        replace(link, Link(newStep, link.precondition))
-                    }
-                    if (link.precondition.step == candidate) {
-                        replace(link, Link(link.setter, Precondition(newStep, link.precondition.variable)))
+            if (fulfiller != candidate) {
+                if (candidate != null) {
+                    for (link in links) {
+                        if (link.setter == candidate) {
+                            replace(link, Link(fulfiller, link.precondition))
+                        }
+                        if (link.precondition.step == candidate) {
+                            replace(link, Link(link.setter, Precondition(fulfiller, link.precondition.variable)))
+                        }
                     }
                 }
-            }
 
-            insert(newStep)
-            for (uc in ucs) {
-                insert(Link(newStep, uc.precondition))
+                insert(fulfiller)
+                for (uc in ucs) {
+                    insert(Link(fulfiller, uc.precondition))
+                }
             }
         }
     }
