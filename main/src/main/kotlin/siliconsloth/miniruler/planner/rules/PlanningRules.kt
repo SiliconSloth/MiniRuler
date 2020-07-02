@@ -222,7 +222,9 @@ fun RuleEngine.fulfillmentRule(planner: RulePlanner, preconditionPredicate: (Pre
 
 fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, preconditionPredicate: (Precondition) -> Boolean, action: Action) = rule {
     val ucs by all<UnfulfilledPrecondition> { preconditionPredicate(precondition) }
-    val candidates by all<Step> { this.action == action }
+    @Suppress("UNCHECKED_CAST")
+    val candidates by all<Step> { ucs.any { this.action[it.precondition.variable] !=  null &&
+            (it.precondition.step.before[it.precondition.variable] as Domain<Any?>).supersetOf(this.after[it.precondition.variable]) } }
     val links by all<Link>()
     this.delay = 10
 
