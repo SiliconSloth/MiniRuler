@@ -226,11 +226,12 @@ fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, preconditionPredic
     val candidates by all<Step> { ucs.any { this.action[it.precondition.variable] !=  null &&
             (it.precondition.step.before[it.precondition.variable] as Domain<Any?>).supersetOf(this.after[it.precondition.variable]) } }
     val links by all<Link>()
+    val orderings by all<Ordering>()
     this.delay = 10
 
     fire {
         if (ucs.any()) {
-            val candidate = candidates.firstOrNull()
+            val candidate = candidates.firstOrNull { c -> !orderings.any { it.after == c && it.before in candidates }  }
             val needed = ucs.groupBy { it.precondition.variable }.mapValues { (v,us) ->
                 LowerBounded(us.map { (it.precondition.step.before[v] as LowerBounded).min }.sum() +
                         ((candidate?.after?.get(v) as? LowerBounded)?.min ?: 0)) }
