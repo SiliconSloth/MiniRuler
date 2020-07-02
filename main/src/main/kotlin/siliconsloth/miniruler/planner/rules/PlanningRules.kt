@@ -273,7 +273,7 @@ fun RuleEngine.multiFulfillmentRule(planner: RulePlanner, preconditionPredicate:
     fire {
         if (ucs.any()) {
             val fulfiller = if (candidates.any()) {
-                candidates.first { c -> !orderings.any { it.before == c && it.after in candidates }  }
+                candidates.first { c -> !orderings.any { it.after == c && it.before in candidates }  }
             } else {
                 val stepGoal = planner.state(ucs.groupBy { it.precondition.variable }.mapValues { (v,us) ->
                     us.first().precondition.step.before[v] })
