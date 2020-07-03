@@ -182,13 +182,13 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     fulfillmentRule(planner, variablePredicate(HOLDING, Item.ROCK_SHOVEL), Select(Item.ROCK_SHOVEL))
     fulfillmentRule(planner, variablePredicate(HOLDING, Item.POWER_GLOVE), Select(Item.POWER_GLOVE))
 
-    aggregateFulfillmentRule(planner, variablePredicate(itemCount(Item.WOOD)), CHOP_TREES)
-    aggregateFulfillmentRule(planner, variablePredicate(itemCount(Item.SAND)), DIG_SAND)
+    aggregateFulfillmentRule(planner, variablePredicate(itemCount(Item.WOOD)), CHOP_TREES, ::summationAggregator)
+    aggregateFulfillmentRule(planner, variablePredicate(itemCount(Item.SAND)), DIG_SAND, ::summationAggregator)
     aggregateFulfillmentRule(planner, { it.variable in listOf(itemCount(Item.COAL), itemCount(Item.STONE)) &&
-            it.step.action != CRAFT_ACTIONS[Item.ROCK_PICKAXE]!! }, MINE_ROCK_WITH_ROCK)
+            it.step.action != CRAFT_ACTIONS[Item.ROCK_PICKAXE]!! }, MINE_ROCK_WITH_ROCK, ::summationAggregator)
 
-    multiFulfillmentRule(planner, variablePredicate(MENU, null), planner.initialize!!)
-    multiFulfillmentRule(planner, variablePredicate(MENU, Menu.FURNACE), OPEN_ACTIONS[Menu.FURNACE]!!)
+    aggregateFulfillmentRule(planner, variablePredicate(MENU, null), planner.initialize!!, ::uniformAggregator)
+    aggregateFulfillmentRule(planner, variablePredicate(MENU, Menu.FURNACE), OPEN_ACTIONS[Menu.FURNACE]!!, ::uniformAggregator)
 }
 
 fun variablePredicate(variable: Variable<*>): (Precondition) -> Boolean = {
@@ -220,7 +220,8 @@ fun RuleEngine.fulfillmentRule(planner: RulePlanner, preconditionPredicate: (Pre
     }
 }
 
-fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, preconditionPredicate: (Precondition) -> Boolean, action: Action) = rule {
+fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, preconditionPredicate: (Precondition) -> Boolean, action: Action,
+        aggregator: (List<Domain<*>>) -> Domain<*>) = rule {
     val ucs by all<UnfulfilledPrecondition> { preconditionPredicate(precondition) }
     @Suppress("UNCHECKED_CAST")
     val candidates by all<Step> { ucs.any { this.action[it.precondition.variable] !=  null &&
@@ -232,7 +233,7 @@ fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, preconditionPredic
     fire {
         if (ucs.any()) {
             val candidate = candidates.firstOrNull { c -> !orderings.any { it.after == c && it.before in candidates }  }
-            val needed = ucs.groupBy { it.precondition.variable }.mapValues { (v,us) -> summationAggregator(
+            val needed = ucs.groupBy { it.precondition. variable }.mapValues { (v,us) -> aggregator(
                     us.map { it.precondition.step.before[v] }.let { domains ->
                         if (candidate == null) {
                             domains
@@ -267,34 +268,6 @@ fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, preconditionPredic
                 }
 
                 insert(fulfiller)
-                for (uc in ucs) {
-                    insert(Link(fulfiller, uc.precondition))
-                }
-            }
-        }
-    }
-}
-
-fun summationAggregator(domains: List<Domain<*>>): Domain<*> =
-        LowerBounded(domains.map { (it as LowerBounded).min }.sum())
-
-fun RuleEngine.multiFulfillmentRule(planner: RulePlanner, preconditionPredicate: (Precondition) -> Boolean, action: Action) = rule {
-    val ucs by all<UnfulfilledPrecondition> { preconditionPredicate(precondition) }
-    @Suppress("UNCHECKED_CAST")
-    val candidates by all<Step> { ucs.any { this.action[it.precondition.variable] !=  null &&
-            (it.precondition.step.before[it.precondition.variable] as Domain<Any?>).supersetOf(this.after[it.precondition.variable]) } }
-    val orderings by all<Ordering>()
-    this.delay = 10
-
-    fire {
-        if (ucs.any()) {
-            val fulfiller = if (candidates.any()) {
-                candidates.first { c -> !orderings.any { it.after == c && it.before in candidates }  }
-            } else {
-                val stepGoal = planner.state(ucs.groupBy { it.precondition.variable }.mapValues { (v,us) ->
-                    us.first().precondition.step.before[v] })
-
-                planner.newStep(action, stepGoal).also { insert(it) }
             }
 
             for (uc in ucs) {
@@ -303,3 +276,9 @@ fun RuleEngine.multiFulfillmentRule(planner: RulePlanner, preconditionPredicate:
         }
     }
 }
+
+fun summationAggregator(domains: List<Domain<*>>): Domain<*> =
+        LowerBounded(domains.map { (it as LowerBounded).min }.sum())
+
+fun uniformAggregator(domains: List<Domain<*>>): Domain<*> =
+        domains.first()
