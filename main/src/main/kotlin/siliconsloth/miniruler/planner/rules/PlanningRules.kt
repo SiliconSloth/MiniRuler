@@ -206,7 +206,7 @@ fun RuleEngine.fulfillmentRule(planner: RulePlanner, preconditionPredicate: (Pre
     val candidates by all<PossibleOrdering> { after == uc.precondition.step && before.action == action &&
             (uc.precondition.step.before[uc.precondition.variable] as Domain<Any?>).supersetOf(before.after[uc.precondition.variable]) }
 
-    delay = 3
+    delay = 10
 
     fire {
         val chosen: Step
