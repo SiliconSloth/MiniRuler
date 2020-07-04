@@ -90,7 +90,8 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
 
     rule {
         val conflicts by all<Conflict> { link.precondition.variable.let {
-                it == itemCount(Item.SAND) || it == itemCount(Item.COAL) || it == itemCount(Item.WOOD) } }
+                it == itemCount(Item.SAND) || it == itemCount(Item.COAL) || it == itemCount(Item.WOOD) ||
+                it == itemCount(Item.STONE)} }
         val links by all<Link>()
         delay = 6
 
