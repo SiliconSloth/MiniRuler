@@ -12,6 +12,7 @@ class InfoPanel(timelinePane: TimelinePane): JPanel() {
     val inserterList = TitledList("", timelinePane)
     val maintainerList = TitledList("", timelinePane)
     val deleterList = TitledList("", timelinePane)
+    val triggeredList = TitledList("", timelinePane)
 
     var period: Track.Period<*>? = null
     set(value) {
@@ -26,11 +27,13 @@ class InfoPanel(timelinePane: TimelinePane): JPanel() {
         inserterList.setTitle(value?.track?.insertsTitle ?: "")
         maintainerList.setTitle(value?.track?.maintainsTitle ?: "")
         deleterList.setTitle(value?.track?.deletesTitle ?: "")
+        triggeredList.setTitle(value?.track?.triggersTitle ?: "")
 
         bindingList.setEntries(value?.bindings ?: listOf())
         inserterList.setEntries(value?.inserts ?: listOf())
         maintainerList.setEntries(value?.maintains ?: listOf())
         deleterList.setEntries(value?.deletes ?: listOf())
+        triggeredList.setEntries(value?.triggers ?: listOf())
 
         revalidate()
     }
@@ -51,6 +54,7 @@ class InfoPanel(timelinePane: TimelinePane): JPanel() {
         panel.add(inserterList)
         panel.add(maintainerList)
         panel.add(deleterList)
+        panel.add(triggeredList)
 
         add(panel, BorderLayout.PAGE_START)
     }

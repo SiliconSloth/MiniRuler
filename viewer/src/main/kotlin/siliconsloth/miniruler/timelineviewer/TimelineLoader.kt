@@ -70,8 +70,8 @@ class TimelineLoader(path: String) {
 
             for (binding in bindings) {
                 when (binding) {
-                    is SingletonListing -> binding.period.bindings.add(SingletonListing(period))
-                    is MultiListing -> binding.periods.forEach { it.bindings.add(SingletonListing(period)) }
+                    is SingletonListing -> binding.period.triggers.add(SingletonListing(period))
+                    is MultiListing -> binding.periods.forEach { it.triggers.add(SingletonListing(period)) }
                 }
             }
         }

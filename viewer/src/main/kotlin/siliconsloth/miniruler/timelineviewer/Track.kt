@@ -29,6 +29,7 @@ abstract class Track<T: Track.Owner, E: Track.Event>(val owner: T) {
     abstract val insertsTitle: String
     abstract val maintainsTitle: String
     abstract val deletesTitle: String
+    abstract val triggersTitle: String
 
     data class Period<E: Event>(val track: Track<*,E>, val events: MutableList<E> = mutableListOf<E>()) {
         /**
@@ -47,13 +48,18 @@ abstract class Track<T: Track.Owner, E: Track.Event>(val owner: T) {
 
         /**
          * For matches: Fact periods that were bind values for this match.
-         * For facts: Matches that matched with this fact as a bind value.
+         * Facts have no bindings.
          */
         val bindings = mutableListOf<InfoListing>()
         // Facts inserted/deleted by this match or matches that inserted/deleted this fact.
         val inserts = mutableListOf<InfoListing>()
         val maintains = mutableListOf<InfoListing>()
         val deletes = mutableListOf<InfoListing>()
+        /**
+         * For facts: Matches that matched with this fact as a bind value.
+         * Matches have no triggers.
+         */
+        val triggers = mutableListOf<InfoListing>()
     }
 
     val periods = mutableListOf(Period(this))

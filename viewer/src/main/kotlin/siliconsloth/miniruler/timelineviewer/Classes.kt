@@ -45,10 +45,11 @@ data class FactEvent(override val time: Int, val isInsert: Boolean, val maintain
 }
 
 class FactTrack(owner: Fact): Track<Fact, FactEvent>(owner) {
-    override val bindingsTitle = "Triggered"
+    override val bindingsTitle = "INVALID SECTION"
     override val insertsTitle = "Inserted by"
     override val maintainsTitle = "Maintained by"
     override val deletesTitle = "Deleted by"
+    override val triggersTitle = "Bound by"
 }
 
 class MatchTrack(owner: Match): Track<Match, MatchEvent>(owner) {
@@ -56,6 +57,7 @@ class MatchTrack(owner: Match): Track<Match, MatchEvent>(owner) {
     override val insertsTitle = "Inserted"
     override val maintainsTitle = "Maintained"
     override val deletesTitle = "Deleted"
+    override val triggersTitle = "INVALID SECTION"
 }
 
 fun configureTextArea(textArea: JTextArea): JTextArea {
