@@ -145,6 +145,20 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     }
 
     rule {
+        val conflict by find<Conflict> { link.precondition.variable == MENU && link.precondition.step.before[MENU] == Enumeration<Menu?>(null) }
+
+        fire {
+            if (conflict.threat.after[MENU] == Enumeration(Menu.INVENTORY)) {
+                delete(conflict.link)
+                val closeStep = planner.newStep(CLOSE_INVENTORY, state())
+                insert(closeStep)
+                insert(Link(closeStep, conflict.link.precondition))
+                insert(Ordering(conflict.threat, closeStep))
+            }
+        }
+    }
+
+    rule {
         val conflict by find<Conflict>()
         find(EqualityFilter { Ordering(conflict.link.precondition.step, conflict.threat) })
 
