@@ -28,7 +28,12 @@ class Select(val item: Item): Action("Select($item)", state(
 ), mapOf(
         MENU to SetTo(null),
         HOLDING to SetTo(item)
-))
+)) {
+    override fun equals(other: Any?): Boolean =
+            other is Select && other.item == item
+
+    override fun hashCode(): Int = item.hashCode()
+}
 
 class Place(val item: Item, val entity: Entity): Action("Place($item)", state(
         MENU to Enumeration<Menu?>(null),
