@@ -133,6 +133,18 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     }
 
     rule {
+        val conflict by find<Conflict> { link.setter.action is Select && link.precondition.variable == HOLDING }
+
+        fire {
+            val selectStep = conflict.link.setter
+            val replacement = planner.newStep(selectStep.before, selectStep.action, selectStep.after)
+            replace(selectStep, replacement)
+            insert(Link(replacement, conflict.link.precondition))
+            insert(Ordering(conflict.threat, replacement))
+        }
+    }
+
+    rule {
         val conflict by find<Conflict>()
         find(EqualityFilter { Ordering(conflict.link.precondition.step, conflict.threat) })
 
