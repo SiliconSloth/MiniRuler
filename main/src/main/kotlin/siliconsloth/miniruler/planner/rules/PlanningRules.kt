@@ -167,20 +167,20 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
         }
     }
 
-    fulfillmentRule(planner, variablePredicate(itemCount(Item.GLASS)), CRAFT_ACTIONS[Item.GLASS]!!)
-    fulfillmentRule(planner, variablePredicate(itemCount(Item.FURNACE)), CRAFT_ACTIONS[Item.FURNACE]!!)
-    fulfillmentRule(planner, variablePredicate(itemCount(Item.ROCK_PICKAXE)), CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!)
-    fulfillmentRule(planner, variablePredicate(itemCount(Item.ROCK_SHOVEL)), CRAFT_ACTIONS[Item.ROCK_SHOVEL]!!)
-    fulfillmentRule(planner, { it.variable == itemCount(Item.STONE) &&
-            it.step.action == CRAFT_ACTIONS[Item.ROCK_PICKAXE]!! }, MINE_ROCK_WITH_HAND)
-    fulfillmentRule(planner, variablePredicate(itemCount(Item.WORKBENCH)), planner.initialize!!)
-    fulfillmentRule(planner, variablePredicate(itemCount(Item.POWER_GLOVE)), planner.initialize!!)
+    aggregateFulfillmentRule(planner, variablePredicate(itemCount(Item.GLASS)), CRAFT_ACTIONS[Item.GLASS]!!, ::uniformAggregator)
+    aggregateFulfillmentRule(planner, variablePredicate(itemCount(Item.FURNACE)), CRAFT_ACTIONS[Item.FURNACE]!!, ::uniformAggregator)
+    aggregateFulfillmentRule(planner, variablePredicate(itemCount(Item.ROCK_PICKAXE)), CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!, ::uniformAggregator)
+    aggregateFulfillmentRule(planner, variablePredicate(itemCount(Item.ROCK_SHOVEL)), CRAFT_ACTIONS[Item.ROCK_SHOVEL]!!, ::uniformAggregator)
+    aggregateFulfillmentRule(planner, { it.variable == itemCount(Item.STONE) &&
+            it.step.action == CRAFT_ACTIONS[Item.ROCK_PICKAXE]!! }, MINE_ROCK_WITH_HAND, ::uniformAggregator)
+    aggregateFulfillmentRule(planner, variablePredicate(itemCount(Item.WORKBENCH)), planner.initialize!!, ::uniformAggregator)
+    aggregateFulfillmentRule(planner, variablePredicate(itemCount(Item.POWER_GLOVE)), planner.initialize!!, ::uniformAggregator)
 
-    fulfillmentRule(planner, variablePredicate(nextTo(Entity.FURNACE)), PLACE_ACTIONS[Item.FURNACE]!!)
-    fulfillmentRule(planner, variablePredicate(HOLDING, Item.FURNACE), Select(Item.FURNACE))
-    fulfillmentRule(planner, variablePredicate(HOLDING, Item.ROCK_PICKAXE), Select(Item.ROCK_PICKAXE))
-    fulfillmentRule(planner, variablePredicate(HOLDING, Item.ROCK_SHOVEL), Select(Item.ROCK_SHOVEL))
-    fulfillmentRule(planner, variablePredicate(HOLDING, Item.POWER_GLOVE), Select(Item.POWER_GLOVE))
+    aggregateFulfillmentRule(planner, variablePredicate(nextTo(Entity.FURNACE)), PLACE_ACTIONS[Item.FURNACE]!!, ::uniformAggregator)
+    aggregateFulfillmentRule(planner, variablePredicate(HOLDING, Item.FURNACE), Select(Item.FURNACE), ::uniformAggregator)
+    aggregateFulfillmentRule(planner, variablePredicate(HOLDING, Item.ROCK_PICKAXE), Select(Item.ROCK_PICKAXE), ::uniformAggregator)
+    aggregateFulfillmentRule(planner, variablePredicate(HOLDING, Item.ROCK_SHOVEL), Select(Item.ROCK_SHOVEL), ::uniformAggregator)
+    aggregateFulfillmentRule(planner, variablePredicate(HOLDING, Item.POWER_GLOVE), Select(Item.POWER_GLOVE), ::uniformAggregator)
 
     aggregateFulfillmentRule(planner, variablePredicate(itemCount(Item.WOOD)), CHOP_TREES, ::summationAggregator)
     aggregateFulfillmentRule(planner, variablePredicate(itemCount(Item.SAND)), DIG_SAND, ::summationAggregator)
@@ -199,32 +199,11 @@ fun <T> variablePredicate(variable: Variable<T>, value: T): (Precondition) -> Bo
     it.variable == variable && it.step.before[variable].supersetOf(Enumeration(value))
 }
 
-fun RuleEngine.fulfillmentRule(planner: RulePlanner, preconditionPredicate: (Precondition) -> Boolean, action: Action) = rule {
-    val uc by find<UnfulfilledPrecondition> { preconditionPredicate(precondition) }
-
-    @Suppress("UNCHECKED_CAST")
-    val candidates by all<PossibleOrdering> { after == uc.precondition.step && before.action == action &&
-            (uc.precondition.step.before[uc.precondition.variable] as Domain<Any?>).supersetOf(before.after[uc.precondition.variable]) }
-
-    delay = 10
-
-    fire {
-        val chosen: Step
-        if (candidates.any()) {
-            chosen = candidates.first().before
-        } else {
-            chosen = planner.newStepFulfilling(action, uc.precondition)
-            insert(chosen)
-        }
-        insert(Link(chosen, uc.precondition))
-    }
-}
-
 fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, preconditionPredicate: (Precondition) -> Boolean, action: Action,
         aggregator: (List<Domain<*>>) -> Domain<*>) = rule {
     val ucs by all<UnfulfilledPrecondition> { preconditionPredicate(precondition) }
     @Suppress("UNCHECKED_CAST")
-    val candidates by all<Step> { ucs.any { this.action[it.precondition.variable] !=  null &&
+    val candidates by all<Step> { !ucs.any { it.precondition.step == this } && ucs.any { this.action[it.precondition.variable] !=  null &&
             (it.precondition.step.before[it.precondition.variable] as Domain<Any?>).supersetOf(this.after[it.precondition.variable]) } }
     val links by all<Link>()
     val orderings by all<Ordering>()
@@ -232,7 +211,9 @@ fun RuleEngine.aggregateFulfillmentRule(planner: RulePlanner, preconditionPredic
 
     fire {
         if (ucs.any()) {
-            val candidate = candidates.firstOrNull { c -> !orderings.any { it.after == c && it.before in candidates }  }
+            val beforeCands = candidates.filter { c -> !orderings.any { o -> o.after == c && ucs.any { it.precondition.step == o.before }  }  }
+            val candidate = beforeCands.firstOrNull { c -> !orderings.any { o -> o.before == c && o.after in beforeCands  } }
+
             val needed = ucs.groupBy { it.precondition. variable }.mapValues { (v,us) -> aggregator(
                     us.map { it.precondition.step.before[v] }.let { domains ->
                         if (candidate == null) {
