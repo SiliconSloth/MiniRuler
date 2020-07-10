@@ -82,7 +82,7 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
                 this.action[it.variable] != null &&
                         ((it.step.before[it.variable] as Domain<Any?>).supersetOf(this.after[it.variable]) ||
                                 this.action[it.variable] is AddArbitrary)
-            }
+            } && (!batches.first().strictCandidates || action == batches.first().fulfillmentAction)
         }
         val links by all<Link>()
         val orderings by all<Ordering>()
@@ -280,7 +280,7 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     fulfillmentRule(variablePredicate(itemCount(Item.ROCK_PICKAXE)), CRAFT_ACTIONS[Item.ROCK_PICKAXE]!!, ::uniformAggregator)
     fulfillmentRule(variablePredicate(itemCount(Item.ROCK_SHOVEL)), CRAFT_ACTIONS[Item.ROCK_SHOVEL]!!, ::uniformAggregator)
     fulfillmentRule({ it.variable == itemCount(Item.STONE) &&
-            it.step.action == CRAFT_ACTIONS[Item.ROCK_PICKAXE]!! }, MINE_ROCK_WITH_HAND, ::uniformAggregator)
+            it.step.action == CRAFT_ACTIONS[Item.ROCK_PICKAXE]!! }, MINE_ROCK_WITH_HAND, ::uniformAggregator, strictCandidates = true)
     fulfillmentRule(variablePredicate(itemCount(Item.WORKBENCH)), planner.initialize!!, ::uniformAggregator)
     fulfillmentRule(variablePredicate(itemCount(Item.POWER_GLOVE)), planner.initialize!!, ::uniformAggregator)
 
@@ -310,12 +310,12 @@ fun <T> variablePredicate(variable: Variable<T>, value: T): (Precondition) -> Bo
 }
 
 fun RuleEngine.fulfillmentRule(preconditionPredicate: (Precondition) -> Boolean, action: Action,
-                               aggregator: (List<Domain<*>>) -> Domain<*>) = rule {
+                               aggregator: (List<Domain<*>>) -> Domain<*>, strictCandidates: Boolean = false) = rule {
     val ucs by all<UnfulfilledPrecondition> { preconditionPredicate(precondition) }
 
     fire {
         if (ucs.any()) {
-            maintain(PreconditionBatch(ucs.map { it.precondition }, action, aggregator))
+            maintain(PreconditionBatch(ucs.map { it.precondition }, action, aggregator, strictCandidates))
         }
     }
 }
