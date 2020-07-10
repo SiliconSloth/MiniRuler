@@ -80,7 +80,8 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
         val candidates by all<Step> { batches.any() &&
             !batches.first().preconditions.any { it.step == this } && batches.first().preconditions.any {
                 this.action[it.variable] != null &&
-                        (it.step.before[it.variable] as Domain<Any?>).supersetOf(this.after[it.variable])
+                        ((it.step.before[it.variable] as Domain<Any?>).supersetOf(this.after[it.variable]) ||
+                                this.action[it.variable] is AddArbitrary)
             }
         }
         val links by all<Link>()
