@@ -288,6 +288,7 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     fulfillmentRule(variablePredicate(HOLDING, Item.ROCK_PICKAXE), Select(Item.ROCK_PICKAXE), ::uniformAggregator)
     fulfillmentRule(variablePredicate(HOLDING, Item.ROCK_SHOVEL), Select(Item.ROCK_SHOVEL), ::uniformAggregator)
     fulfillmentRule(variablePredicate(HOLDING, Item.POWER_GLOVE), Select(Item.POWER_GLOVE), ::uniformAggregator)
+    fulfillmentRule(variablePredicate(HOLDING, null), planner.initialize!!, ::uniformAggregator)
 
     fulfillmentRule(variablePredicate(itemCount(Item.WOOD)), CHOP_TREES, ::summationAggregator)
     fulfillmentRule(variablePredicate(itemCount(Item.SAND)), DIG_SAND, ::summationAggregator)
