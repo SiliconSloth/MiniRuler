@@ -86,7 +86,7 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
         }
         val links by all<Link>()
         val orderings by all<Ordering>()
-        this .delay = 10
+        delay = 15
 
         fire {
             if (batches.any()) {
@@ -147,11 +147,41 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
                 @Suppress("UNCHECKED_CAST")
                 !(link.precondition.step.before[link.precondition.variable] as Domain<Any?>)
                         .supersetOf(after[link.precondition.variable]) }
-        find(EqualityFilter { Ordering(link.setter, threat) })
-        find(EqualityFilter { Ordering(threat, link.precondition.step) })
 
         fire {
-            maintain(Conflict(link, threat))
+            maintain(PossibleConflict(link, threat))
+        }
+    }
+
+    rule {
+        val conflicts by all<PossibleConflict>()
+        find<Ordering> { this == conflicts.firstOrNull()?.let { c -> Ordering(c.link.setter, c.threat) } }
+        find<PossibleOrdering> { this == conflicts.firstOrNull()?.let { c -> PossibleOrdering(c.link.precondition.step, c.threat) } }
+
+        fire {
+            val conflict = conflicts.first()
+            maintain(Ordering(conflict.link.precondition.step, conflict.threat))
+        }
+    }
+
+    rule {
+        val conflicts by all<PossibleConflict>()
+        find<Ordering> { this == conflicts.firstOrNull()?.let { c -> Ordering(c.threat, c.link.precondition.step) } }
+        find<PossibleOrdering> { this == conflicts.firstOrNull()?.let { c -> PossibleOrdering(c.threat, c.link.setter) } }
+
+        fire {
+            val conflict = conflicts.first()
+            maintain(Ordering(conflict.threat, conflict.link.setter))
+        }
+    }
+
+    rule {
+        val conflict by find<PossibleConflict>()
+        find(EqualityFilter { Ordering(conflict.link.setter, conflict.threat) })
+        find(EqualityFilter { Ordering(conflict.threat, conflict.link.precondition.step) })
+
+        fire {
+            maintain(Conflict(conflict.link, conflict.threat))
         }
     }
 
@@ -272,6 +302,14 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
 
         fire {
             println(conflicts)
+        }
+    }
+
+    rule {
+        val steps by all<Step>()
+
+        fire {
+            println(steps.groupBy { it.action }.mapValues { (_,v) -> v.size })
         }
     }
 
