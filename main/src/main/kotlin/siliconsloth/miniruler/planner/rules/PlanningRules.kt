@@ -64,6 +64,24 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     }
 
     rule {
+        val ordering by find<Ordering>()
+        not(EqualityFilter { ordering.before })
+
+        fire {
+            delete(ordering)
+        }
+    }
+
+    rule {
+        val ordering by find<Ordering>()
+        not(EqualityFilter { ordering.after })
+
+        fire {
+            delete(ordering)
+        }
+    }
+
+    rule {
         val sa by find<Step>()
         val sb by find<Step> { this != sa }
         not(EqualityFilter { Ordering(sb, sa) })
