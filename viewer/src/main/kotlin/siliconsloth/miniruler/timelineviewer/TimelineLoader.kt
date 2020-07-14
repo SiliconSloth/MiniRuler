@@ -35,6 +35,8 @@ class TimelineLoader(path: String) {
             }
         }
 
+        // Make sure facts that started on the last timestep are visible.
+        maxTime++
         tracks.values.forEach { it.finalize(maxTime) }
     }
 
