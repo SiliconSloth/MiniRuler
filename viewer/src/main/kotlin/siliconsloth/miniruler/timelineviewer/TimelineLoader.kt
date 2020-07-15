@@ -29,7 +29,7 @@ class TimelineLoader(path: String) {
                         else -> error("Unknown event type: ${json["type"]}")
                     }
                     maxTime = max(maxTime, json.int("time")!!)
-                } catch (ex: KlaxonException) {
+                } catch (ex: Exception) {
                     println("Warning: Skipping corrupt line in timeline file")
                 }
             }
