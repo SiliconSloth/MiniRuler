@@ -267,6 +267,15 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     }
 
     rule {
+        val la by find<Link>()
+        val lb by find<Link> { precondition == la.precondition && setter != la.setter }
+
+        fire {
+            error("Duplicate links: $la, $lb")
+        }
+    }
+
+    rule {
         val oa by find<Ordering>()
         find(EqualityFilter { Ordering(oa.after, oa.before) })
 
