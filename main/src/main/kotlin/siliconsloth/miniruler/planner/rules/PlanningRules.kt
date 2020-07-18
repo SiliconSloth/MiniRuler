@@ -164,32 +164,6 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     }
 
     rule {
-        val conflicts by all<PossibleConflict>()
-        find<Ordering> { this == conflicts.firstOrNull()?.let { c -> Ordering(c.link.setter, c.threat) } }
-        not<Ordering> { this == conflicts.firstOrNull()?.let { c -> Ordering(c.threat, c.link.precondition.step) } }
-
-        delay = 3
-
-        fire {
-            val conflict = conflicts.first()
-            insert(Ordering(conflict.link.precondition.step, conflict.threat))
-        }
-    }
-
-    rule {
-        val conflicts by all<PossibleConflict>()
-        find<Ordering> { this == conflicts.firstOrNull()?.let { c -> Ordering(c.threat, c.link.precondition.step) } }
-        not<Ordering> { this == conflicts.firstOrNull()?.let { c -> Ordering(c.link.setter, c.threat) } }
-
-        delay = 3
-
-        fire {
-            val conflict = conflicts.first()
-            insert(Ordering(conflict.threat, conflict.link.setter))
-        }
-    }
-
-    rule {
         val conflict by find<PossibleConflict>()
         find(EqualityFilter { Ordering(conflict.link.setter, conflict.threat) })
         find(EqualityFilter { Ordering(conflict.threat, conflict.link.precondition.step) })
