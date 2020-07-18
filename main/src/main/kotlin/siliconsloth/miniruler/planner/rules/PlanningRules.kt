@@ -218,14 +218,17 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     }
 
     rule {
-        val conflict by find<Conflict> { link.setter.action is Select && link.precondition.variable == HOLDING }
+        val conflicts by all<Conflict> { link.setter.action is Select && link.precondition.variable == HOLDING }
 
         fire {
-            val selectStep = conflict.link.setter
-            val replacement = planner.newStep(selectStep.before, selectStep.action, selectStep.after)
-            replace(selectStep, replacement)
-            insert(Link(replacement, conflict.link.precondition))
-            insert(Ordering(conflict.threat, replacement))
+            if (conflicts.any()) {
+                val conflict = conflicts.first()
+                val selectStep = conflict.link.setter
+                val replacement = planner.newStep(selectStep.before, selectStep.action, selectStep.after)
+                replace(selectStep, replacement)
+                replace(conflict.link, Link(replacement, conflict.link.precondition))
+                insert(Ordering(conflict.threat, replacement))
+            }
         }
     }
 
