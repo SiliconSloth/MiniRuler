@@ -183,7 +183,6 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
         fire {
             val conflict = conflicts.firstOrNull() ?: return@fire
 
-            val setter = conflict.link.setter
             val threat = conflict.threat
             val dependent = conflict.link.precondition.step
             val variable = conflict.link.precondition.variable
@@ -193,7 +192,8 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
 
             replace(threat, newStep)
 
-            insert(Link(setter, Precondition(newStep, variable)))
+            delete(conflict.link)
+            // Don't insert link from setter to newStep, since the threat will already have a link for this variable.
             insert(Link(newStep, Precondition(dependent, variable)))
 
             links.filter { it.setter == threat }.forEach { replace(it, Link(newStep, it.precondition)) }
