@@ -235,6 +235,8 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
         not<Conflict> { link.precondition == conflict.link.precondition &&
                 threatOrderings.any { it.after == threat } }
 
+        delay = 2
+
         fire {
             if (conflict.threat.after[MENU] == Enumeration(Menu.INVENTORY)) {
                 delete(conflict.link)
