@@ -231,6 +231,9 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
 
     rule {
         val conflict by find<Conflict> { link.precondition.variable == MENU && link.precondition.step.before[MENU] == Enumeration<Menu?>(null) }
+        val threatOrderings by all<Ordering> { before == conflict.threat }
+        not<Conflict> { link.precondition == conflict.link.precondition &&
+                threatOrderings.any { it.after == threat } }
 
         fire {
             if (conflict.threat.after[MENU] == Enumeration(Menu.INVENTORY)) {
