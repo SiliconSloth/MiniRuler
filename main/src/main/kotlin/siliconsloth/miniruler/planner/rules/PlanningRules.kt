@@ -82,16 +82,6 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     }
 
     rule {
-        val sa by find<Step>()
-        val sb by find<Step> { this != sa }
-        not(EqualityFilter { Ordering(sb, sa) })
-
-        fire {
-            maintain(PossibleOrdering(sa, sb))
-        }
-    }
-
-    rule {
         val batches by all<PreconditionBatch>()
 
         @Suppress("UNCHECKED_CAST")
@@ -165,6 +155,8 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
                 @Suppress("UNCHECKED_CAST")
                 !(link.precondition.step.before[link.precondition.variable] as Domain<Any?>)
                         .supersetOf(after[link.precondition.variable]) }
+        not(EqualityFilter { Ordering(link.precondition.step, threat) })
+        not(EqualityFilter { Ordering(threat, link.setter) })
 
         fire {
             maintain(PossibleConflict(link, threat))
@@ -174,22 +166,26 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     rule {
         val conflicts by all<PossibleConflict>()
         find<Ordering> { this == conflicts.firstOrNull()?.let { c -> Ordering(c.link.setter, c.threat) } }
-        find<PossibleOrdering> { this == conflicts.firstOrNull()?.let { c -> PossibleOrdering(c.link.precondition.step, c.threat) } }
+        not<Ordering> { this == conflicts.firstOrNull()?.let { c -> Ordering(c.threat, c.link.precondition.step) } }
+
+        delay = 3
 
         fire {
             val conflict = conflicts.first()
-            maintain(Ordering(conflict.link.precondition.step, conflict.threat))
+            insert(Ordering(conflict.link.precondition.step, conflict.threat))
         }
     }
 
     rule {
         val conflicts by all<PossibleConflict>()
         find<Ordering> { this == conflicts.firstOrNull()?.let { c -> Ordering(c.threat, c.link.precondition.step) } }
-        find<PossibleOrdering> { this == conflicts.firstOrNull()?.let { c -> PossibleOrdering(c.threat, c.link.setter) } }
+        not<Ordering> { this == conflicts.firstOrNull()?.let { c -> Ordering(c.link.setter, c.threat) } }
+
+        delay = 3
 
         fire {
             val conflict = conflicts.first()
-            maintain(Ordering(conflict.threat, conflict.link.setter))
+            insert(Ordering(conflict.threat, conflict.link.setter))
         }
     }
 
@@ -267,8 +263,8 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
                 delete(conflict.link)
                 val closeStep = planner.newStep(CLOSE_INVENTORY, state())
                 insert(closeStep)
+                insert(Link(conflict.threat, Precondition(closeStep, MENU)))
                 insert(Link(closeStep, conflict.link.precondition))
-                insert(Ordering(conflict.threat, closeStep))
             }
         }
     }
@@ -281,8 +277,8 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
                 delete(conflict.link)
                 val openStep = planner.newStep(OPEN_INVENTORY, state())
                 insert(openStep)
+                insert(Link(conflict.threat, Precondition(openStep, MENU)))
                 insert(Link(openStep, conflict.link.precondition))
-                insert(Ordering(conflict.threat, openStep))
             }
         }
     }
@@ -302,6 +298,14 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
 
         fire {
             error("Bad ordering $oa")
+        }
+    }
+
+    rule {
+        val ordering by find<Ordering> { after.action == planner.initialize || before.action == planner.finalize }
+
+        fire {
+            error("Bad ordering $ordering")
         }
     }
 
