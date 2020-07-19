@@ -273,6 +273,25 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     }
 
     rule {
+        val conflicts by all<Conflict> { link.precondition.variable == MENU && link.precondition.step.before[MENU] == Enumeration(Menu.WORKBENCH) }
+        val orderings by all<Ordering>()
+
+        delay = 2
+
+        fire {
+            if (conflicts.any()) {
+                val conflict = conflicts.first { c -> !orderings.any { o -> o.before == c.threat && conflicts.any { it.threat == o.after } } }
+                assert(conflict.threat.after[MENU] != Enumeration(Menu.WORKBENCH))
+                delete(conflict.link)
+                val openStep = planner.newStep(OPEN_ACTIONS[Menu.WORKBENCH]!!, state())
+                insert(openStep)
+                insert(Link(conflict.threat, Precondition(openStep, MENU)))
+                insert(Link(openStep, conflict.link.precondition))
+            }
+        }
+    }
+
+    rule {
         val placeStep by find<Step> { action == PLACE_ACTIONS[Item.FURNACE]!! }
         val openLink by find<Link> { setter == placeStep && precondition.variable == nextTo(Entity.FURNACE) &&
                 precondition.step.action == OPEN_ACTIONS[Menu.FURNACE]!! }
