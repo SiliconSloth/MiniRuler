@@ -365,14 +365,14 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     fulfillmentRule(variablePredicate(HOLDING, Item.ROCK_PICKAXE), Select(Item.ROCK_PICKAXE), ::uniformAggregator)
     fulfillmentRule(variablePredicate(HOLDING, Item.ROCK_SHOVEL), Select(Item.ROCK_SHOVEL), ::uniformAggregator)
     fulfillmentRule(variablePredicate(HOLDING, Item.POWER_GLOVE), Select(Item.POWER_GLOVE), ::uniformAggregator)
-    fulfillmentRule(variablePredicate(HOLDING, null), planner.initialize!!, ::uniformAggregator)
+    fulfillmentRule(variablePredicate(HOLDING, null), planner.initialize!!, ::uniformAggregator, strictCandidates = true)
 
     fulfillmentRule(variablePredicate(itemCount(Item.WOOD)), CHOP_TREES, ::summationAggregator)
     fulfillmentRule(variablePredicate(itemCount(Item.SAND)), DIG_SAND, ::summationAggregator)
     fulfillmentRule({ it.variable in listOf(itemCount(Item.COAL), itemCount(Item.STONE)) &&
             it.step.action != CRAFT_ACTIONS[Item.ROCK_PICKAXE]!! }, MINE_ROCK_WITH_ROCK, ::summationAggregator)
 
-    fulfillmentRule(variablePredicate(MENU, null), planner.initialize!!, ::uniformAggregator)
+    fulfillmentRule(variablePredicate(MENU, null), planner.initialize!!, ::uniformAggregator, strictCandidates = true)
     fulfillmentRule(variablePredicate(MENU, Menu.FURNACE), OPEN_ACTIONS[Menu.FURNACE]!!, ::uniformAggregator)
     fulfillmentRule(variablePredicate(MENU, Menu.INVENTORY), OPEN_INVENTORY, ::uniformAggregator)
 }
