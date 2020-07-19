@@ -273,6 +273,24 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     }
 
     rule {
+        val placeStep by find<Step> { action == PLACE_ACTIONS[Item.FURNACE]!! }
+        val openLink by find<Link> { setter == placeStep && precondition.variable == nextTo(Entity.FURNACE) &&
+                precondition.step.action == OPEN_ACTIONS[Menu.FURNACE]!! }
+        val pickUpLink by find<Link> { setter == placeStep && precondition.variable == nextTo(Entity.FURNACE) &&
+                precondition.step.action == PICK_UP_ACTIONS[Entity.FURNACE]!! }
+
+        fire {
+            val openStep = openLink.precondition.step
+            val pickUpStep = pickUpLink.precondition.step
+            val closeStep = planner.newStepFulfilling(CLOSE_CRAFTING, Precondition(pickUpStep, MENU))
+
+            insert(closeStep)
+            insert(Link(openStep, Precondition(pickUpStep, MENU)))
+            insert(Link(pickUpStep, Precondition(closeStep, MENU)))
+        }
+    }
+
+    rule {
         val conflict by find<Conflict>()
         find(EqualityFilter { Ordering(conflict.link.precondition.step, conflict.threat) })
 
