@@ -343,13 +343,13 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
         }
     }
 
-    rule {
-        val steps by all<Step>()
-
-        fire {
-            println(steps.groupBy { it.action }.mapValues { (_,v) -> v.size })
-        }
-    }
+//    rule {
+//        val steps by all<Step>()
+//
+//        fire {
+//            println(steps.groupBy { it.action }.mapValues { (_,v) -> v.size })
+//        }
+//    }
 
     fulfillmentRule(variablePredicate(itemCount(Item.GLASS)), CRAFT_ACTIONS[Item.GLASS]!!, ::uniformAggregator)
     fulfillmentRule(variablePredicate(itemCount(Item.FURNACE)), CRAFT_ACTIONS[Item.FURNACE]!!, ::uniformAggregator)
