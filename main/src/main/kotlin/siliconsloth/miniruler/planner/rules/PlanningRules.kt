@@ -370,7 +370,7 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
     fulfillmentRule(variablePredicate(itemCount(Item.WOOD)), CHOP_TREES, ::summationAggregator)
     fulfillmentRule(variablePredicate(itemCount(Item.SAND)), DIG_SAND, ::summationAggregator)
     fulfillmentRule({ it.variable in listOf(itemCount(Item.COAL), itemCount(Item.STONE)) &&
-            it.step.action != CRAFT_ACTIONS[Item.ROCK_PICKAXE]!! }, MINE_ROCK_WITH_ROCK, ::summationAggregator)
+            it.step.action != CRAFT_ACTIONS[Item.ROCK_PICKAXE]!! }, MINE_ROCK_WITH_ROCK, ::summationAggregator, strictCandidates = true)
 
     fulfillmentRule(variablePredicate(MENU, null), planner.initialize!!, ::uniformAggregator, strictCandidates = true)
     fulfillmentRule(variablePredicate(MENU, Menu.FURNACE), OPEN_ACTIONS[Menu.FURNACE]!!, ::uniformAggregator)
