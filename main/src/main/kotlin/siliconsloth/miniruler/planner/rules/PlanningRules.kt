@@ -374,6 +374,7 @@ fun RuleEngine.planningRules(planner: RulePlanner) {
 
     fulfillmentRule(variablePredicate(MENU, null), planner.initialize!!, ::uniformAggregator, strictCandidates = true)
     fulfillmentRule(variablePredicate(MENU, Menu.FURNACE), OPEN_ACTIONS[Menu.FURNACE]!!, ::uniformAggregator)
+    fulfillmentRule(variablePredicate(MENU, Menu.WORKBENCH), OPEN_ACTIONS[Menu.WORKBENCH]!!, ::uniformAggregator)
     fulfillmentRule(variablePredicate(MENU, Menu.INVENTORY), OPEN_INVENTORY, ::uniformAggregator)
 }
 
