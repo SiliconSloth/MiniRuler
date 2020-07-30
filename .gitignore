@@ -1,7 +1,4 @@
-build
-dist
-
+.gradle
 .idea
-out
-*.iml
-/lib/
+build
+run
